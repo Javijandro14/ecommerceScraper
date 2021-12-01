@@ -34,6 +34,7 @@ def getJson():
         res = request.get(url)
     except:
         print("Error en la clase 'getJson()'")
+        print("Url Fallido:"+ url)
     else:
         data = json.loads(res.text)
         menu = data['menu_sub_1s']
@@ -45,6 +46,7 @@ def getUrl(url):
         send = request.get(url)
     except:
         print("Revise el url, no se proceso correctamente")
+        print("Url Fallido:" + url)
     else:
         soup = BeautifulSoup(send.text, 'html.parser')
         return soup
@@ -55,6 +57,7 @@ def areas(url):
         menu = soup.find_all('a')
     except:
         print("hubo un error en clase 'areas'")
+        print("Url Fallido:" + url)
     else:
         temp = []
         for i in menu:
@@ -102,6 +105,17 @@ categorias = getCategorias(menu)
 #Getting Menu
 base = "https://www.intelaf.com"
 nivel0 = []
+links = []
+productInfo={}
+codigo = []
+nombre = []
+precio = []
+oferta = []
+detalles = []
+categoria = []
+garantia = []
+
+
 for iter in range(len(categorias)):
      intelaf = base + categorias[menu[iter]['Area']]
      res = list(areas(intelaf))
@@ -111,7 +125,6 @@ for iter in range(len(categorias)):
      else:
          nivel0.extend(res[:-1])
  
-links = []
 for i in nivel0:
      if "Precios_stock_resultado.aspx?area=" in i:
          links.append(i)
@@ -122,14 +135,16 @@ for i in nivel0:
          if res is None:
              pass
          else:
-             links.extend(res[:-1])
+            links.extend(res[:-1])
+            break
 
-productInfo={}
 for i in links:
     intelaf = base +"/"+ i
     soup = getUrl(intelaf)
     producto = getProducts()
 #informacion del producto
+
+
 for i in producto:
     intelaf = base + "/" + producto[i]
     #intelaf = base + "/" + 'precios_stock_detallado.aspx?codigo=AUDIF-XT-XTH710'
@@ -137,27 +152,15 @@ for i in producto:
     soup = getUrl(intelaf)
     paginaProducto = soup.find('div',{'class':'row cuerpo'})
     pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+    
+    codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
+    nombre.append( paginaProducto.find('h1').text)
+    precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
+    oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
+    detalles.append([j.text for j in pp])
+    categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
+    garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
 
-    # detalle = [j.text for j in pp]
-    # detalle.remove('')
-    codigo = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
-    nombre = paginaProducto.find('h1').text
-    precio = (paginaProducto.find('p',{'class':'precio_normal'}).text)[17:]
-    oferta = (paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:]
-    detalles = ["detalle"]
-    categoria = (paginaProducto.find('p',{'class':'area'}).text)[23:]
-    garantia = (paginaProducto.find('p',{'class':'garantia'}).text)[9:]
-
-    productInfo = {
-        "codigo":codigo,
-        "nombre":nombre,
-        "precio":precio,
-        "oferta":oferta,
-        "detalles":detalles,
-        "categoria":categoria,
-        "garantia":garantia
-     }
-    #print(productInfo)
 #Existencias del Producto
 #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
 #     tiendas = disp.find_all('div',{'class':'div_stock_sucu'})
@@ -168,8 +171,17 @@ for i in producto:
 #     tienda = j.find_all('div')
 #     existencias[tienda[0].text] = tienda[1] .text
     #print(existencias)
-
-print(productInfo)
+productInfo = {
+        "codigo":codigo,
+        "nombre":nombre,
+        "precio":precio,
+        "oferta":oferta,
+        "detalles":detalles,
+        "categoria":categoria,
+        "garantia":garantia
+     }
+#print(productInfo)
+print(len(productInfo))
 
 df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
 df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
