@@ -137,15 +137,26 @@ for i in producto:
     soup = getUrl(intelaf)
     paginaProducto = soup.find('div',{'class':'row cuerpo'})
     pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+
     # detalle = [j.text for j in pp]
     # detalle.remove('')
-    productInfo["codigo"] = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
-    productInfo["nombre"] = paginaProducto.find('h1').text
-    productInfo["precio"] = (paginaProducto.find('p',{'class':'precio_normal'}).text)[17:]
-    productInfo["oferta"] = (paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:]
-    productInfo["detalles"] = ["detalle"]
-    productInfo["categoria"] = (paginaProducto.find('p',{'class':'area'}).text)[23:]
-    productInfo["garantia"] = (paginaProducto.find('p',{'class':'garantia'}).text)[9:]
+    codigo = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
+    nombre = paginaProducto.find('h1').text
+    precio = (paginaProducto.find('p',{'class':'precio_normal'}).text)[17:]
+    oferta = (paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:]
+    detalles = ["detalle"]
+    categoria = (paginaProducto.find('p',{'class':'area'}).text)[23:]
+    garantia = (paginaProducto.find('p',{'class':'garantia'}).text)[9:]
+
+    productInfo = {
+        "codigo":codigo,
+        "nombre":nombre,
+        "precio":precio,
+        "oferta":oferta,
+        "detalles":detalles,
+        "categoria":categoria,
+        "garantia":garantia
+     }
     #print(productInfo)
 #Existencias del Producto
 #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
