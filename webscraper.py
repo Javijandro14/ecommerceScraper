@@ -136,7 +136,7 @@ for i in nivel0:
              pass
          else:
             links.extend(res[:-1])
-            break
+            #break
 
 for i in links:
     intelaf = base +"/"+ i
@@ -181,10 +181,10 @@ productInfo = {
         "garantia":garantia
      }
 #print(productInfo)
-print(len(productInfo))
+print(len(codigo))
 
-df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
-df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
+#df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
+#df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
 
 
 
