@@ -193,6 +193,7 @@ for link2 in links_2[1:]:
         print("No hay articulos en este link:" + link2)
     else:
         links_3.extend(res)
+        
 
 # for link3 in links_3:
 #     print("Url Lvl 3: " + link3)
@@ -212,15 +213,37 @@ for link3 in links_3:
         codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
         nombre.append( paginaProducto.find('h1').text)
         precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
-        oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
+        oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])        
         detalles.append([j.text for j in pp])
         categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
         garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
     except:
-        print(link3 + '---> Status: link Fallido!')
+        print(link3 + ' ---> Status: link Fallido!')
         continue
     else:
-        print(link3 + '---> Status: link exitoso!')
+        print(link3 + ' ---> Status: link exitoso!')
+    
+
+
+
+productInfo = {
+        "codigo":codigo,
+        "nombre":nombre,
+        "precio":precio,
+        "oferta":oferta,
+        "detalles":detalles,
+        "categoria":categoria,
+        "garantia":garantia
+     }
+try:
+    df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
+    df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
+except:
+    print("No se exporto a excel, revise codigo")
+else:
+    print("Se proceso correctamente, mire si la informacion esta correcta")
+
+
 
 #Existencias del Producto
 #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
@@ -232,28 +255,5 @@ for link3 in links_3:
 #     tienda = j.find_all('div')
 #     existencias[tienda[0].text] = tienda[1] .text
     #print(existencias)
-
-# productInfo = {
-#         "codigo":codigo,
-#         "nombre":nombre,
-#         "precio":precio,
-#         "oferta":oferta,
-#         "detalles":detalles,
-#         "categoria":categoria,
-#         "garantia":garantia
-#      }
-#print(productInfo)
-#print(len(codigo))
-try:
-    df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
-    df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
-except:
-    print("No se exporto a excel, revise codigo")
-else:
-    print("Se proceso correctamente, mire si la informacion esta correcta")
-
-
-
-
 
 
