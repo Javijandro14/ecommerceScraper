@@ -75,7 +75,7 @@ def nivel1(url):
     else:
         temp = []
         for i in menu:
-            if 'Menu_areas.aspx?' in i.get('href'):
+            if 'Menu_areas.aspx?' in i.get('href') and ("nivel=0" not in i.get('href') or "Nivel=0" not in i.get('href')) :
                     temp.append(i.get('href'))
         return temp
 
@@ -130,7 +130,7 @@ categorias = getCategorias(menu)
 # # #print(menu[2]['Area']+": "+ categorias[menu[2]['Area']])
 
 #Getting Menu
-base = "https://www.intelaf.com"
+base = "https://www.intelaf.com/"
 links_0 = [] #Nivel 0 de links
 links_1 = [] #Nivel 1 de links
 links_2 = [] #Nivel 2 de links
@@ -148,26 +148,26 @@ categoria = []
 garantia = []
 
 for i in categorias:
-    links_0.append(base + categorias[i])
+    if "Menu_areas.aspx?" in categorias[i]:
+        links_0.append((categorias[i])[1:])
+    else:
+        links_2.append((categorias[i])[1:])
 print("Links en Nivel 0: " + format(len(links_0)))
-base = "https://www.intelaf.com/"
 
 for i in links_0:
     print("Url Lvl 0: " + i)
 
-for l in range (len(links_0)):
-    if "Menu_areas.aspx?" in links_0[l-1] and "nivel=0" in links_0[l-1]:
-        res = nivel0(links_0[l-1])
-        print("URL Lvl 0->1: "+ format(links_0[l-1]))
-        #print("Categoria:" + categorias[menu[l]['Area']] + " Areas:"+ format(res))
-        #print(len(res))
+for link0 in links_0:
+    if "Menu_areas.aspx?" in links_0 and ("nivel=0" in link0 or "Nivel=0" in link0):
+        res = nivel0(base + link0)
+        print("URL Lvl 0->1: "+ link0)
         if not res:
              pass
         else:
             links_1.extend(res[:-1])
     else:
-        print("URL Lvl 0->2: "+ format(links_0[l-1]))
-        links_2.append(links_0[l-1])
+        print("URL Lvl 0->2: "+ link0)
+        links_2.append(link0)
 print("Links en Nivel 1: " + format(len(links_1)))
 print("Links en Nivel 2: " + format(len(links_2)))
 
@@ -190,8 +190,8 @@ for i in links_1:
 
 # print("Links Nivel 2:" + format(len(links_2)))
 
-# for i in links_2:
-    #print("Url Lvl 2: " + i)
+for i in links_2:
+    print("Url Lvl 2: " + i)
 
 # for i in links:
 #     intelaf = base +"/"+ i
