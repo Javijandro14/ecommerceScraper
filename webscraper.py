@@ -61,7 +61,7 @@ def nivel0(url):
     else:
         temp = []
         for i in menu:
-            if 'Menu_areas.aspx?' in i.get('href'):
+            if 'Menu_areas.aspx?' in i.get('href') and ("nivel=1" in i.get('href') or "Nivel=1" in i.get('href')):
                     temp.append(i.get('href'))
         return temp
 
@@ -75,7 +75,7 @@ def nivel1(url):
     else:
         temp = []
         for i in menu:
-            if 'Menu_areas.aspx?' in i.get('href') and ("nivel=0" not in i.get('href') or "Nivel=0" not in i.get('href')) :
+            if "Precios_stock_resultado.aspx?" in i.get('href') and not("nivel=1" in i.get('href') or "Nivel=1" in i.get('href')) :
                     temp.append(i.get('href'))
         return temp
 
@@ -89,7 +89,7 @@ def nivel2(url):
     else:
         temp = []
         for i in menu:
-            if 'Menu_areas.aspx?' in i.get('href'):
+            if 'precios_stock_detallado.aspx?' in i.get('href'):
                     temp.append(i.get('href'))
         return temp
 
@@ -152,69 +152,75 @@ for i in categorias:
         links_0.append((categorias[i])[1:])
     else:
         links_2.append((categorias[i])[1:])
-print("Links en Nivel 0: " + format(len(links_0)))
 
-for i in links_0:
-    print("Url Lvl 0: " + i)
+#for i in links_0:
+#    print("Url Lvl 0: " + i)
 
 for link0 in links_0:
-    if "Menu_areas.aspx?" in links_0 and ("nivel=0" in link0 or "Nivel=0" in link0):
+    if "Menu_areas.aspx?" in link0 and ("nivel=0" in link0 or "Nivel=0" in link0):
         res = nivel0(base + link0)
-        print("URL Lvl 0->1: "+ link0)
+        #print("URL Lvl 0->1: "+ link0)
         if not res:
              pass
         else:
             links_1.extend(res[:-1])
     else:
-        print("URL Lvl 0->2: "+ link0)
+        #print("URL Lvl 0->2: "+ link0)
         links_2.append(link0)
-print("Links en Nivel 1: " + format(len(links_1)))
-print("Links en Nivel 2: " + format(len(links_2)))
 
-for i in links_1:
-    print("Url Lvl 1: " + i)
+# for i in links_1:
+#     print("Url Lvl 1: " + i)
 
-# for l in range (len(links_1)):
-#     if "Menu_areas.aspx?" in links_1[l-1] and ("Nivel=1" in links_1[l-1] in links_1[l-1]):
-#         res = nivel1(base + links_1[l-1])
-#         print("URL Lvl 1->2: "+ format(links_1[l-1]))
-#         #print("Categoria:" + categorias[menu[l]['Area']] + " Areas:"+ format(res))
-#         #print(len(res))
-#         if not res:
-#              pass
-#         else:
-#             links_2.extend(res[:-1])
-#     else:
-#         print("URL Lvl 2->2: "+ format(links_1[l-1]))
-#         links_2.append(links_1[l-1])
+for link1 in links_1:
+    if "Menu_areas.aspx?" in link1 and ("Nivel=1" in link1 or "nivel=1" in link1):
+        res = nivel1(base + link1)
+        #print("URL Lvl 1->2: "+ link1)
+        if not res:
+             pass
+        else:
+            links_2.extend(res[:-1])
+    else:
+        #print("URL Lvl 2->2: "+ link1)
+        links_2.append(link1)
 
-# print("Links Nivel 2:" + format(len(links_2)))
+# for i in links_2:
+#     print("Url Lvl 2: " + i)
 
-for i in links_2:
-    print("Url Lvl 2: " + i)
+for link2 in links_2[1:]:
+    res = nivel2(base + link2)
+    #print('Url Lvl 2->3:' + link2)
+    if not res:
+        print("No hay articulos en este link:" + link2)
+    else:
+        links_3.extend(res)
 
-# for i in links:
-#     intelaf = base +"/"+ i
-#     soup = getUrl(intelaf)
-#     producto = getProducts()
-#informacion del producto
+# for link3 in links_3:
+#     print("Url Lvl 3: " + link3)
+
+print("Total Links Lvl 0: "+format(len(links_0)))
+print("Total Links Lvl 1: "+format(len(links_1)))
+print("Total Links Lvl 2: "+format(len(links_2)))
+print("Total Links Lvl 3: "+format(len(links_3)))
 
 
-# for i in producto:
-#     intelaf = base + "/" + producto[i]
-#     #intelaf = base + "/" + 'precios_stock_detallado.aspx?codigo=AUDIF-XT-XTH710'
-#     #print(intelaf)
-#     soup = getUrl(intelaf)
-#     paginaProducto = soup.find('div',{'class':'row cuerpo'})
-#     pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-    
-#     codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
-#     nombre.append( paginaProducto.find('h1').text)
-#     precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
-#     oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
-#     detalles.append([j.text for j in pp])
-#     categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
-#     garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
+for link3 in links_3:
+    try:
+        soup = getUrl(base + link3)
+        paginaProducto = soup.find('div',{'class':'row cuerpo'})
+        pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+
+        codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
+        nombre.append( paginaProducto.find('h1').text)
+        precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
+        oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
+        detalles.append([j.text for j in pp])
+        categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
+        garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
+    except:
+        print(link3 + '---> Status: link Fallido!')
+        continue
+    else:
+        print(link3 + '---> Status: link exitoso!')
 
 #Existencias del Producto
 #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
@@ -238,9 +244,13 @@ for i in links_2:
 #      }
 #print(productInfo)
 #print(len(codigo))
-
-#df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
-#df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
+try:
+    df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
+    df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
+except:
+    print("No se exporto a excel, revise codigo")
+else:
+    print("Se proceso correctamente, mire si la informacion esta correcta")
 
 
 
