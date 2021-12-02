@@ -51,18 +51,46 @@ def getUrl(url):
         soup = BeautifulSoup(send.text, 'html.parser')
         return soup
 
-def areas(url):
+def nivel0(url):
     try:
         soup = getUrl(url)
         menu = soup.find_all('a')
     except:
-        print("hubo un error en clase 'areas'")
+        print("hubo un error en clase 'Nivel0'")
         print("Url Fallido:" + url)
     else:
         temp = []
         for i in menu:
-            if "Precios_stock_resultado.aspx?" in i.get('href') or 'Menu_areas.aspx?' in i.get('href'):
-                temp.append(i.get('href'))
+            if 'Menu_areas.aspx?' in i.get('href'):
+                    temp.append(i.get('href'))
+        return temp
+
+def nivel1(url):
+    try:
+        soup = getUrl(url)
+        menu = soup.find_all('a')
+    except:
+        print("hubo un error en clase 'Nivel1'")
+        print("Url Fallido:" + url)
+    else:
+        temp = []
+        for i in menu:
+            if 'Menu_areas.aspx?' in i.get('href'):
+                    temp.append(i.get('href'))
+        return temp
+
+def nivel2(url):
+    try:
+        soup = getUrl(url)
+        menu = soup.find_all('a')
+    except:
+        print("hubo un error en clase 'Nivel2'")
+        print("Url Fallido:" + url)
+    else:
+        temp = []
+        for i in menu:
+            if 'Menu_areas.aspx?' in i.get('href'):
+                    temp.append(i.get('href'))
         return temp
 
 def getCategorias(menu):
@@ -99,15 +127,19 @@ def getProducts():
 #Getting Json file
 menu = getJson()
 categorias = getCategorias(menu)
-
 # # #print(menu[2]['Area']+": "+ categorias[menu[2]['Area']])
 
 #Getting Menu
 base = "https://www.intelaf.com"
-nivel0 = []
-links = []
-productInfo={}
-codigo = []
+links_0 = [] #Nivel 0 de links
+links_1 = [] #Nivel 1 de links
+links_2 = [] #Nivel 2 de links
+links_3 = [] #Nivel 3 o ya los links que nos dirigen a todos los articulos
+
+productInfo={} #Descripcion de cada producto
+
+#Listas de todos los articulos ingresados
+codigo = [] 
 nombre = []
 precio = []
 oferta = []
@@ -115,51 +147,74 @@ detalles = []
 categoria = []
 garantia = []
 
+for i in categorias:
+    links_0.append(base + categorias[i])
+print("Links en Nivel 0: " + format(len(links_0)))
+base = "https://www.intelaf.com/"
 
-for iter in range(len(categorias)):
-     intelaf = base + categorias[menu[iter]['Area']]
-     res = list(areas(intelaf))
-     # print(res)
-     if res is None:
-         pass
-     else:
-         nivel0.extend(res[:-1])
- 
-for i in nivel0:
-     if "Precios_stock_resultado.aspx?area=" in i:
-         links.append(i)
-     elif "Menu_areas.aspx?" in i:
-         intelaf = base + "/" + i
-         res = list(areas(intelaf))
-         # print(res)
-         if res is None:
+for i in links_0:
+    print("Url Lvl 0: " + i)
+
+for l in range (len(links_0)):
+    if "Menu_areas.aspx?" in links_0[l-1] and "nivel=0" in links_0[l-1]:
+        res = nivel0(links_0[l-1])
+        print("URL Lvl 0->1: "+ format(links_0[l-1]))
+        #print("Categoria:" + categorias[menu[l]['Area']] + " Areas:"+ format(res))
+        #print(len(res))
+        if not res:
              pass
-         else:
-            links.extend(res[:-1])
-            #break
+        else:
+            links_1.extend(res[:-1])
+    else:
+        print("URL Lvl 0->2: "+ format(links_0[l-1]))
+        links_2.append(links_0[l-1])
+print("Links en Nivel 1: " + format(len(links_1)))
+print("Links en Nivel 2: " + format(len(links_2)))
 
-for i in links:
-    intelaf = base +"/"+ i
-    soup = getUrl(intelaf)
-    producto = getProducts()
+for i in links_1:
+    print("Url Lvl 1: " + i)
+
+# for l in range (len(links_1)):
+#     if "Menu_areas.aspx?" in links_1[l-1] and ("Nivel=1" in links_1[l-1] in links_1[l-1]):
+#         res = nivel1(base + links_1[l-1])
+#         print("URL Lvl 1->2: "+ format(links_1[l-1]))
+#         #print("Categoria:" + categorias[menu[l]['Area']] + " Areas:"+ format(res))
+#         #print(len(res))
+#         if not res:
+#              pass
+#         else:
+#             links_2.extend(res[:-1])
+#     else:
+#         print("URL Lvl 2->2: "+ format(links_1[l-1]))
+#         links_2.append(links_1[l-1])
+
+# print("Links Nivel 2:" + format(len(links_2)))
+
+# for i in links_2:
+    #print("Url Lvl 2: " + i)
+
+# for i in links:
+#     intelaf = base +"/"+ i
+#     soup = getUrl(intelaf)
+#     producto = getProducts()
 #informacion del producto
 
 
-for i in producto:
-    intelaf = base + "/" + producto[i]
-    #intelaf = base + "/" + 'precios_stock_detallado.aspx?codigo=AUDIF-XT-XTH710'
-    #print(intelaf)
-    soup = getUrl(intelaf)
-    paginaProducto = soup.find('div',{'class':'row cuerpo'})
-    pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+# for i in producto:
+#     intelaf = base + "/" + producto[i]
+#     #intelaf = base + "/" + 'precios_stock_detallado.aspx?codigo=AUDIF-XT-XTH710'
+#     #print(intelaf)
+#     soup = getUrl(intelaf)
+#     paginaProducto = soup.find('div',{'class':'row cuerpo'})
+#     pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
     
-    codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
-    nombre.append( paginaProducto.find('h1').text)
-    precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
-    oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
-    detalles.append([j.text for j in pp])
-    categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
-    garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
+#     codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
+#     nombre.append( paginaProducto.find('h1').text)
+#     precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
+#     oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
+#     detalles.append([j.text for j in pp])
+#     categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
+#     garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
 
 #Existencias del Producto
 #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
@@ -171,17 +226,18 @@ for i in producto:
 #     tienda = j.find_all('div')
 #     existencias[tienda[0].text] = tienda[1] .text
     #print(existencias)
-productInfo = {
-        "codigo":codigo,
-        "nombre":nombre,
-        "precio":precio,
-        "oferta":oferta,
-        "detalles":detalles,
-        "categoria":categoria,
-        "garantia":garantia
-     }
+
+# productInfo = {
+#         "codigo":codigo,
+#         "nombre":nombre,
+#         "precio":precio,
+#         "oferta":oferta,
+#         "detalles":detalles,
+#         "categoria":categoria,
+#         "garantia":garantia
+#      }
 #print(productInfo)
-print(len(codigo))
+#print(len(codigo))
 
 #df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
 #df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')    
