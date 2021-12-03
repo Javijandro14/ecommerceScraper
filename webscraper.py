@@ -322,7 +322,7 @@ for link2 in links_2:
         codigo.append(codigos)
         marca = paginaProducto.find("h2")
         des = paginaProducto.find("h5")
-        nombre.append((marca.text).strip() + ": " + (nombre.text).strip())
+        nombre.append((marca.text).strip() + ": " + (des.text).strip())
         ofertaP = paginaProducto.find('span',{'class':'red-text'})
         precioO = paginaProducto.find('span',{'class':'grey-text'})
         if ofertaP == None:
@@ -344,7 +344,7 @@ for link2 in links_2:
         intentosFallidos+=1
     else:
         intentosExistosos+=1
-    #     print(link2 + " --> Status: Existoso!")
+        print(link2 + " --> Status: Existoso!")
 
 print("Exitosos:" + format(intentosExistosos))
 print("Fallidos:" + format(intentosFallidos))
