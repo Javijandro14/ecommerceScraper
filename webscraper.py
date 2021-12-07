@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import pandas as pd
+import gc 
 
 
 # Estados Unidos(Expandir para mas info)
@@ -565,9 +566,11 @@ for link0 in links_0:
     for link in area:
         #print(link.get('href'))
         links_1.append(link.get('href'))
+soup.decompose()
+gc.collect()
+
 for link1 in links_1:
     try:
-        print(link1)
         soup = getUrl(link1)
         noProductos= int(((soup.find('span',{'class':'toolbar-number'})).text)[:-10])
         print("Numero de Productos: " + format(noProductos))
@@ -587,68 +590,76 @@ for link1 in links_1:
         for iter in range(1,paginas+1):
             link = (format(link1)+"?p=" + format(iter) + "&product_list_limit=30")
             soup = getUrl(link)
-            print(link)
             links = soup.find_all('a',{'class':'product-item-link'})
             for i in links:
                 #print("Link lvl 2: " + format(i.get('href')))
                 links_2.append(i.get('href'))
             print("Links: "+format(len(links_2)))
+        soup.decompose()
+        gc.collect()
 
 
-    
-    
-    # res = soup.find_all('a',{'class':'product-item-link'})
-    # for link in res:
-    #     print(link.get('href'))
-    #     # codigo = []
-    #     # nombre = []
-    #     # precio = []
-    #     # oferta = []
-    #     # categoria = []
-    #     # detalles = []
-    #     # garantia = []
+codigo = []
+nombre = []
+precio = []
+oferta = []
+categoria = []
+detalles = []
+garantia = []
 
+intentosFallidos = 0
+intentosExistosos = 0
 
-    #     # intentosFallidos = 0
-    #     # intentosExistosos = 0
-    #     # for link2 in links_2:
-    #     #     try:
-    #     #         soup = getUrl(base + link2)
-    #     #         paginaProducto = soup.find('section',{'class':'text-center'})
-    #     #     except:
-    #     #         print(link2 + " --> Status: Fallido!")
-    #     #         intentosFallidos+=1
-    #     #     else:
-    #     #         intentosExistosos+=1
-    #     #         codigo.append(codigos)
-    #     #         print(link2 + " --> Status: Existoso!")
+for link2 in links_2:
+    try:
+        soup = getUrl(link2)
+        codigos = soup.find('div',{'itemprop':'sku'})
+        title = soup.find('h1',{'class':'page-title'})
+        nombre.append((title.text).strip())
+        precios = soup.find('span',{'data-price-type':'oldPrice'})
+        if precios == None:
+            precios = "N/A"
+            precio.append(precios)
+        else:
+            precio.append((precios.text)[1:])
 
-    #     # print("Exitosos:" + format(intentosExistosos))
-    #     # print("Fallidos:" + format(intentosFallidos))
-    #     # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+        precioOferta = soup.find('span',{'data-price-type':'finalPrice'})
+        oferta.append((precioOferta.text)[1:])
+        categoria = "N/A"
+        detalle = soup.find_all('tr')
+        detalles.append(detalle)
+        garantias = soup.find('td',{'data-th':'Garantía'})
+        garantia.append(garantias)
+    except:
+        print(link2 + " --> Status: Fallido!")
+        intentosFallidos+=1
+    else:
+        intentosExistosos+=1
+        codigo.append(codigos)
+        print(link2 + " --> Status: Existoso!")
+        soup.decompose
+        gc.collect()
+print("Exitosos:" + format(intentosExistosos))
+print("Fallidos:" + format(intentosFallidos))
+print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
 
-    #     # productInfo = {
-    #     #     "codigo": codigo,
-    #     #     "nombre": nombre,
-    #     #     "precio": precio,
-    #     #     "oferta": oferta,
-    #     #     "categoria": categoria,
-    #     #     "detalles": detalles,
-    #     #     "garantia": garantia
-    #     # }
+productInfo = {
+    "codigo": codigo,
+    "nombre": nombre,
+    "precio": precio,
+    "oferta": oferta,
+    "categoria": categoria,
+    "detalles": detalles,
+    "garantia": garantia
+}
+try:
+    df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","garantia"])
+    df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\MaxProducts.xlsx')
+except:
+    print("No se exporto a excel, revise codigo")
+else:
+    print("Se proceso correctamente, mire si la informacion esta correcta")
 
-# soup = getUrl(test)
-# codigos = soup.find('div',{'itemprop':'sku'})
-# title = soup.find('h1',{'class':'page-title'})
-# print((title.text).strip())
-# precios = soup.find('span',{'data-price-type':'oldPrice'})
-# print((precios.text)[1:])
-# precioOferta = soup.find('span',{'data-price-type':'finalPrice'})
-# print((precioOferta.text)[1:])
-# categoria = ""
-# detalles = soup.find_all('tr')
-# garantia = soup.find('td',{'data-th':'Garantía'})
-# print('garantia: ' + garantia.text)
 
 # Pacifiko(Expandir para mas info)
         # def getUrl(url):
