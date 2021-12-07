@@ -565,43 +565,77 @@ for link0 in links_0:
     for link in area:
         #print(link.get('href'))
         links_1.append(link.get('href'))
+for link1 in links_1:
+    try:
+        print(link1)
+        soup = getUrl(link1)
+        noProductos= int(((soup.find('span',{'class':'toolbar-number'})).text)[:-10])
+        print("Numero de Productos: " + format(noProductos))
+    except:
+        print('Hubo un error, puede ser que no hay artiuclos o que la Url este mal')
+        print('Link fallido: ' + format(link1))
+    else:
+        paginas = 0
+        if noProductos >= 30:
+            paginas = noProductos//30
+        else:
+            paginas = 0
 
-        # codigo = []
-        # nombre = []
-        # precio = []
-        # oferta = []
-        # categoria = []
-        # detalles = []
-        # garantia = []
+        if (noProductos % 30) >= 1:
+            paginas += 1
+        #print(paginas)
+        for iter in range(1,paginas+1):
+            link = (format(link1)+"?p=" + format(iter) + "&product_list_limit=30")
+            soup = getUrl(link)
+            print(link)
+            links = soup.find_all('a',{'class':'product-item-link'})
+            for i in links:
+                #print("Link lvl 2: " + format(i.get('href')))
+                links_2.append(i.get('href'))
+            print("Links: "+format(len(links_2)))
 
 
-        # intentosFallidos = 0
-        # intentosExistosos = 0
-        # for link2 in links_2:
-        #     try:
-        #         soup = getUrl(base + link2)
-        #         paginaProducto = soup.find('section',{'class':'text-center'})
-        #     except:
-        #         print(link2 + " --> Status: Fallido!")
-        #         intentosFallidos+=1
-        #     else:
-        #         intentosExistosos+=1
-        #         codigo.append(codigos)
-        #         print(link2 + " --> Status: Existoso!")
+    
+    
+    # res = soup.find_all('a',{'class':'product-item-link'})
+    # for link in res:
+    #     print(link.get('href'))
+    #     # codigo = []
+    #     # nombre = []
+    #     # precio = []
+    #     # oferta = []
+    #     # categoria = []
+    #     # detalles = []
+    #     # garantia = []
 
-        # print("Exitosos:" + format(intentosExistosos))
-        # print("Fallidos:" + format(intentosFallidos))
-        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
 
-        # productInfo = {
-        #     "codigo": codigo,
-        #     "nombre": nombre,
-        #     "precio": precio,
-        #     "oferta": oferta,
-        #     "categoria": categoria,
-        #     "detalles": detalles,
-        #     "garantia": garantia
-        # }
+    #     # intentosFallidos = 0
+    #     # intentosExistosos = 0
+    #     # for link2 in links_2:
+    #     #     try:
+    #     #         soup = getUrl(base + link2)
+    #     #         paginaProducto = soup.find('section',{'class':'text-center'})
+    #     #     except:
+    #     #         print(link2 + " --> Status: Fallido!")
+    #     #         intentosFallidos+=1
+    #     #     else:
+    #     #         intentosExistosos+=1
+    #     #         codigo.append(codigos)
+    #     #         print(link2 + " --> Status: Existoso!")
+
+    #     # print("Exitosos:" + format(intentosExistosos))
+    #     # print("Fallidos:" + format(intentosFallidos))
+    #     # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+
+    #     # productInfo = {
+    #     #     "codigo": codigo,
+    #     #     "nombre": nombre,
+    #     #     "precio": precio,
+    #     #     "oferta": oferta,
+    #     #     "categoria": categoria,
+    #     #     "detalles": detalles,
+    #     #     "garantia": garantia
+    #     # }
 
 # soup = getUrl(test)
 # codigos = soup.find('div',{'itemprop':'sku'})
