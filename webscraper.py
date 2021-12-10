@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import pandas as pd
+import gc
 
 
 # Estados Unidos(Expandir para mas info)
@@ -542,120 +543,130 @@ import pandas as pd
         #         print("Url Fallido:" + url)
         #     else:
         #         soup = BeautifulSoup(send.text, 'html.parser')
+        #         request.close()
         #         return soup
 
         # base = "https://www.max.com.gt"
         # soup = getUrl(base)
 
         # menu = soup.find('div',{'class','content-mega'})
-        # categoria = menu.find_all('li',{'class':'level2'})
+        # cat = menu.find_all('li',{'class':'level2'})
 
-        # links_0 = []
-        # links_1 = []
-        # links_2 = []
+        # categorias = [(c.find('a')) for c in cat]#no poner text o get('href'), llamar funcion si necesario
 
-        # for i in categoria:
-        #     #print((i.find('a')).get('href')[22:])
-        #     links_0.append((i.find('a')).get('href')[22:])
-
-        # for link0 in links_0:
-        #     soup = getUrl(base+link0)
-        #     cat = soup.find('ul',{'class':'sub-cat-list'})
-        #     area = cat.find_all('a')
-        #     for link in area:
-        #         #print(link.get('href'))
-        #         links_1.append(link.get('href'))
-        #     soup.decompose()
-        # for link1 in links_1:
-        #     try:
-        #         soup = getUrl(link1)
-        #         noProductos= int(((soup.find('span',{'class':'toolbar-number'})).text)[:-10])
-        #         print("Numero de Productos: " + format(noProductos))
-        #     except:
-        #         print('Hubo un error, puede ser que no hay artiuclos o que la Url este mal')
-        #         print('Link fallido: ' + format(link1))
+        # menus = { }
+        # for c in categorias:
+        #     soup = getUrl(c.get('href'))
+        #     subcategorias = soup.find('ul',{'class':['sub-cat-list',' slick-initialized',' slick-slider']})
+        #     list = subcategorias.find_all('li')
+        #     res = [(i.find('a')) for i in list]#no poner text o get('href'), llamar funcion si necesario
+        #     if None in res:
+        #         menus[(c.text).strip()] = c.get('href') #Algunos no tienen sub categorias, entocnes se pone su link original
         #     else:
-        #         paginas = 0
-        #         if noProductos >= 30:
-        #             paginas = noProductos//30
-        #         else:
-        #             paginas = 0
-
-        #         if (noProductos % 30) >= 1:
-        #             paginas += 1
-        #         #print(paginas)
-        #         for iter in range(1,paginas+1):
-        #             link = (format(link1)+"?p=" + format(iter) + "&product_list_limit=30")
-        #             soup = getUrl(link)
-        #             links = soup.find_all('a',{'class':'product-item-link'})
-        #             for i in links:
-        #                 #print("Link lvl 2: " + format(i.get('href')))
-        #                 links_2.append(i.get('href'))
-        #             print("Links: "+format(len(links_2)))
-        #         soup.decompose()
-
-
-        # codigo = []
-        # nombre = []
-        # precio = []
-        # oferta = []
-        # categoria = []
-        # detalles = []
-        # garantia = []
+        #         menus[(c.text).strip()] = res
+        # soup.decompose()
+        # gc.collect()
 
         # intentosFallidos = 0
         # intentosExistosos = 0
 
-        # for link2 in links_2:
-        #     try:
-        #         soup = getUrl(link2)
-        #         print(link2)
-        #         codigos = soup.find('div',{'itemprop':'sku'})
-        #         title = soup.find('h1',{'class':'page-title'})
-        #         nombre.append((title.text).strip())
-        #         precios = soup.find('span',{'data-price-type':'oldPrice'})
-        #         if precios == None:
-        #             precios = "N/A"
-        #             precio.append(precios)
+        # for m in menus:
+        #     links_0 = menus[m]
+        #     #print(links_0)
+        #     for link0 in links_0:
+        #         try:
+        #             soup = getUrl(link0.get('href'))
+        #             print(link0.get('href'))
+        #             noProductos= int(((soup.find('span',{'class':'toolbar-number'})).text)[:-10])
+        #             print("Numero de Productos: " + format(noProductos))
+        #         except:
+        #             print('Hubo un error, puede ser que no hay artiuclos o que la Url este mal')
+        #             print('Link fallido: ' + format(link0.get('href')))
         #         else:
-        #             precio.append((precios.text)[1:])
+        #             paginas = 0
+        #             if noProductos >= 30:
+        #                 paginas = noProductos//30
+        #             else:
+        #                 paginas = 0
 
-        #         precioOferta = soup.find('span',{'data-price-type':'finalPrice'})
-        #         oferta.append((precioOferta.text)[1:])
-        #         categoria = "N/A"
-        #         detalle = soup.find_all('tr')
-        #         detalles.append(detalle)
-        #         garantias = soup.find('td',{'data-th':'Garantía'})
-        #         garantia.append(garantias)
-        #     except:
-        #         print(link2 + " --> Status: Fallido!")
-        #         intentosFallidos+=1
-        #     else:
-        #         intentosExistosos+=1
-        #         codigo.append(codigos)
-        #         print(link2 + " --> Status: Existoso!")
-        #         soup.decompose
+        #             if (noProductos % 30) >= 1:
+        #                 paginas += 1
+                    
+        #             links_1 = []
+        #             area = {}
+        #             for iter in range(1,paginas+1):
+        #                 link = (format(link0.get('href'))+"?p=" + format(iter) + "&product_list_limit=30")
+        #                 soup = getUrl(link)
+        #                 links = soup.find_all('a',{'class':'product-item-link'})
+        #                 links_1.extend(links)
+        #             print("Links: "+format(len(links_1)))
+        #             area[link0.text] = links_1
+        #         soup.decompose()
+        #         gc.collect()
+
+        #     for a in area:
+
+        #         links_2 = []
+        #         codigo = []
+        #         nombre = []
+        #         precio = []
+        #         oferta = []
+        #         categoria = []
+        #         detalles = []
+        #         garantia = []
+        #         links_2 = area[a]
+
+        #         for link2 in links_2:
+        #             try:
+        #                 soup = getUrl(link2.get('href'))
+        #                 codigos = soup.find('div',{'itemprop':'sku'})
+        #                 title = soup.find('h1',{'class':'page-title'})
+        #                 nombre.append((title.text).strip())
+        #                 precios = soup.find('span',{'data-price-type':'oldPrice'})
+        #                 if precios == None:
+        #                     precios = "N/A"
+        #                     precio.append(precios)
+        #                 else:
+        #                     precio.append((precios.text)[1:])
+        #                 precioOferta = soup.find('span',{'data-price-type':'finalPrice'})
+        #                 oferta.append((precioOferta.text)[1:])
+        #                 categoria.append(format(m) + "/" + format(a))
+        #                 detalle = soup.find_all('tr')
+        #                 l = [i.text for i in detalle]
+        #                 detalles.append(""+format(l)+"")
+        #                 garantias = soup.find('td',{'data-th':'Garantía'})
+        #                 garantia.append(garantias.text)
+        #             except:
+        #                 print(link2.get('href') + " --> Status: Fallido!")
+        #                 intentosFallidos+=1
+        #             else:
+        #                 intentosExistosos+=1
+        #                 codigo.append(codigos.text)
+        #                 print(link2.get('href') + " --> Status: Existoso!")
+        #                 soup.decompose()
+        #                 gc.collect()
+        #         productInfo = {
+        #             "codigo": codigo,
+        #             "nombre": nombre,
+        #             "precio": precio,
+        #             "oferta": oferta,
+        #             "categoria": categoria,
+        #             "detalles": detalles,
+        #             "garantia": garantia
+        #         }
+        #         # try:
+        #         #     sheetName = format(m) + "-" + format(a)
+        #         #     df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","detalles","garantia"])
+        #         #     df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\MaxProducts.xlsx',sheet_name= sheetName)
+        #         # except:
+        #         #     print("No se exporto a excel, revise codigo")
+        #         # else:
+        #         #     print("Se proceso correctamente, mire si la informacion esta correcta")
 
         # print("Exitosos:" + format(intentosExistosos))
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
 
-        # productInfo = {
-        #     "codigo": codigo,
-        #     "nombre": nombre,
-        #     "precio": precio,
-        #     "oferta": oferta,
-        #     "categoria": categoria,
-        #     "detalles": detalles,
-        #     "garantia": garantia
-        # }
-        # try:
-        #     df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","garantia"])
-        #     df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\MaxProducts.xlsx')
-        # except:
-        #     print("No se exporto a excel, revise codigo")
-        # else:
-        #     print("Se proceso correctamente, mire si la informacion esta correcta")
 
 
 # Pacifiko(Expandir para mas info)
