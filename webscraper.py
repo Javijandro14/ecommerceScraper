@@ -684,5 +684,37 @@ print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intent
 
 
 # Pacifiko(Expandir para mas info)
+# def getUrl(url):
+#     try:
+#         request = requests.Session()
+#         send = request.get(url)
+#     except:
+#         print("Revise el url, no se proceso correctamente")
+#         print("Url Fallido:" + url)
+#     else:
+#         soup = BeautifulSoup(send.text, 'html.parser')
+#         return soup
+
+# base = "https://www.pacifiko.com/"
+
+# test = "https://www.pacifiko.com/compras-en-linea/bateria-de-reemplazo-para-samsung-s6-edge-steren&pid=MGFkZjNhOT"
+
+# soup = getUrl(test)
+
+# codigo = soup.find('span',{'class':'propery-des'})
+# print(codigo.text)
+
+# title = soup.find('h1')
+# print(title.text)
+
+# precioO = soup.find('span',{'id':'price-old'})
+# print((precioO.text).strip())
+
+# oferta = soup.find('span',{'id':'price-special'})
+# if oferta == None:
+#     oferta = "N/A"
+#     print(oferta)
+# else:
+#     print((oferta.text).strip())
 
 
