@@ -18,3 +18,4 @@ Esto nos sirve para que podamos conseguir el tipo de variable 'Soup' del modulo 
 Es lo mismo que 'getUrl', pero la diferencia es que si tenemos un archivo .json que la pagina recibe(por ejemplo, de intelaf), entonces lo podemos extraer y tener ya casi toda la informacion del producto o categoria. No todas las paginas lo tienen, y si lo tienen, muchas veces no es de los productos en si, sino que de otra informacion que puede ser o no util a nuestra situacion
 ### 3. 
 
+
