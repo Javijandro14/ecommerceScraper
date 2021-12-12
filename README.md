@@ -7,6 +7,6 @@ Estamos probando generar una tabla de datos para TODA la pagina, pero podemos ha
 ### Funciones Comunes
 Aqui tenemos las funciones que nos van a servir, ya que cada pagina esta parecido para sacar datos
 
-#### 1. 'getUrl(url)':
+#### 1. ´getUrl(url)´:
 Esto
 
