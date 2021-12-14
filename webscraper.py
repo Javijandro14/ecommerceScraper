@@ -17,33 +17,23 @@ def getUrl(url):
         request.close()
         return soup
 
-def findItem(soup,item,attType,attName):
+def findItem(soup, item, attType, attName):
     try:
-        result = soup.find(item,{attType:attName})
+        result = soup.find(item, {attType: attName})
     except:
         print("error en la funcion 'findItem'")
         print("Item Fallido: " + item)
     else:
         return result
 
-def findItems(soup,item,attType,attName):
+def findItems(soup, item, attType, attName):
     try:
-        result = soup.find_all(item,{attType:attName})
+        result = soup.find_all(item, {attType: attName})
     except:
         print("error en la funcion 'findItems'")
         print("Item Fallido: " + item)
     else:
-        return result        
-
-def py2excel(sheetName,productInfo,columns,directory):
-    try:
-        df = pd.DataFrame(productInfo,columns)
-        df.to_excel(r" "+directory ,sheetName)
-    except:
-        print("Hubo un problema en la funcion 'py2excel'")
-    else:
-        print("revise el documento si se ingresaron los datos correctamente")
-
+        return result
 
 # Estados Unidos(Expandir para mas info)
     # 1 Amazon(Expandir para mas info)
@@ -265,141 +255,132 @@ def py2excel(sheetName,productInfo,columns,directory):
         #     existencias[tienda[0].text] = tienda[1] .text
         # print(existencias)
 
-    #Click(Expandir para mas info)
-        
-        # def nivel1(url):
-        #     try:
-        #         soup = getUrl(url)
-        #         links = soup.find_all('a')
-        #     except:
-        #         print("Hubo un error en la clase 'nivel1()'")
-        #     else:
-        #         temp = []
-        #         for l in links:
-        #             temp.append(l.get('href'))
-        #         return temp
+    # Click(Expandir para mas info)
+def nivel1(url):
+    try:
+        soup = getUrl(url)
+        links = soup.find_all('a')
+    except:
+        print("Hubo un error en la clase 'nivel1()'")
+    else:
+        temp = []
+        for l in links:
+            temp.append(l.get('href'))
+        return temp
 
+base = "https://www.click.gt"
+soup = getUrl(base)
+area = findItem(soup,'div','class','container')
+menu = findItems(area,'a',None,None)
 
-        # base = "https://www.click.gt"
-        # soup = getUrl(base)
-        # area = findItem(soup,'div','class','container')
-        # menu = findItems(area,'a',None,None)
+links_0 = []
+links_1 = []
+links_2 = []
 
-        # links_0 = []
-        # links_1 = []
-        # links_2 = []
+for i in menu:
+    # print(i.get('href'))
+    if i.get('href') == None:
+        pass
+    elif "/productos/" in i.get('href'):
+        links_0.append(i.get('href'))
 
-        # for i in menu:
-        #     # print(i.get('href'))
-        #     if i.get('href') == None:
-        #         pass
-        #     elif "/productos/" in i.get('href'):
-        #         links_0.append(i.get('href'))
+for link0 in links_0:
+    soup = getUrl(base+link0)
+    pagination = soup.find_all('button', {'class': 'page-link'})
+    if len(pagination) == 0:
+        res = base+link0
+        #print(base+link0)
+        links_1.append(res)
+    elif len(pagination) == 2:
+        paginas = int(pagination[0].text)
+        for i in range(1, paginas):
+            res = base+link0+"?page="+format(i)
+            #print(base+link0+"?page="+format(i))
+            links_1.append(res)
+    elif len(pagination) == 3:
+        paginas = int(pagination[-2].text)
+        for i in range(1, paginas):
+            res = base+link0+"?page="+format(i)
+            #print(base+link0+"?page="+format(i))
+            links_1.append(res)
+    else:
+        paginas = int(pagination[-2].text)
+        for i in range(1, paginas):
+            res = base+link0+"?page="+format(i)
+            #print(base+link0+"?page="+format(i))
+            links_1.append(res)
 
-        # for link0 in links_0:
-        #     soup = getUrl(base+link0)
-        #     pagination = soup.find_all('button', {'class': 'page-link'})
-        #     if len(pagination) == 0:
-        #         res = base+link0
-        #         #print(base+link0)
-        #         links_1.append(res)
-        #     elif len(pagination) == 2:
-        #         paginas = int(pagination[0].text)
-        #         for i in range(1, paginas):
-        #             res = base+link0+"?page="+format(i)
-        #             #print(base+link0+"?page="+format(i))
-        #             links_1.append(res)
-        #     elif len(pagination) == 3:
-        #         paginas = int(pagination[-2].text)
-        #         for i in range(1, paginas):
-        #             res = base+link0+"?page="+format(i)
-        #             #print(base+link0+"?page="+format(i))
-        #             links_1.append(res)
-        #     else:
-        #         paginas = int(pagination[-2].text)
-        #         for i in range(1, paginas):
-        #             res = base+link0+"?page="+format(i)
-        #             #print(base+link0+"?page="+format(i))
-        #             links_1.append(res)
+for link1 in links_1:
+    res = nivel1(link1)
+    for r in res:
+        if r == None:
+            pass
+        elif "/single-product/" in r:
+            links_2.append(r)
 
-        # for link1 in links_1:
-        #     res = nivel1(link1)
-        #     for r in res:
-        #         if r == None:
-        #             pass
-        #         elif "/single-product/" in r:
-        #             links_2.append(r)
+print("Links Lvl 0: " + format(len(links_0)))
+print("Links Lvl 1: " + format(len(links_1)))
+print("Links Lvl 2: " + format(len(links_2)))
 
-        # print("Links Lvl 0: " + format(len(links_0)))
-        # print("Links Lvl 1: " + format(len(links_1)))
-        # print("Links Lvl 2: " + format(len(links_2)))
+codigo = []
+nombre = []
+precio = []
+oferta = []
+categoria = []
+detalles = []
+garantia = []
 
-        # codigo = []
-        # nombre = []
-        # precio = []
-        # oferta = []
-        # categoria = []
-        # detalles = []
-        # garantia = []
+intentosFallidos = 0
+intentosExistosos = 0
+for link2 in links_2:
+    try:
+        soup = getUrl(base + link2)
+        paginaProducto = findItem(soup,'section','class','text-center')
+        codigos = link2[16:]
 
+        marca = findItem(paginaProducto,"h2",None,None)
+        des = findItem(paginaProducto,"h5",None,None)
+        nombre.append((marca.text).strip() + ": " + (des.text).strip())
+        ofertaP = findItem(paginaProducto,'span','class','red-text')
+        precioO = findItem(paginaProducto,'span','class','grey-text')
+        if ofertaP == None:
+            ofertaP = "N/A"
+            oferta.append(ofertaP)
+        else:
+            oferta.append(ofertaP.text)
+        precio.append(precioO.text)
+        garant = findItem(paginaProducto,"label",None,None)
+        categoria.append('N/A')
+        if garant == None:
+            garant = "N/A"
+            garantia.append(garant)
+        else:
+            garantia.append(garant.text)
+        especificar = findItem(paginaProducto,'div','id','collapseOne1')
+        detalles.append((especificar.text).strip())
+    except:
+        print(link2 + " --> Status: Fallido!")
+        intentosFallidos+=1
+    else:
+        intentosExistosos+=1
+        codigo.append(codigos)
+        print(link2 + " --> Status: Existoso!")
 
-        # intentosFallidos = 0
-        # intentosExistosos = 0
-        # for link2 in links_2:
-        #     try:
-        #         soup = getUrl(base + link2)
-        #         paginaProducto = findItem(soup,'section','class','text-center')
-        #         codigos = link2[16:]
-                
-        #         marca = findItem(paginaProducto,"h2",None,None)
-        #         des = findItem(paginaProducto,"h5",None,None)
-        #         nombre.append((marca.text).strip() + ": " + (des.text).strip())
-        #         ofertaP = findItem(paginaProducto,'span','class','red-text')
-        #         precioO = findItem(paginaProducto,'span','class','grey-text')
-        #         if ofertaP == None:
-        #             ofertaP = "N/A"
-        #             oferta.append(ofertaP)
-        #         else:
-        #             oferta.append(ofertaP.text)
-        #         precio.append(precioO.text)
-        #         garant = findItem(paginaProducto,"label",None,None)
-        #         categoria.append('N/A')
-        #         if garant == None:
-        #             garant = "N/A"
-        #             garantia.append(garant)
-        #         else:
-        #             garantia.append(garant.text)
-        #         especificar = findItem(paginaProducto,'div','id','collapseOne1')
-        #         detalles.append((especificar.text).strip())
-        #     except:
-        #         print(link2 + " --> Status: Fallido!")
-        #         intentosFallidos+=1
-        #     else:
-        #         intentosExistosos+=1
-        #         codigo.append(codigos)
-        #         print(link2 + " --> Status: Existoso!")
+print("Exitosos:" + format(intentosExistosos))
+print("Fallidos:" + format(intentosFallidos))
+print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
 
-        # print("Exitosos:" + format(intentosExistosos))
-        # print("Fallidos:" + format(intentosFallidos))
-        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
-
-        # productInfo = {
-        #     "codigo": codigo,
-        #     "nombre": nombre,
-        #     "precio": precio,
-        #     "oferta": oferta,
-        #     "categoria": categoria,
-        #     "detalles": detalles,
-        #     "garantia": garantia
-        # }
-
-        # try:
-        #     df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","garantia"])
-        #     df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\clickProducts.xlsx')
-        # except:
-        #     print("No se exporto a excel, revise codigo")
-        # else:
-        #     print("Se proceso correctamente, mire si la informacion esta correcta")
+productInfo = {
+    "codigo": codigo,
+    "nombre": nombre,
+    "precio": precio,
+    "oferta": oferta,
+    "categoria": categoria,
+    "detalles": detalles,
+    "garantia": garantia
+}
+#df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","garantia"])
+#df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\clickProducts.xlsx')
 
     # Kemik
         # base = "https://www.kemik.gt/"
@@ -408,11 +389,10 @@ def py2excel(sheetName,productInfo,columns,directory):
         # for link0 in links_0:
         #     print(link0.get('href'))
 
-
         # Macrosistemas(Expandir para mas info)
 
         # Elektra(Expandir para mas info)
-        
+
         # Tecnofacil(Expandir para mas info)
 
     # SpiritComputacion(Expandir para mas info)
@@ -462,7 +442,6 @@ def py2excel(sheetName,productInfo,columns,directory):
         # print("Url Lvl 0:" + format(len(links_0)))
         # print("Url Lvl 1:" + format(len(links_1)))
 
-
         # for link1 in links_1:
         #     soup = getUrl(base+link1)
         #     res = soup.find_all('a',{'class':'item-title'})
@@ -471,16 +450,12 @@ def py2excel(sheetName,productInfo,columns,directory):
         #         #print(r.get('href'))
         #         links_2.append(r.get('href'))
 
-
-
         # print("Url Lvl 0:" + format(len(links_0)))
         # print("Url Lvl 1:" + format(len(links_1)))
         # print("Url Lvl 2:" + format(len(links_2)))
 
-
         # intentosFallidos = 0
         # intentosExistosos = 0
-
 
         # for link2 in links_2:
         #     try:
@@ -552,103 +527,123 @@ def py2excel(sheetName,productInfo,columns,directory):
         #     print("Se proceso correctamente, mire si la informacion esta correcta")
 
 # Max(Expandir para mas info)
+    # Aqui estamos buscando todos los links que se haya posible, en algunas paginas no tienen JSON files, entonces este fragemento busca links y luego
+    # lo vamos a meter en varios diccionarios para luego hacer nuestro propio archivo JSON, esto es porque se nos hace mas facil hacerlo de esta forma que hacer todo junto
+    # ya que si consume bastante memoria buscar todos los datos de las paginas
 
-base = "https://www.max.com.gt"
-soup = getUrl(base)
+    # base = "https://www.max.com.gt"
+    # soup = getUrl(base)
+    # menu = findItem(soup,'div','class','content-mega')
+    # cat = findItems(menu,'li','class','level2')
+    # categorias = [(findItem(c,'a',None,None)) for c in cat]
+    # products ={}
+    # level0 = { }#Categoria Principal
+    # for c in categorias:
+    #     soup = getUrl(c.get('href'))
+    #     subcategorias = findItem(soup,'ul','class',['sub-cat-list' ,'slick-initialized' ,'slick-slider'])
+    #     list = findItems(subcategorias,'li',None,None)
+    #     res = [(findItem(i,'a',None,None)) for i in list] #no poner text o get('href'), llamar funcion si necesario
+    #     if None in res:
+    #         level0[(c.text).strip()] = c.get('href') #Algunos no tienen sub categorias, entocnes se pone su link original
+    #     else:
+    #         level0[(c.text).strip()] = res
 
-menu = findItem(soup,'div','class','content-mega')
-cat = findItems(menu,'li','class','level2')
-categorias = [(findItem(c,'a',None,None)) for c in cat]
-products ={}
-menus = { }
-for c in categorias:
-    soup = getUrl(c.get('href'))
-    subcategorias = findItem(soup,'ul','class',['sub-cat-list' ,'slick-initialized' ,'slick-slider'])
-    list = findItems(subcategorias,'li',None,None)
-    res = [(findItem(i,'a',None,None)) for i in list] #no poner text o get('href'), llamar funcion si necesario
-    if None in res:
-        menus[(c.text).strip()] = c.get('href') #Algunos no tienen sub categorias, entocnes se pone su link original
-    else:
-        menus[(c.text).strip()] = res
-
-for m in menus:
-    links_0 = menus[m]
-    area = {}
-    for link0 in links_0:
-        try:
-            soup = getUrl(link0.get('href'))
-            noProductos = int((findItem(soup,'span','class','toolbar-number').text)[:-10])
-            paginas = 0
-            if noProductos >= 30:
-                paginas = noProductos//30
-            else:
-                paginas = 0
-            if (noProductos % 30) >= 1:
-                paginas += 1
-            links_1 = []
-            for iter in range(1,paginas+1):
-                link = (format(link0.get('href'))+"?p=" + format(iter) + "&product_list_limit=30")
-                soup = getUrl(link)
-                links = findItems(soup,'a','class','product-item-link')
-                for l in links:
-                    area[link0.text] = { (l.text).strip() : l.get('href')}
-            #area[link0.text] = links_1
-        except:
-            print("Hubo un error, puede ser que la url este mal o no hay productos")
-            print("Url fallido:" + link0.get('href'))
-    products[m] = area
-    
-file =open("newfile.txt",mode="w",encoding="utf-8")
-file.write(str(products))
-file.close()
-
-with open("maxJson.json",'w') as file:
-    jsonData = str(products)
-    json.dump(jsonData,file)
-
-
-#for a in area:
-
-    #     links_2 = []
-    #     codigo = []
-    #     nombre = []
-    #     precio = []
-    #     oferta = []
-    #     categoria = []
-    #     detalles = []
-    #     garantia = []
-    #     links_2 = area[a]
-
-    #     for link2 in links_2:
+    # for m in level0:
+    #     links_0 = level0[m]
+    #     level1 = {} #Subcategoria de cada Categoria
+    #     for link0 in links_0:
     #         try:
-    #             soup = getUrl(link2.get('href'))
-    #             codigos = soup.find('div',{'itemprop':'sku'})
-    #             title = soup.find('h1',{'class':'page-title'})
-    #             nombre.append((title.text).strip())
-    #             precios = soup.find('span',{'data-price-type':'oldPrice'})
-    #             if precios == None:
-    #                 precios = "N/A"
-    #                 precio.append(precios)
+    #             soup = getUrl(link0.get('href'))
+    #             noProductos = int((findItem(soup,'span','class','toolbar-number').text)[:-10])
+    #             print("No productos: " + format(noProductos))
+    #             paginas = 0
+    #             if noProductos >= 30:
+    #                 paginas = noProductos//30
     #             else:
-    #                 precio.append((precios.text)[1:])
-    #             precioOferta = soup.find('span',{'data-price-type':'finalPrice'})
-    #             oferta.append((precioOferta.text)[1:])
-    #             categoria.append(format(m) + "/" + format(a))
-    #             detalle = soup.find_all('tr')
-    #             l = [i.text for i in detalle]
-    #             detalles.append(""+format(l)+"")
-    #             garantias = soup.find('td',{'data-th':'Garantía'})
-    #             garantia.append(garantias.text)
+    #                 paginas = 0
+    #             if (noProductos % 30) >= 1:
+    #                 paginas += 1
+    #             level2 = {}
+    #             for iter in range(1,paginas+1):
+    #                 link = (format(link0.get('href'))+"?p=" + format(iter) + "&product_list_limit=30")
+    #                 soup = getUrl(link)
+    #                 links = findItems(soup,'a','class','product-item-link')
+    #                 for l in links:
+    #                     # l.text es nivel2 y l.get('href') es nivel 3, que son Nombres de productos y links
+    #                     level2[(l.text).strip()] = l.get('href')
+    #                 level1[link0.text] = level2
+    #             print("Productos agregados:" + format(len(level2)))
+    #             #area[link0.text] = level1
     #         except:
-    #             print(link2.get('href') + " --> Status: Fallido!")
-    #             intentosFallidos+=1
-    #         else:
-    #             intentosExistosos+=1
-    #             codigo.append(codigos.text)
-    #             print(link2.get('href') + " --> Status: Existoso!")
-    #             soup.decompose()
-    #             gc.collect()
+    #             print("Hubo un error, puede ser que la url este mal o no hay productos")
+    #             print("Url fallido:" + link0.get('href'))
+    #     products[m] = level1
+        
+    # #Se imprime 2 archivos, uno de texto y otro JSON, solo es de preuba el de txt, para ver que si nos sale el resultado deseado, la que nos importa seria JSON
+    # # file =open("newfile.txt",mode="w",encoding="utf-8")
+    # # file.write(products)
+    # # file.close()
+    # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/max/maxJson.json",'w') as file:
+    #     json.dump(products,file)
+    # file.close()
+    # # Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
+    # # y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
+    # file = open("maxJson.json",)
+    # jsonData = json.load(file)
+    # # print(jsonData['Televisores'])
+    # intentosExitosos = 0
+    # intentosFallidos = 0
 
+    # columns = ["codigo","nombre","precio","oferta","categoria","detalles","garantia"]
+    # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/max/MaxProducts.xlsx'
+    # sheetName = []
+    # df=[]
+    # for j in jsonData:
+    #     for k in jsonData[j]:
+    #         codigo = []
+    #         nombre = []
+    #         precio = []
+    #         oferta = []
+    #         categoria = []
+    #         detalles = []
+    #         garantia = []
+    #         for l in jsonData[j][k]:
+    #             link = jsonData[j][k][l]
+                
+    #             try:
+    #                 soup = getUrl(link)
+    #                 codigos = findItem(soup, 'div', 'itemprop', 'sku')
+    #                 title = findItem(soup, 'h1', 'class', 'page-title')
+    #                 precios = findItem(soup, 'span', 'data-price-type', 'oldPrice')
+    #                 precioOferta = findItem(soup, 'span', 'data-price-type', 'finalPrice')
+    #                 detalle = findItems(soup,'tr',None,None)
+    #                 d = [i.text.strip for i in detalle]
+    #                 garantias = findItem(soup,'td','data-th','Garantía')
+    #             except:
+    #                 print(link + " --> Status: Fallido!")
+    #                 intentosFallidos += 1
+    #                 break
+    #             else:
+    #                 intentosExitosos += 1
+    #                 print(link + " --> Status: Existoso!")
+    #                 codigo.append(codigos.text)
+    #                 nombre.append(title.text)
+    #                 if precios == None:
+    #                     precios = "N/A"
+    #                     precio.append(precios)
+    #                 else:
+    #                     precio.append((precios.text)[1:])
+    #                 oferta.append((precioOferta.text)[1:])
+    #                 detalles.append(""+format(d)+"")
+    #                 categoria.append(format(j) + "/" + format(k))
+    #                 if garantias == None:
+    #                     garantias = "N/A"
+    #                     garantia.append(garantia)
+    #                     continue
+    #                 else:
+    #                     garantia.append(garantias.text)
+    #                 soup.decompose()
+    #                 gc.collect()
     #     productInfo = {
     #         "codigo": codigo,
     #         "nombre": nombre,
@@ -658,21 +653,18 @@ with open("maxJson.json",'w') as file:
     #         "detalles": detalles,
     #         "garantia": garantia
     #     }
+    #     sheetName.append(format(j))
+    #     df.append(pd.DataFrame(productInfo, columns))
 
-    #     sheetName = format(m) + "-" + format(a)
 
-    #     directory = 'C:\Users\javie\Desktop\EcommerceWebscraper\MaxProducts.xlsx'
+    # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+    # for i in range(1,len(df)):
+    #     df[i-1].to_excel(writer,sheetName[i-1])
+    # writer.save()
 
-    #     columns = ["codigo","nombre","precio","oferta","categoria","detalles","garantia"]
-
-    #     py2excel(sheetName,productInfo,columns, directory)
-
-            
-
-# print("Exitosos:" + format(intentosExistosos))
-# print("Fallidos:" + format(intentosFallidos))
-# print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
-
+    # print("Exitosos:" + format(intentosExitosos))
+    # print("Fallidos:" + format(intentosFallidos))
+    # print("Porcentaje de Exito:" + format(intentosExitosos/(intentosFallidos+intentosExitosos)))
 
 
 # Pacifiko(Expandir para mas info)
@@ -708,4 +700,3 @@ with open("maxJson.json",'w') as file:
 #     print(oferta)
 # else:
 #     print((oferta.text).strip())
-
