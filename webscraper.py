@@ -75,20 +75,36 @@ for cat in categorias:
     soup = getUrl(link)
     res1 = findItems(soup,'a','class','hover_effect')
     if not res1:
-        level0[cat] = link  
+        #level0[cat] = link  
+        res1 = findItems(soup,'div','class','zoom_info')
+        level1 = {}
+        for r1 in res1:
+            nombre = (findItem(r1,'button','class','btn_cotiza')).get('name')
+            link = base + "/" + (findItem(r1,'button','class','btn_mas_info')).get('name')
+            level1[nombre] = link
+        level0[cat] = level1
     else:
         level1 = {}
         for r1 in res1:
-            print((findItem(r1,'div','class','image-area')).get('title'))
+            #print((findItem(r1,'div','class','image-area')).get('title'))
             link = base+ "/" + r1.get('href')
             soup = getUrl(link)
             res2 = findItems(soup,'a','class','hover_effect')
             if not res2:
-                level1[(findItem(r1,'div','class','image-area')).get('title')] = link
+                res2 = findItems(soup,'div','class','zoom_info')
+                if not res2:
+                    print("No hay productos en: " + r1.get('href'))
+                else:
+                    level2 = {}
+                    for r2 in res2:
+                        nombre = (findItem(r2,'button','class','btn_cotiza')).get('name')
+                        link = base + "/" + (findItem(r2,'button','class','btn_mas_info')).get('name')
+                        level2[nombre] = link
+                    level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
             else:
                 level2 = {}
                 for r2 in res2:
-                    print(r2.text)
+                    #print(r2.text)
                     link = base + "/" + r2.get('href')
                     soup = getUrl(link)
                     res3 = findItems(soup,'a','class','hover_effect')
@@ -106,7 +122,7 @@ for cat in categorias:
                     else:
                         level3 = {}
                         for r3 in res3:
-                            print(r3.text)
+                            #print(r3.text)
                             link = base + "/" + r3.get('href')
                             soup = getUrl(link)
                             res4 = findItems(soup,'div','class','zoom_info')
@@ -123,114 +139,13 @@ for cat in categorias:
                 level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
         level0[cat] = level1  
 
+#Se imprime 2 archivos, uno de texto y otro JSON, solo es de preuba el de txt, para ver que si nos sale el resultado deseado, la que nos importa seria JSON
+with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",'w') as file:
+    json.dump(level0,file)
+file.close()
+#Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
+#y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
 
-# productInfo={} #Descripcion de cada producto
-
-# #Listas de todos los articulos ingresados
-# codigo = []
-# nombre = []
-# precio = []
-# oferta = []
-# detalles = []
-# categoria = []
-# garantia = []
-
-#Getting Menu
-# links_0 = [] #Nivel 0 de links
-# links_1 = [] #Nivel 1 de links
-# links_2 = [] #Nivel 2 de links
-# links_3 = [] #Nivel 3 o ya los links que nos dirigen a todos los articulos
-
-# for i in categorias:
-#     if "Menu_areas.aspx?" in categorias[i]:
-#         links_0.append((categorias[i])[1:])
-#     else:
-#         links_2.append((categorias[i])[1:])
-
-# #for i in links_0:
-# #    print("Url Lvl 0: " + i)
-
-# for link0 in links_0:
-#     if "Menu_areas.aspx?" in link0 and ("nivel=0" in link0 or "Nivel=0" in link0):
-#         res = nivel0(base + link0)
-#         #print("URL Lvl 0->1: "+ link0)
-#         if not res:
-#                 pass
-#         else:
-#             links_1.extend(res[:-1])
-#     else:
-#         #print("URL Lvl 0->2: "+ link0)
-#         links_2.append(link0)
-
-# # for i in links_1:
-# #     print("Url Lvl 1: " + i)
-
-# for link1 in links_1:
-#     if "Menu_areas.aspx?" in link1 and ("Nivel=1" in link1 or "nivel=1" in link1):
-#         res = nivel1(base + link1)
-#         #print("URL Lvl 1->2: "+ link1)
-#         if not res:
-#                 pass
-#         else:
-#             links_2.extend(res[:-1])
-#     else:
-#         #print("URL Lvl 2->2: "+ link1)
-#         links_2.append(link1)
-
-# # for i in links_2:
-# #     print("Url Lvl 2: " + i)
-
-# for link2 in links_2[1:]:
-#     res = nivel2(base + link2)
-#     #print('Url Lvl 2->3:' + link2)
-#     if not res:
-#         print("No hay articulos en este link:" + link2)
-#     else:
-#         links_3.extend(res)
-
-# # for link3 in links_3:
-# #     print("Url Lvl 3: " + link3)
-
-# print("Total Links Lvl 0: "+format(len(links_0)))
-# print("Total Links Lvl 1: "+format(len(links_1)))
-# print("Total Links Lvl 2: "+format(len(links_2)))
-# print("Total Links Lvl 3: "+format(len(links_3)))
-
-# for link3 in links_3:
-#     try:
-#         soup = getUrl(base + link3)
-#         paginaProducto = soup.find('div',{'class':'row cuerpo'})
-#         pp = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-
-#         codigo.append((paginaProducto.find('p',{'class':'codigo'}).text)[16:])
-#         nombre.append( paginaProducto.find('h1').text)
-#         precio.append((paginaProducto.find('p',{'class':'precio_normal'}).text)[17:])
-#         oferta.append((paginaProducto.find('p',{'class':'beneficio_efectivo'}).text)[21:])
-#         detalles.append([j.text for j in pp])
-#         categoria.append((paginaProducto.find('p',{'class':'area'}).text)[23:])
-#         garantia.append((paginaProducto.find('p',{'class':'garantia'}).text)[9:])
-#     except:
-#         print(link3 + ' ---> Status: link Fallido!')
-#         continue
-#     else:
-#         print(link3 + ' ---> Status: link exitoso!')
-
-# productInfo = {
-#         "codigo":codigo,
-#         "nombre":nombre,
-#         "precio":precio,
-#         "oferta":oferta,
-#         "detalles":detalles,
-#         "categoria":categoria,
-#         "garantia":garantia
-#         }
-# try:
-#     df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","detalles","categoria","garantia"])
-#     df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\prueba.xlsx')
-# except:
-#     print("No se exporto a excel, revise codigo")
-# else:
-#     print("Se proceso correctamente, mire si la informacion esta correcta")
 
 # Existencias del Producto
     # Falta terminar esta parte
