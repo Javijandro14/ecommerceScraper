@@ -52,100 +52,361 @@ def findItems(soup, item, attType, attName):
 # Guatemala(Expandir para mas info)
     # Intelaf(Expandir para comentarios)
 
-def getCategorias(menu):
-    categorias = {}
-    for info in menu:
-        area = info['Area']
-        url = info['url']
-        categorias[area] = url
-    return categorias
+# def getCategorias(menu):
+#     categorias = {}
+#     for info in menu:
+#         area = info['Area']
+#         url = info['url']
+#         categorias[area] = url
+#     return categorias
 
-#Getting Json file
-url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
-res = getUrl(url)
-data = json.loads(res.text)
-menu = data['menu_sub_1s']
-categorias = getCategorias(menu)
+# #Getting Json file
+# url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
+# res = getUrl(url)
+# data = json.loads(res.text)
+# menu = data['menu_sub_1s']
+# categorias = getCategorias(menu)
 
-base = "https://www.intelaf.com"
-level0 = {}
-for cat in categorias:
-    print(cat)
-    link = base + categorias[cat]
-    soup = getUrl(link)
-    res1 = findItems(soup,'a','class','hover_effect')
-    if not res1:
-        #level0[cat] = link  
-        res1 = findItems(soup,'div','class','zoom_info')
-        level1 = {}
-        for r1 in res1:
-            nombre = (findItem(r1,'button','class','btn_cotiza')).get('name')
-            link = base + "/" + (findItem(r1,'button','class','btn_mas_info')).get('name')
-            level1[nombre] = link
-        level0[cat] = level1
-    else:
-        level1 = {}
-        for r1 in res1:
-            #print((findItem(r1,'div','class','image-area')).get('title'))
-            link = base+ "/" + r1.get('href')
-            soup = getUrl(link)
-            res2 = findItems(soup,'a','class','hover_effect')
-            if not res2:
-                res2 = findItems(soup,'div','class','zoom_info')
-                if not res2:
-                    print("No hay productos en: " + r1.get('href'))
-                else:
-                    level2 = {}
-                    for r2 in res2:
-                        nombre = (findItem(r2,'button','class','btn_cotiza')).get('name')
-                        link = base + "/" + (findItem(r2,'button','class','btn_mas_info')).get('name')
-                        level2[nombre] = link
-                    level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
-            else:
-                level2 = {}
-                for r2 in res2:
-                    #print(r2.text)
-                    link = base + "/" + r2.get('href')
-                    soup = getUrl(link)
-                    res3 = findItems(soup,'a','class','hover_effect')
-                    if not res3:
-                        res3 = findItems(soup,'div','class','zoom_info')
-                        if not res3:
-                            print("No hay productos en: " + r2.get('href'))
-                        else:
-                            level3 = {}
-                            for r3 in res3:
-                                nombre = (findItem(r3,'button','class','btn_cotiza')).get('name')
-                                link = base + "/" + (findItem(r3,'button','class','btn_mas_info')).get('name')
-                                level3[nombre] = link
-                        level2[r2.text] = level3    
-                    else:
-                        level3 = {}
-                        for r3 in res3:
-                            #print(r3.text)
-                            link = base + "/" + r3.get('href')
-                            soup = getUrl(link)
-                            res4 = findItems(soup,'div','class','zoom_info')
-                            if not res4:
-                                print("No hay productos en: " + r3.get('href'))
-                            else:
-                                level4 = {}
-                                for r4 in res4:
-                                    nombre = (findItem(r4,'button','class','btn_cotiza')).get('name')
-                                    link = base + "/" + (findItem(r4,'button','class','btn_mas_info')).get('name')
-                                    level4[nombre] = link
-                                level3[r3.text] = level4
-                        level2[r2.text] = level3
-                level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
-        level0[cat] = level1  
+# base = "https://www.intelaf.com"
+# level0 = {}
+# for cat in categorias:
+#     print(cat)
+#     link = base + categorias[cat]
+#     soup = getUrl(link)
+#     res1 = findItems(soup,'a','class','hover_effect')
+#     if not res1:
+#         #level0[cat] = link  
+#         res1 = findItems(soup,'div','class','zoom_info')
+#         level1 = {}
+#         for r1 in res1:
+#             nombre = (findItem(r1,'button','class','btn_cotiza')).get('name')
+#             link = base + "/" + (findItem(r1,'button','class','btn_mas_info')).get('name')
+#             level1[nombre] = link
+#         level0[cat] = level1
+#     else:
+#         level1 = {}
+#         for r1 in res1:
+#             #print((findItem(r1,'div','class','image-area')).get('title'))
+#             link = base+ "/" + r1.get('href')
+#             soup = getUrl(link)
+#             res2 = findItems(soup,'a','class','hover_effect')
+#             if not res2:
+#                 res2 = findItems(soup,'div','class','zoom_info')
+#                 if not res2:
+#                     print("No hay productos en: " + r1.get('href'))
+#                 else:
+#                     level2 = {}
+#                     for r2 in res2:
+#                         nombre = (findItem(r2,'button','class','btn_cotiza')).get('name')
+#                         link = base + "/" + (findItem(r2,'button','class','btn_mas_info')).get('name')
+#                         level2[nombre] = link
+#                     level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
+#             else:
+#                 level2 = {}
+#                 for r2 in res2:
+#                     #print(r2.text)
+#                     link = base + "/" + r2.get('href')
+#                     soup = getUrl(link)
+#                     res3 = findItems(soup,'a','class','hover_effect')
+#                     if not res3:
+#                         res3 = findItems(soup,'div','class','zoom_info')
+#                         if not res3:
+#                             print("No hay productos en: " + r2.get('href'))
+#                         else:
+#                             level3 = {}
+#                             for r3 in res3:
+#                                 nombre = (findItem(r3,'button','class','btn_cotiza')).get('name')
+#                                 link = base + "/" + (findItem(r3,'button','class','btn_mas_info')).get('name')
+#                                 level3[nombre] = link
+#                         level2[r2.text] = level3    
+#                     else:
+#                         level3 = {}
+#                         for r3 in res3:
+#                             #print(r3.text)
+#                             link = base + "/" + r3.get('href')
+#                             soup = getUrl(link)
+#                             res4 = findItems(soup,'div','class','zoom_info')
+#                             if not res4:
+#                                 print("No hay productos en: " + r3.get('href'))
+#                             else:
+#                                 level4 = {}
+#                                 for r4 in res4:
+#                                     nombre = (findItem(r4,'button','class','btn_cotiza')).get('name')
+#                                     link = base + "/" + (findItem(r4,'button','class','btn_mas_info')).get('name')
+#                                     level4[nombre] = link
+#                                 level3[r3.text] = level4
+#                         level2[r2.text] = level3
+#                 level1[(findItem(r1,'div','class','image-area')).get('title')] = level2
+#         level0[cat] = level1  
 
-#Se imprime 2 archivos, uno de texto y otro JSON, solo es de preuba el de txt, para ver que si nos sale el resultado deseado, la que nos importa seria JSON
-with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",'w') as file:
-    json.dump(level0,file)
-file.close()
+# #Se imprime 2 archivos, uno de texto y otro JSON, solo es de preuba el de txt, para ver que si nos sale el resultado deseado, la que nos importa seria JSON
+# with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",'w') as file:
+#     json.dump(level0,file)
+# file.close()
 #Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
 #y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
 
+file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",)
+jsonData = json.load(file)
+# print(jsonData['Televisores'])
+intentosExitosos = 0
+intentosFallidos = 0
+
+directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafProducts.xlsx'
+sheetName = []
+df = []
+for j in jsonData:
+    codigo = []
+    nombre = []
+    precio = []
+    oferta = []
+    categoria = []
+    detalles = []
+    garantia = []
+    for k in jsonData[j]:
+        if isinstance(jsonData[j][k],dict):
+            for l in jsonData[j][k]:
+                if isinstance(jsonData[j][k][l],dict):
+                    for m in jsonData[j][k][l]:
+                        if isinstance(jsonData[j][k][l][m],dict):
+                            for n in jsonData[j][k][l][m]:#jsonData[j][k][l][m][n]
+                                try:
+                                    link = jsonData[j][k][l][m][n]
+                                    soup = getUrl(link)
+                                    paginaProducto = findItem(soup,'div','class','row cuerpo')
+                                    #------Codigo del Producto-------#
+                                    codigos = findItem(paginaProducto,'p','class','codigo')
+                                    if codigos == None:
+                                        continue
+                                    else:            
+                                        codigo.append((codigos.text)[16:])
+                                    #------Nombre del Producto-------#
+                                    title = findItem(paginaProducto,'h1',None,None).text
+                                    if title == None:
+                                        continue
+                                    else:
+                                        nombre.append(title)
+                                    #------Precio Viejo-------#
+                                    precios = findItem(paginaProducto,'p','class','precio_normal')
+                                    if precios == None:
+                                        precios = "N/A"
+                                        precio.append(precios)
+                                    else:
+                                        precio.append((precios.text)[17:])
+                                    #------Precio de Ofertas-------#
+                                    precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
+                                    if precioOferta == None:
+                                        continue
+                                    else:
+                                        oferta.append((precioOferta.text)[21:])
+                                    #------Detalles de Productos-------#
+                                    detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+                                    if detalle == None:
+                                        detalle = "N/A"
+                                        detalles.append(detalle)
+                                    else:
+                                        d = [i.text for i in detalle]
+                                        detalles.append(""+format(d)+"")
+                                    #------Categorias-------#
+                                    categoria.append(format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)+"-"+format(n))
+                                    #------Garantias-------#
+                                    garantias = findItem(paginaProducto,'p','class','garantia')
+                                    if garantias == None:
+                                        garantias = "N/A"
+                                        garantia.append(garantia)
+                                    else:
+                                        garantia.append(garantias.text[9:])
+                                except:
+                                    print(format(link) + " --> Status: Fallido!")
+                                    intentosFallidos += 1
+                                else:
+                                    intentosExitosos += 1
+                                    print(format(link) + " --> Status: Existoso!")
+                                    soup.decompose()
+                        else:#jsonData[j][k][l][m]
+                            try:
+                                link = jsonData[j][k][l][m]
+                                soup = getUrl(link)
+                                paginaProducto = findItem(soup,'div','class','row cuerpo')
+                                #------Codigo del Producto-------#
+                                codigos = findItem(paginaProducto,'p','class','codigo')
+                                if codigos == None:
+                                    continue
+                                else:            
+                                    codigo.append((codigos.text)[16:])
+                                #------Nombre del Producto-------#
+                                title = findItem(paginaProducto,'h1',None,None).text
+                                if title == None:
+                                    continue
+                                else:
+                                    nombre.append(title)
+                                #------Precio Viejo-------#
+                                precios = findItem(paginaProducto,'p','class','precio_normal')
+                                if precios == None:
+                                    precios = "N/A"
+                                    precio.append(precios)
+                                else:
+                                    precio.append((precios.text)[17:])
+                                #------Precio de Ofertas-------#
+                                precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
+                                if precioOferta == None:
+                                    continue
+                                else:
+                                    oferta.append((precioOferta.text)[21:])
+                                #------Detalles de Productos-------#
+                                detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+                                if detalle == None:
+                                    detalle = "N/A"
+                                    detalles.append(detalle)
+                                else:
+                                    d = [i.text for i in detalle]
+                                    detalles.append(""+format(d)+"")
+                                #------Categorias-------#
+                                categoria.append(format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m))
+                                #------Garantias-------#
+                                garantias = findItem(paginaProducto,'p','class','garantia')
+                                if garantias == None:
+                                    garantias = "N/A"
+                                    garantia.append(garantia)
+                                else:
+                                    garantia.append(garantias.text[9:])
+                            except:
+                                print(format(link) + " --> Status: Fallido!")
+                                intentosFallidos += 1
+                            else:
+                                intentosExitosos += 1
+                                print(format(link) + " --> Status: Existoso!")
+                                soup.decompose()
+                else:#jsonData[j][k][l]
+                    try:
+                        link = jsonData[j][k][l]
+                        soup = getUrl(link)
+                        paginaProducto = findItem(soup,'div','class','row cuerpo')
+                        #------Codigo del Producto-------#
+                        codigos = findItem(paginaProducto,'p','class','codigo')
+                        if codigos == None:
+                            continue
+                        else:            
+                            codigo.append((codigos.text)[16:])
+                        #------Nombre del Producto-------#
+                        title = findItem(paginaProducto,'h1',None,None).text
+                        if title == None:
+                            continue
+                        else:
+                            nombre.append(title)
+                        #------Precio Viejo-------#
+                        precios = findItem(paginaProducto,'p','class','precio_normal')
+                        if precios == None:
+                            precios = "N/A"
+                            precio.append(precios)
+                        else:
+                            precio.append((precios.text)[17:])
+                        #------Precio de Ofertas-------#
+                        precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
+                        if precioOferta == None:
+                            continue
+                        else:
+                            oferta.append((precioOferta.text)[21:])
+                        #------Detalles de Productos-------#
+                        detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+                        if detalle == None:
+                            detalle = "N/A"
+                            detalles.append(detalle)
+                        else:
+                            d = [i.text for i in detalle]
+                            detalles.append(""+format(d)+"")
+                        #------Categorias-------#
+                        categoria.append(format(j)+"-"+format(k)+"-"+format(l))
+                        #------Garantias-------#
+                        garantias = findItem(paginaProducto,'p','class','garantia')
+                        if garantias == None:
+                            garantias = "N/A"
+                            garantia.append(garantia)
+                        else:
+                            garantia.append(garantias.text[9:])
+                    except:
+                        print(format(link) + " --> Status: Fallido!")
+                        intentosFallidos += 1
+                    else:
+                        intentosExitosos += 1
+                        print(format(link) + " --> Status: Existoso!")
+                        soup.decompose()
+        else:#jsonData[j][k]
+            try:
+                link = jsonData[j][k]
+                soup = getUrl(link)
+                paginaProducto = findItem(soup,'div','class','row cuerpo')
+                #------Codigo del Producto-------#
+                codigos = findItem(paginaProducto,'p','class','codigo')
+                if codigos == None:
+                    continue
+                else:            
+                    codigo.append((codigos.text)[16:])
+                #------Nombre del Producto-------#
+                title = findItem(paginaProducto,'h1',None,None).text
+                if title == None:
+                    continue
+                else:
+                    nombre.append(title)
+                #------Precio Viejo-------#
+                precios = findItem(paginaProducto,'p','class','precio_normal')
+                if precios == None:
+                    precios = "N/A"
+                    precio.append(precios)
+                else:
+                    precio.append((precios.text)[17:])
+                #------Precio de Ofertas-------#
+                precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
+                if precioOferta == None:
+                    continue
+                else:
+                    oferta.append((precioOferta.text)[21:])
+                #------Detalles de Productos-------#
+                detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+                if detalle == None:
+                    detalle = "N/A"
+                    detalles.append(detalle)
+                else:
+                    d = [i.text for i in detalle]
+                    detalles.append(""+format(d)+"")
+                #------Categorias-------#
+                categoria.append(format(j)+"-"+format(k))
+                #------Garantias-------#
+                garantias = findItem(paginaProducto,'p','class','garantia')
+                if garantias == None:
+                    garantias = "N/A"
+                    garantia.append(garantia)
+                else:
+                    garantia.append(garantias.text[9:])
+            except:
+                print(format(link) + " --> Status: Fallido!")
+                intentosFallidos += 1
+            else:
+                intentosExitosos += 1
+                print(format(link) + " --> Status: Existoso!")
+                soup.decompose()
+    productInfo = {
+        "codigo": codigo,
+        "nombre": nombre,
+        "precio": precio,
+        "oferta": oferta,
+        "categoria": categoria,
+        "detalles": detalles,
+        "garantia": garantia
+    }
+    sheetName.append(format(j)+format(k))
+    df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
+    gc.collect()
+
+
+writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+for i in range(1, len(df)):
+    df[i-1].to_excel(writer, sheetName[i-1])
+writer.save()
+
+print("Exitosos:" + format(intentosExitosos))
+print("Fallidos:" + format(intentosFallidos))
+print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
 
 # Existencias del Producto
     # Falta terminar esta parte
