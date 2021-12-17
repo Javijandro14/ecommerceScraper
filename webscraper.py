@@ -650,14 +650,41 @@ def findItems(soup, item, attType, attName):
 #         link1 = (findItem(r0,'a',None,None).get('href'))
 #         soup = getUrl(base+link1)
 #         div = findItem(soup,'div','class',['vm-pagination','vm-pagination-bottom'])
-#         paginacion = findItems(div,'a','class','pagenav')
+#         paginacion = findItems(div,'li',None,None)
+#         level2={}
 #         if not paginacion:
-#             pass
+#             soup = getUrl(base+link1)
+#             res = soup.find_all('a',{'class':'item-title'})
+#             for r in res:
+#                 name2 = r.text
+#                 link2 = r.get('href')
+#                 level2[name2] = link2
 #         else:
-#             for p in paginacion[:-3]:
-#                 print(p.get('href'))
-
+#             for p in paginacion[2:-3]:
+#                 a = findItem(p,'a',None,None)
+#                 if a == None:
+#                     soup = getUrl(base+link1)
+#                     res = soup.find_all('a',{'class':'item-title'})
+#                     for r in res:
+#                         name2 = r.text
+#                         link2 = r.get('href')
+#                         level2[name2] = link2
+#                 else:
+#                     soup = getUrl(base+a.get('href'))
+#                     res = soup.find_all('a',{'class':'item-title'})
+#                     for r in res:
+#                         name2 = r.text
+#                         link2 = r.get('href')
+#                         level2[name2] = link2
+#         level1[name1] = level2        
 #     level0[name0] = level1
+
+# with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritJson.json",'w') as file:
+#     json.dump(level0,file)
+# file.close()
+
+file = open("maxJson.json",)
+jsonData = json.load(file)
 
 # categorias = menu.find_all('li',{'class':'parent'})
 # subMenu = menu.find_all('ul',{'class':'unstyled'})
@@ -981,3 +1008,13 @@ def findItems(soup, item, attType, attName):
         # else:
         #     print((oferta.text).strip())
     #No terminado
+
+    #GoatShop
+    #base = "https://goatshopgt.com/"
+
+    #Zukko
+    #base = "https://zukko.store/"
+
+    #Funky
+    #base = "https://storefunky.com/"
+
