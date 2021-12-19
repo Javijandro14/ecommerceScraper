@@ -620,88 +620,262 @@ def findItems(soup, item, attType, attName):
         # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #Terminado
     # Kemik
-base = "https://www.kemik.gt"
-soup = getUrl(base)
-navbar = findItem(soup,'div','id','wide-nav')
-menus = findItems(navbar,'li','class','menu-item-design-default')
-level0 = { }
+        # base = "https://www.kemik.gt"
+        # soup = getUrl(base)
+        # navbar = findItem(soup,'div','id','wide-nav')
+        # menus = findItems(navbar,'li','class','menu-item-design-default')
+        # level0 = { }
 
-for menu in menus:
-    name0 = format(findItem(menu,'a',None,None).text.strip()) + " lvl 0"
-    link0 = findItem(menu,'a',None,None).get('href')
-    level1 = {}
-    submenu =findItem(menu,'ul','class','nav-dropdown-default')
-    if submenu == None:# Si nivel 0 no tiene dropdown, entonces ira al unico link que tiene, y verifica si no tiene subcategorias
-        soup = getUrl(link0)
-        categorias = findItems(soup,'div','class','product-category')
-        for subcat in categorias:
-            name1 = findItem(menu,'a',None,None)
-            link1 = findItem(menu,'a',None,None)
-            if name1 == None or link1 == None: # Si tampoco tenemos subcategorias, entonces aqui tendremos codigo para conseguir todos los articulos
-                    continue
-            else:# Si tenemos subcategorias, entonces los analizaremos y luego verificamos si no tiene subcategorias dentro de este hasta que lleguemos al nivel que debemos tener
-                soup = getUrl(link1.get('href'))
-                subcategorias1 = findItem(soup,'div','class','product-category')
-                level2 = {}
-                for subcat1 in subcategorias1:
-                    name2 = findItem(subcat1,'div','class','product-category')
-                    link2 = findItem(subcat1,'a',None,None)
-                    if name2 == None or link2 == None:
-                        continue
-                    else:
-                        soup = getUrl(link2.get('href'))
-                        subcategorias2 = findItems(soup,'div','class','product-category')
-                        level3 ={}
-                        for subcat2 in subcategorias2:
-                            name3 = findItem(subcat,'h5','class','header-title')
-                            link3 = findItem(subcat,'a',None,None)
-                            if name3 == None or link3 == None:
-                                continue
-                            else:
-                                level3[format(name3.text.strip()) + " lvl 3"] = link3.get('href')        
-                        level2[format(name2.text.strip()) + " lvl 2"] = level3
-                level1[format(name1.text.strip()) + " lvl 1"] = level2
-    else:
-        smlist = findItems(submenu,'li',None,None)
-        for sml in smlist:
-            name1 = format(sml.text.strip()) + " lvl 1"
-            link1 = findItem(sml,'a',None,None).get('href')
-            soup = getUrl(link1)
-            categorias = findItems(soup,'div','class','product-category')
-            level2 = {}
-            for subcat in categorias:
-                name2 = findItem(subcat,'h5','class','header-title')
-                link2 = findItem(subcat,'a',None,None)
-                if name2 == None or link2 == None:
-                    continue
-                else:
-                    soup = getUrl(link2.get('href'))
-                    subcategorias1 = findItems(soup,'div','class','product-category')
-                    level3 ={}
-                    for subcat1 in subcategorias1:
-                        name3 = findItem(subcat,'h5','class','header-title')
-                        link3 = findItem(subcat,'a',None,None)
-                        if name3 == None or link3 == None:
-                            continue
-                        else:
-                            soup = getUrl(link3.get('href'))
-                            subcategorias2 = findItems(soup,'div','class','product-category')
-                            level4 = {}
-                            for subcat2 in subcategorias2:
-                                name4 = findItem(subcat,'h5','class','header-title')
-                                link4 = findItem(subcat,'a',None,None)
-                                if name3 == None or link3 == None:
-                                    continue
-                                else:
+        # for menu in menus:
+        #     name0 = format(findItem(menu,'a',None,None).text.strip()) + " lvl 0"
+        #     link0 = findItem(menu,'a',None,None).get('href')
+        #     level1 = {}
+        #     submenu = findItem(menu,'ul','class','nav-dropdown-default')
+        #     if submenu == None:# Si nivel 0 no tiene dropdown, entonces ira al unico link que tiene, y verifica si no tiene subcategorias
+        #         soup = getUrl(link0)
+        #         categorias = findItems(soup,'div','class','product-category')
+        #         if not categorias:
+        #             soup = getUrl(link0)
+        #             productos = []
+        #             productos = findItems(soup,'div','class','title-wrapper')
+        #             level1 = {}
+        #             for p in productos:
+        #                 nameProd = findItem(p,'p','class','product-title').text
+        #                 linkProd = findItem(p,'a',None,None).get('href')
+        #                 level1["Prod:" + format(nameProd)] = linkProd
+        #         else:
+        #             for subcat in categorias:
+        #                 name1 = findItem(subcat,'a',None,None)
+        #                 link1 = findItem(subcat,'a',None,None)
+        #                 if name1 == None or link1 == None: # Si tampoco tenemos subcategorias, entonces aqui tendremos codigo para conseguir todos los articulos
+        #                     soup = getUrl(link1.get('href'))
+        #                     productos = []
+        #                     productos = findItems(soup,'div','class','title-wrapper')
+        #                     level2 = {}
+        #                     for p in productos:
+        #                         nameProd = findItem(p,'p','class','product-title').text
+        #                         linkProd = findItem(p,'a',None,None).get('href')
+        #                         level2["Prod:" + format(nameProd)] = linkProd
+        #                 else:# Si tenemos subcategorias, entonces los analizaremos y luego verificamos si no tiene subcategorias dentro de este hasta que lleguemos al nivel que debemos tener
+        #                     soup = getUrl(link1.get('href'))
+        #                     subcategorias1 = findItems(soup,'div','class','product-category')
+        #                     level2 = {}
+        #                     if not subcategorias1:
+        #                         soup = getUrl(link0)
+        #                         productos = []
+        #                         productos = findItems(soup,'div','class','title-wrapper')
+        #                         level1 = {}
+        #                         for p in productos:
+        #                             nameProd = findItem(p,'p','class','product-title').text
+        #                             linkProd = findItem(p,'a',None,None).get('href')
+        #                             level1["Prod:" + format(nameProd)] = linkProd
+        #                     else:
+        #                         for subcat1 in subcategorias1:
+        #                             name2 = findItem(subcat1,'h5','class','header-title')
+        #                             link2 = findItem(subcat1,'a',None,None)
+        #                             if name2 == None or link2 == None:
+        #                                 soup = getUrl(link2.get('href'))
+        #                                 productos = []
+        #                                 productos = findItems(soup,'div','class','title-wrapper')
+        #                                 level3 = {}
+        #                                 for p in productos:
+        #                                     nameProd = findItem(p,'p','class','product-title').text
+        #                                     linkProd = findItem(p,'a',None,None).get('href')
+        #                                     level3["Prod:" + format(nameProd)] = linkProd
+        #                             else:
+        #                                 soup = getUrl(link2.get('href'))
+        #                                 subcategorias2 = findItems(soup,'div','class','product-category')
+        #                                 level3 ={}
+        #                                 for subcat2 in subcategorias2:
+        #                                     name3 = findItem(subcat2,'h5','class','header-title')
+        #                                     link3 = findItem(subcat2,'a',None,None)
+        #                                     if name3 == None or link3 == None:
+        #                                         soup = getUrl(link3.get('href'))
+        #                                         productos = []
+        #                                         productos = findItems(soup,'div','class','title-wrapper')
+        #                                         level4 = {}
+        #                                         for p in productos:
+        #                                             nameProd = findItem(p,'p','class','product-title').text
+        #                                             linkProd = findItem(p,'a',None,None).get('href')
+        #                                             level4["Prod:" + format(nameProd)] = linkProd
+        #                                     else:
+        #                                         soup = getUrl(link3.get('href'))
+        #                                         subcategorias3 = findItems(soup,'div','class','product-category')
+        #                                         level4 ={}
+        #                                         for subcat3 in subcategorias3:
+        #                                             name4 = findItem(subcat3,'h5','class','header-title')
+        #                                             link4 = findItem(subcat3,'a',None,None)
+        #                                             if name4 == None or link4 == None:
+        #                                                 soup = getUrl(link4.get('href'))
+        #                                                 productos = []
+        #                                                 productos = findItems(soup,'div','class','title-wrapper')
+        #                                                 level5 = {}
+        #                                                 for p in productos:
+        #                                                     nameProd = findItem(p,'p','class','product-title').text
+        #                                                     linkProd = findItem(p,'a',None,None).get('href')
+        #                                                     level5["Prod:" + format(nameProd)] = linkProd
+        #                                                 level4[format(name4.text.strip()) + " lvl 4"] = level5
+        #                                             else:
+        #                                                 #Por si debemos seguir buscando mas niveles, se repite el codigo
+        #                                                 level4[format(name4.text.strip()) + " lvl 4"] = link4.get('href') 
+        #                                     level3[format(name3.text.strip()) + " lvl 3"] = level4        
+        #                         level2[format(name2.text.strip()) + " lvl 2"] = level3
+        #                 level1[format(name1.text.strip()) + " lvl 1"] = level2
+        #     else:
+        #         smlist = findItems(submenu,'li',None,None)
+        #         for sml in smlist:
+        #             name1 = format(sml.text.strip()) + " lvl 1"
+        #             link1 = findItem(sml,'a',None,None).get('href')
+        #             soup = getUrl(link1)
+        #             categorias = findItems(soup,'div','class','product-category')
+        #             level2 = {}
+        #             for subcat in categorias:
+        #                 name2 = findItem(subcat,'h5','class','header-title')
+        #                 link2 = findItem(subcat,'a',None,None)
+        #                 if name2 == None or link2 == None:
+        #                     soup = getUrl(link2.get('href'))
+        #                     productos = []
+        #                     productos = findItems(soup,'div','class','title-wrapper')
+        #                     level3 = {}
+        #                     for p in productos:
+        #                         nameProd = findItem(p,'p','class','product-title').text
+        #                         linkProd = findItem(p,'a',None,None).get('href')
+        #                         level3["Prod:" + format(nameProd)] = linkProd
+        #                 else:
+        #                     soup = getUrl(link2.get('href'))
+        #                     subcategorias1 = findItems(soup,'div','class','product-category')
+        #                     level3 ={}
+        #                     for subcat1 in subcategorias1:
+        #                         name3 = findItem(subcat,'h5','class','header-title')
+        #                         link3 = findItem(subcat,'a',None,None)
+        #                         if name3 == None or link3 == None:
+        #                             soup = getUrl(link3.get('href'))
+        #                             productos = []
+        #                             productos = findItems(soup,'div','class','title-wrapper')
+        #                             level4 = {}
+        #                             for p in productos:
+        #                                 nameProd = findItem(p,'p','class','product-title').text
+        #                                 linkProd = findItem(p,'a',None,None).get('href')
+        #                                 level4["Prod:" + format(nameProd)] = linkProd
+        #                         else:
+        #                             soup = getUrl(link3.get('href'))
+        #                             subcategorias2 = findItems(soup,'div','class','product-category')
+        #                             level4 = {}
+        #                             for subcat2 in subcategorias2:
+        #                                 name4 = findItem(subcat,'h5','class','header-title')
+        #                                 link4 = findItem(subcat,'a',None,None)
+        #                                 if name4 == None or link4 == None:
+        #                                     soup = getUrl(link4.get('href'))
+        #                                     productos = []
+        #                                     productos = findItems(soup,'div','class','title-wrapper')
+        #                                     level5 = {}
+        #                                     for p in productos:
+        #                                         nameProd = findItem(p,'p','class','product-title').text
+        #                                         linkProd = findItem(p,'a',None,None).get('href')
+        #                                         level5["Prod:" + format(nameProd)] = linkProd
+        #                                     level4[format(name4.text.strip()) + " lvl 4"] = level5
+        #                                 else:
+        #                                     #Por si debemos seguir buscando mas niveles, se repite el codigo
+        #                                     level4[format(name4.text.strip()) + " lvl 4"] = link4.get('href')
+        #                         level3[format(name3.text.strip()) + " lvl 3"] = level4
+        #                     #level2[name2.text.strip()] = link2.get('href')
+        #                 level2[format(name2.text.strip()) + " lvl 2"] = level3
+        #             level1[name1] = level2
+        #     level0[name0] = level1
+        # print("Se termino el proceso, revise si hay un documento json")
 
-                                    level4[format(name4.text.strip()) + " lvl 4"] = link4.get('href')
-                            level3[format(name3.text.strip()) + " lvl 3"] = level4
-                    #level2[name2.text.strip()] = link2.get('href')
-                    level2[format(name2.text.strip()) + " lvl 2"] = level3
-            level1[name1] = level2
-    level0[name0] = level1
+        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/kemik/kemikJson.json",'w') as file:
+        #     json.dump(level0,file)
+        # file.close()
+                # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/click/clickJson.json",)
+                # jsonData = json.load(file)
 
+                # intentosExitosos = 0
+                # intentosFallidos = 0
 
+                # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/click/clickProducts.xlsx'
+                # sheetName = []
+                # df = []
+
+                # for j in jsonData:
+                #     codigo = []
+                #     nombre = []
+                #     precio = []
+                #     oferta = []
+                #     categoria = []
+                #     detalles = []
+                #     garantia = []
+                #     for k in jsonData[j]:
+                #         for l in jsonData[j][k]:
+                #             link = jsonData[j][k][l]
+                #             try:
+                #                 soup = getUrl(link)
+                #                 paginaProducto = findItem(soup,'section','class','text-center')
+                #                 #------Codigo del Producto-------#
+                #                 codigos = link[35:]           
+                #                 #------Nombre del Producto-------#
+                #                 marca = findItem(paginaProducto,"h2",None,None)
+                #                 des = findItem(paginaProducto,"h5",None,None)
+                #                 nombre.append((marca.text).strip() + ": " + (des.text).strip())
+                #                 #------Precio de Ofertas-------#
+                #                 precioOferta = findItem(paginaProducto,'span','class','red-text')
+                #                 if precioOferta == None:
+                #                     precioOferta = "N/A"
+                #                     oferta.append(precioOferta)
+                #                 else:
+                #                     oferta.append(precioOferta.text)
+                #                 #------Precio Viejo-------#
+                #                 precios = findItem(paginaProducto,'span','class','grey-text')
+                #                 if precios == None:
+                #                     precios = "N/A"
+                #                     precio.append(precios)
+                #                 else:
+                #                     precio.append(precios.text)
+                #                 #------Categorias-------#
+                #                 categoria.append(format(k))
+                #                 #------Garantias-------#
+                #                 garantias = findItem(paginaProducto,"label",None,None)
+                #                 if garantias == None:
+                #                     garantias = "N/A"
+                #                     garantia.append(garantia)
+                #                 else:
+                #                     garantia.append(garantias.text)
+                #                 #------Detalles de Productos-------#
+                #                 especificar = findItem(paginaProducto,'div','id','collapseOne1')
+                #                 if especificar == None:
+                #                     continue
+                #                 else:
+                #                     detalles.append((especificar.text).strip())
+                #             except:
+                #                 print(link + " --> Status: Fallido!")
+                #                 intentosFallidos += 1
+                #                 break
+                #             else:
+                #                 intentosExitosos += 1
+                #                 print(link + " --> Status: Existoso!")
+                #                 codigo.append(codigos)
+                #                 soup.decompose()
+                #         productInfo = {
+                #         "codigo": codigo,
+                #         "nombre": nombre,
+                #         "precio": precio,
+                #         "oferta": oferta,
+                #         "categoria": categoria,
+                #         "detalles": detalles,
+                #         "garantia": garantia
+                #         }
+                #     sheetName.append(format(j))
+                #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
+                #     gc.collect()
+
+                # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+                # for i in range(1, len(df)):
+                #    df[i-1].to_excel(writer, sheetName[i-1])
+                # writer.save()
+
+                # print("Exitosos:" + format(intentosExitosos))
+                # print("Fallidos:" + format(intentosFallidos))
+                # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #No terminado
 
     # Macrosistemas(Expandir para mas info)
