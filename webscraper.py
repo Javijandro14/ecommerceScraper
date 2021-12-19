@@ -419,7 +419,6 @@ def findItems(soup, item, attType, attName):
             #     existencias[tienda[0].text] = tienda[1] .text
             # print(existencias)
     #Terminado(Faltan Existencias, pero eso se vera luego)
-
     # Click(Expandir para mas info)
         # base = "https://www.click.gt"
         # soup = getUrl(base)
@@ -620,188 +619,231 @@ def findItems(soup, item, attType, attName):
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #Terminado
-
     # Kemik
-        # base = "https://www.kemik.gt/"
-        # soup = getUrl(base)
-        # links_0 = soup.find_all('a')
-        # for link0 in links_0:
-        #     print(link0.get('href'))
+base = "https://www.kemik.gt"
+soup = getUrl(base)
+navbar = findItem(soup,'div','id','wide-nav')
+menus = findItems(navbar,'li','class','menu-item-design-default')
+level0 = { }
+
+for menu in menus:
+    name0 = format(findItem(menu,'a',None,None).text.strip()) + " lvl 0"
+    link0 = findItem(menu,'a',None,None).get('href')
+    level1 = {}
+    submenu =findItem(menu,'ul','class','nav-dropdown-default')
+    if submenu == None:# Si nivel 0 no tiene dropdown, entonces ira al unico link que tiene, y verifica si no tiene subcategorias
+        soup = getUrl(link0)
+        categorias = findItems(soup,'div','class','product-category')
+        for subcat in categorias:
+            name1 = findItem(menu,'a',None,None)
+            link1 = findItem(menu,'a',None,None)
+            if name1 == None or link1 == None: # Si tampoco tenemos subcategorias, entonces aqui tendremos codigo para conseguir todos los articulos
+                    continue
+            else:# Si tenemos subcategorias, entonces los analizaremos y luego verificamos si no tiene subcategorias dentro de este hasta que lleguemos al nivel que debemos tener
+                soup = getUrl(link1.get('href'))
+                subcategorias1 = findItem(soup,'div','class','product-category')
+                level2 = {}
+                for subcat1 in subcategorias1:
+                    name2 = findItem(subcat1,'div','class','product-category')
+                    link2 = findItem(subcat1,'a',None,None)
+                    if name2 == None or link2 == None:
+                        continue
+                    else:
+                        soup = getUrl(link2.get('href'))
+                        subcategorias2 = findItems(soup,'div','class','product-category')
+                        level3 ={}
+                        for subcat2 in subcategorias2:
+                            name3 = findItem(subcat,'h5','class','header-title')
+                            link3 = findItem(subcat,'a',None,None)
+                            if name3 == None or link3 == None:
+                                continue
+                            else:
+                                level3[format(name3.text.strip()) + " lvl 3"] = link3.get('href')        
+                        level2[format(name2.text.strip()) + " lvl 2"] = level3
+                level1[format(name1.text.strip()) + " lvl 1"] = level2
+    else:
+        smlist = findItems(submenu,'li',None,None)
+        for sml in smlist:
+            name1 = format(sml.text.strip()) + " lvl 1"
+            link1 = findItem(sml,'a',None,None).get('href')
+            soup = getUrl(link1)
+            categorias = findItems(soup,'div','class','product-category')
+            level2 = {}
+            for subcat in categorias:
+                name2 = findItem(subcat,'h5','class','header-title')
+                link2 = findItem(subcat,'a',None,None)
+                if name2 == None or link2 == None:
+                    continue
+                else:
+                    soup = getUrl(link2.get('href'))
+                    subcategorias1 = findItems(soup,'div','class','product-category')
+                    level3 ={}
+                    for subcat1 in subcategorias1:
+                        name3 = findItem(subcat,'h5','class','header-title')
+                        link3 = findItem(subcat,'a',None,None)
+                        if name3 == None or link3 == None:
+                            continue
+                        else:
+                            soup = getUrl(link3.get('href'))
+                            subcategorias2 = findItems(soup,'div','class','product-category')
+                            level4 = {}
+                            for subcat2 in subcategorias2:
+                                name4 = findItem(subcat,'h5','class','header-title')
+                                link4 = findItem(subcat,'a',None,None)
+                                if name3 == None or link3 == None:
+                                    continue
+                                else:
+
+                                    level4[format(name4.text.strip()) + " lvl 4"] = link4.get('href')
+                            level3[format(name3.text.strip()) + " lvl 3"] = level4
+                    #level2[name2.text.strip()] = link2.get('href')
+                    level2[format(name2.text.strip()) + " lvl 2"] = level3
+            level1[name1] = level2
+    level0[name0] = level1
+
+
+    #No terminado
 
     # Macrosistemas(Expandir para mas info)
+    #No terminado
 
     # Elektra(Expandir para mas info)
+    #No terminado
 
     # Tecnofacil(Expandir para mas info)
+    #No terminado
 
     # SpiritComputacion(Expandir para mas info)
-# base = "https://spiritcomputacion.com"
-# soup = getUrl(base)
-# categorias = findItems(soup,'li','class',['vm-categories-wall-catwrapper','floatleft','width25'])
-# level0 = {}
-# for cat in categorias:
-#     name0 = (findItem(cat,'a',None,None).text).strip("\n")
-#     link0 = (findItem(cat,'a',None,None).get('href'))
-#     soup = getUrl(base + link0)
-#     res0 = findItems(soup,'div','class','spacer')
-#     level1 = {}
-#     for r0 in res0:
-#         name1 = (findItem(r0,'a',None,None).get('title'))
-#         link1 = (findItem(r0,'a',None,None).get('href'))
-#         soup = getUrl(base+link1)
-#         div = findItem(soup,'div','class',['vm-pagination','vm-pagination-bottom'])
-#         paginacion = findItems(div,'li',None,None)
-#         level2={}
-#         if not paginacion:
-#             soup = getUrl(base+link1)
-#             res = soup.find_all('a',{'class':'item-title'})
-#             for r in res:
-#                 name2 = r.text
-#                 link2 = r.get('href')
-#                 level2[name2] = link2
-#         else:
-#             for p in paginacion[2:-3]:
-#                 a = findItem(p,'a',None,None)
-#                 if a == None:
-#                     soup = getUrl(base+link1)
-#                     res = soup.find_all('a',{'class':'item-title'})
-#                     for r in res:
-#                         name2 = r.text
-#                         link2 = r.get('href')
-#                         level2[name2] = link2
-#                 else:
-#                     soup = getUrl(base+a.get('href'))
-#                     res = soup.find_all('a',{'class':'item-title'})
-#                     for r in res:
-#                         name2 = r.text
-#                         link2 = r.get('href')
-#                         level2[name2] = link2
-#         level1[name1] = level2        
-#     level0[name0] = level1
+        #base = "https://spiritcomputacion.com"
+        # soup = getUrl(base)
+        # categorias = findItems(soup,'li','class',['vm-categories-wall-catwrapper','floatleft','width25'])
+        # level0 = {}
+        # for cat in categorias:
+        #     name0 = (findItem(cat,'a',None,None).text).strip("\n")
+        #     link0 = (findItem(cat,'a',None,None).get('href'))
+        #     soup = getUrl(base + link0)
+        #     res0 = findItems(soup,'div','class','spacer')
+        #     level1 = {}
+        #     for r0 in res0:
+        #         name1 = (findItem(r0,'a',None,None).get('title'))
+        #         link1 = (findItem(r0,'a',None,None).get('href'))
+        #         soup = getUrl(base+link1)
+        #         div = findItem(soup,'div','class',['vm-pagination','vm-pagination-bottom'])
+        #         paginacion = findItems(div,'li',None,None)
+        #         level2={}
+        #         if not paginacion:
+        #             soup = getUrl(base+link1)
+        #             res = soup.find_all('a',{'class':'item-title'})
+        #             for r in res:
+        #                 name2 = r.text
+        #                 link2 = r.get('href')
+        #                 level2[name2] = link2
+        #         else:
+        #             for p in paginacion[2:-3]:
+        #                 a = findItem(p,'a',None,None)
+        #                 if a == None:
+        #                     soup = getUrl(base+link1)
+        #                     res = soup.find_all('a',{'class':'item-title'})
+        #                     for r in res:
+        #                         name2 = r.text
+        #                         link2 = r.get('href')
+        #                         level2[name2] = link2
+        #                 else:
+        #                     soup = getUrl(base+a.get('href'))
+        #                     res = soup.find_all('a',{'class':'item-title'})
+        #                     for r in res:
+        #                         name2 = r.text
+        #                         link2 = r.get('href')
+        #                         level2[name2] = link2
+        #         level1[name1] = level2        
+        #     level0[name0] = level1
 
-# with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritJson.json",'w') as file:
-#     json.dump(level0,file)
-# file.close()
+        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritJson.json",'w') as file:
+        #     json.dump(level0,file)
+        # file.close()
 
-file = open("maxJson.json",)
-jsonData = json.load(file)
+        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritJson.json",)
+        # jsonData = json.load(file)
 
-# categorias = menu.find_all('li',{'class':'parent'})
-# subMenu = menu.find_all('ul',{'class':'unstyled'})
+        # intentosFallidos = 0
+        # intentosExistosos = 0
+        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritProducts.xlsx'
+        # sheetName = []
+        # df = []
+        # for j in jsonData:
+        #     codigo = []
+        #     nombre = []
+        #     precio = []
+        #     oferta = []
+        #     categoria = []
+        #     detalles = []
+        #     garantia = []
+        #     for k in jsonData[j]:
+        #         for l in jsonData[j][k]:
+        #             try:
+        #                 soup = getUrl(base+jsonData[j][k][l])
+        #                 #------Codigo del Producto-------#
+        #                 codigos = findItem(soup,'div','class','sku')
+        #                 if codigos == None:
+        #                     continue
+        #                 else:            
+        #                     codigo.append((codigos.text)[7:])
+        #                 #------Nombre del Producto-------#
+        #                 title = soup.find('h3',{'class':'title-product'})
+        #                 if title == None:
+        #                     continue
+        #                 else:
+        #                     nombre.append(title.text)
+        #                 #------Precio Viejo-------#
+        #                 precioO = soup.find('span',{'class':'PricesalesPrice'})
+        #                 precio.append(precioO.text[2:])
+        #                 #------Precio de Ofertas-------#
+        #                 precioOferta = soup.find('div',{'class':'cashprice'})
+        #                 if precioOferta == None:
+        #                     precioOferta = "N/A"
+        #                     oferta.append(precioOferta)
+        #                 else:
+        #                     oferta.append((precioOferta.text)[22:])
+        #                 #------Detalles de Productos-------#
+        #                 descripcion = soup.find('div',{'class':'product-description'})
+        #                 if descripcion == None:
+        #                     descripcion = "N/A"
+        #                     detalles.append(descripcion)
+        #                 else:
+        #                     detalles.append(descripcion.text)
+        #                 #------Categorias-------#
+        #                 categoria.append(format(k)+"-"+format(l))
+        #                 #---------Garantias---------#
+        #                 garantiaP = "N/A"
+        #                 garantia.append(garantiaP)
+        #             except:
+        #                 print(format(base+jsonData[j][k][l]) + " --> Status: Fallido!")
+        #                 intentosFallidos+=1
+        #             else:
+        #                 intentosExistosos+=1
+        #                 print(format(base+jsonData[j][k][l]) + " --> Status: Existoso!")
+        #                 soup.decompose()
+        #     productInfo = {
+        #         "codigo": codigo,
+        #         "nombre": nombre,
+        #         "precio": precio,
+        #         "oferta": oferta,
+        #         "categoria": categoria,
+        #         "detalles": detalles,
+        #         "garantia": garantia
+        #     }
+        #     sheetName.append(format(j))
+        #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
+        #     gc.collect()
 
-# #Nivel de Links
-# links_0 = []
-# links_1 = []
-# links_2 = []
-
-# #Listas de todos los articulos ingresados
-# codigo = []
-# nombre = []
-# precio = []
-# oferta = []
-# detalles = []
-# categoria = []
-# garantia = []
-
-# productInfo ={}
-
-# for c in categorias:
-#     link0 =(c.find('a')).get('href')
-#     links_0.append(link0)
-# for s in subMenu:
-#     subCategorias = s.find_all('li')
-#     for sc in subCategorias:
-#         link1 = (sc.find('a')).get('href')
-#         #print(link1)
-#         links_1.append(link1)
-
-# print("Url Lvl 0:" + format(len(links_0)))
-# print("Url Lvl 1:" + format(len(links_1)))
-
-# for link1 in links_1:
-#     soup = getUrl(base+link1)
-#     res = soup.find_all('a',{'class':'item-title'})
-#     print("Url Lvl 2:" + format(len(links_2)))
-#     for r in res:
-#         #print(r.get('href'))
-#         links_2.append(r.get('href'))
-
-# print("Url Lvl 0:" + format(len(links_0)))
-# print("Url Lvl 1:" + format(len(links_1)))
-# print("Url Lvl 2:" + format(len(links_2)))
-
-# intentosFallidos = 0
-# intentosExistosos = 0
-
-# for link2 in links_2:
-#     try:
-#         soup = getUrl(base+link2)
-#         codigos = soup.find('div',{'class':'sku'})
-#         titulo = soup.find('h3',{'class':'title-product'})
-#         nombre.append(titulo.text)
-#         #print(titulo.text)
-#         precioO = soup.find('span',{'class':'PricesalesPrice'})
-#         precioOferta = soup.find('div',{'class':'cashprice'})
-#         #print((precioO.text)[2:])
-#         precio.append(precioO.text[2:])
-#         if precioOferta == None:
-#             precioOferta = "N/A"
-#             #print(precioOferta)
-#             oferta.append(precioOferta)
-#         else:
-#             #print((precioOferta.text)[1:])
-#             oferta.append((precioOferta.text)[22:])
-
-#         descripcion = soup.find('div',{'class':'product-description'})
-#         if descripcion == None:
-#             descripcion = "N/A"
-#             detalles.append(descripcion)
-#         else:
-#             #print((descripcion.text))
-#             detalles.append(descripcion.text)
-
-#         garantiaP = "N/A"
-#         categoriaP = link2.split("/")
-#         #print(categoriaP[2])
-#         categoria.append(categoriaP[2])
-#         garantia.append(garantiaP)
-#     except:
-#         print(link2 + " --> Status: Fallido!")
-#         intentosFallidos+=1
-#     else:
-#         intentosExistosos+=1
-#         codigo.append((codigos.text)[7:])
-#         print(link2 + " --> Status: Existoso!")
-
-# print("codigo: " + format(len(codigo)))
-# print("nombre: " + format(len(nombre)))
-# print("precio: " + format(len(precio)))
-# print("oferta: " + format(len(oferta)))
-# print("detalles: " + format(len(detalles)))
-# print("categoria: " + format(len(categoria)))
-# print("garantia: " + format(len(garantia)))
-
-# print("Exitosos:" + format(intentosExistosos))
-# print("Fallidos:" + format(intentosFallidos))
-# print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
-
-        # productInfo = {
-        #     "codigo" : codigo,
-        #     "nombre" : nombre,
-        #     "precio" : precio,
-        #     "oferta" : oferta,
-        #     "detalles" : detalles,
-        #     "categoria" : categoria,
-        #     "garantia" : garantia
-        # }
-        # try:
-        #     df = pd.DataFrame(productInfo,columns=["codigo","nombre","precio","oferta","categoria","garantia"])
-        #     df.to_excel(r'C:\Users\javie\Desktop\EcommerceWebscraper\SpiritCompProducts.xlsx')
-        # except:
-        #     print("No se exporto a excel, revise codigo")
-        # else:
-        #     print("Se proceso correctamente, mire si la informacion esta correcta")
-    #No terminado
+        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+        # for i in range(1, len(df)):
+        #    df[i-1].to_excel(writer, sheetName[i-1])
+        # writer.save()
+        # print("Exitosos:" + format(intentosExistosos))
+        # print("Fallidos:" + format(intentosFallidos))
+        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+    #Terminado
 
     # Max(Expandir para mas info)
         # Aqui estamos buscando todos los links que se haya posible, en algunas paginas no tienen JSON files, entonces este fragemento busca links y luego
@@ -885,12 +927,8 @@ jsonData = json.load(file)
         ##        detalles = []
         ##        garantia = []
         ##    for k in jsonData[j]:
-        ##
-        ##        
-        ##
         ##        for l in jsonData[j][k]:
         ##            link = jsonData[j][k][l]
-        ##
         ##            try:
         ##                soup = getUrl(link)
         ##
@@ -1010,11 +1048,16 @@ jsonData = json.load(file)
     #No terminado
 
     #GoatShop
-    #base = "https://goatshopgt.com/"
-
+        #base = "https://goatshopgt.com/"
+    #No terminado
     #Zukko
-    #base = "https://zukko.store/"
-
+        #base = "https://zukko.store/"
+    #No terminado
     #Funky
-    #base = "https://storefunky.com/"
-
+        #base = "https://storefunky.com/"
+    #No terminado
+    #Guateclic
+        #base = "https://www.guateclic.com/"
+    #No terminado
+    #https://www.imeqmo.com/
+    #https://www.officedepot.com.gt/
