@@ -1,3 +1,4 @@
+from os import link
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -20,7 +21,7 @@ def findItem(soup, item, attType, attName):
         result = soup.find(item, {attType: attName})
     except:
         print("error en la funcion 'findItem'")
-        print("Item Fallido: " + item)
+        print("Item Fallido: " + item + " Tipo de Atributo: " + attType + " Nombre del Atributo: " + attName)
     else:
         return result
 
@@ -29,7 +30,7 @@ def findItems(soup, item, attType, attName):
         result = soup.find_all(item, {attType: attName})
     except:
         print("error en la funcion 'findItems'")
-        print("Item Fallido: " + item)
+        print("Item Fallido: " + item + " Tipo de Atributo: " + attType + " Nombre del Atributo: " + attName)
     else:
         return result
 
@@ -876,10 +877,208 @@ def findItems(soup, item, attType, attName):
                 # print("Exitosos:" + format(intentosExitosos))
                 # print("Fallidos:" + format(intentosFallidos))
                 # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
-    #No terminado
+    #No terminado(Postponer)
 
     # Macrosistemas(Expandir para mas info)
-    #No terminado
+
+        #base = "https://www.macrosistemas.com"
+        # soup = getUrl(base)
+        # menu = findItem(soup,'ul','id','menu_footer')
+        # categorias = findItems(menu,'a',None,None)
+        # level0 = {}
+        # for cat in categorias:
+        #     name0 = cat.text
+        #     link0 = base + format(cat.get('href'))
+        #     soup = getUrl(link0)
+        #     leftmenu = soup.find('ul',{'id':'menu_left'})
+        #     level1 = {}
+        #     if leftmenu == None:
+        #         divpag = findItem(soup,'div','class','vm-pagination')
+        #         if divpag == None:
+        #             numeroPag = 1
+        #         else:
+        #             paginacion = findItem(divpag,'span','class','vm-page-counter')
+        #             if paginacion.text=="":
+        #                 numeroPag = 1
+        #             else:
+        #                 numeroPag = int(paginacion.text[-2:])
+        #         links_2 = []
+        #         for pag in range(1,(numeroPag+1)):
+        #             if pag == 1:
+        #                 links_2.append(format(link0)+"?start=0")
+        #             elif pag >1:
+        #                 links_2.append(format(link0)+"?start="+str((pag-1)*24))
+                
+        #         for link2 in links_2:
+        #             soup = getUrl(link2)
+        #             productos = findItems(soup,'div','class','product-inner')    
+        #             for p in productos:
+        #                 item = findItem(p,'a','class','item-title')
+        #                 level1[item.text.strip()] = base + item.get('href')
+        #     else:
+        #         subcat = leftmenu.find_all('li')
+        #         for sub in subcat:
+        #             name1 = sub.text.strip()
+        #             link1 = base + (findItem(sub,'a',None,None).get('href'))
+        #             soup = getUrl(link1)
+        #             divpag = findItem(soup,'div','class','vm-pagination')
+        #             if divpag == None:
+        #                 numeroPag = 1
+        #             else:
+        #                 paginacion = findItem(divpag,'span','class','vm-page-counter')
+        #                 if paginacion.text=="":
+        #                     numeroPag = 1
+        #                 else:
+        #                     numeroPag = int(paginacion.text[-2:])
+        #             links_2 = []
+        #             for pag in range(1,(numeroPag+1)):
+        #                 if pag == 1:
+        #                     links_2.append(format(link0)+"?start=0")
+        #                 elif pag >1:
+        #                     links_2.append(format(link0)+"?start="+str((pag-1)*24))
+                    
+        #             level2 = {}
+        #             for link2 in links_2:
+        #                 soup = getUrl(link2)
+        #                 productos = findItems(soup,'div','class','product-inner')    
+        #                 for p in productos:
+        #                     item = findItem(p,'a','class','item-title')
+        #                     level2[item.text.strip()] = base + item.get('href')
+        #             level1[name1] = level2
+        #     level0[name0] = level1
+        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/macrosistemas/macroJson.json",'w') as file:
+        #     json.dump(level0,file)
+        # file.close()
+
+        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/macrosistemas/macroJson.json",)
+        # jsonData = json.load(file)
+        # intentosFallidos = 0
+        # intentosExistosos = 0
+        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/macrosistemas/macroProducts.xlsx'
+        # sheetName = []
+        # df = []
+
+        # for j in jsonData:
+        #     codigo = []
+        #     nombre = []
+        #     precio = []
+        #     oferta = []
+        #     categoria = []
+        #     detalles = []
+        #     garantia = []
+        #     for k in jsonData[j]:
+        #         if isinstance(jsonData[j][k],dict):
+        #             for l in jsonData[j][k]:
+        #                 try:
+        #                     soup = getUrl(jsonData[j][k][l])
+        #                     #------Codigo del Producto-------#
+        #                     codigos = (soup.find('div',{'class':'sku'}))
+        #                     if codigos == None:
+        #                         continue
+        #                     else:            
+        #                         codigo.append(codigos.text.strip()[8:])
+        #                     #------Nombre del Producto-------#
+        #                     title = (soup.find('h1',{'class':'title-product'}))
+        #                     if title == None:
+        #                         continue
+        #                     else:
+        #                         nombre.append(title.text.strip())
+        #                     #------Precio Viejo-------#
+        #                     precioO = (soup.find('span',{'class':'PricesalesPrice'})).text.strip()
+        #                     precio.append(precioO)
+        #                     #------Precio de Ofertas-------#
+        #                     precioOferta = soup.find('div',{'class':'cash'})
+        #                     if precioOferta == None:
+        #                         precioOferta = "N/A"
+        #                         oferta.append(precioOferta)
+        #                     else:
+        #                         oferta.append(precioOferta.text.strip()[13:])
+        #                     #------Detalles de Productos-------#
+        #                     des = soup.find('div',{'class':'product-description'})
+        #                     if des == None:
+        #                         descripcion = "N/A"
+        #                         detalles.append(descripcion)
+        #                     else:
+        #                         descripcion = des.find_all('tr')
+        #                         detalles.append([(i.text.strip()) for i in descripcion])
+        #                     #------Categorias-------#
+        #                     categoria.append(format(j)+"-"+format(k))
+        #                     #---------Garantias---------#
+        #                     garantiaP = "N/A"
+        #                     garantia.append(garantiaP)
+        #                 except:
+        #                     print(format(jsonData[j][k][l]) + " --> Status: Fallido!")
+        #                     intentosFallidos+=1
+        #                 else:
+        #                     intentosExistosos+=1
+        #                     print(format(jsonData[j][k][l]) + " --> Status: Existoso!")
+        #                     soup.decompose()
+        #         else:
+        #             try:
+        #                 soup = getUrl(jsonData[j][k])
+        #                 #------Codigo del Producto-------#
+        #                 codigos = (soup.find('div',{'class':'sku'}))
+        #                 if codigos == None:
+        #                     continue
+        #                 else:            
+        #                     codigo.append(codigos.text.strip()[8:])
+        #                 #------Nombre del Producto-------#
+        #                 title = (soup.find('h1',{'class':'title-product'}))
+        #                 if title == None:
+        #                     continue
+        #                 else:
+        #                     nombre.append(title.text.strip())
+        #                 #------Precio Viejo-------#
+        #                 precioO = (soup.find('span',{'class':'PricesalesPrice'})).text.strip()
+        #                 precio.append(precioO)
+        #                 #------Precio de Ofertas-------#
+        #                 precioOferta = soup.find('div',{'class':'cash'})
+        #                 if precioOferta == None:
+        #                     precioOferta = "N/A"
+        #                     oferta.append(precioOferta)
+        #                 else:
+        #                     oferta.append(precioOferta.text.strip()[13:])
+        #                 #------Detalles de Productos-------#
+        #                 des = soup.find('div',{'class':'product-description'})
+        #                 if des == None:
+        #                     descripcion = "N/A"
+        #                     detalles.append(descripcion)
+        #                 else:
+        #                     descripcion = des.find_all('tr')
+        #                     detalles.append([(i.text.strip()) for i in descripcion])
+        #                 #------Categorias-------#
+        #                 categoria.append(format(j)+"-"+format(k))
+        #                 #---------Garantias---------#
+        #                 garantiaP = "N/A"
+        #                 garantia.append(garantiaP)
+        #             except:
+        #                 print(format(jsonData[j][k]) + " --> Status: Fallido!")
+        #                 intentosFallidos+=1
+        #             else:
+        #                 intentosExistosos+=1
+        #                 print(format(jsonData[j][k]) + " --> Status: Existoso!")
+        #                 soup.decompose()
+        #     productInfo = {
+        #         "codigo": codigo,
+        #         "nombre": nombre,
+        #         "precio": precio,
+        #         "oferta": oferta,
+        #         "categoria": categoria,
+        #         "detalles": detalles,
+        #         "garantia": garantia
+        #     }
+        #     sheetName.append(format(j).replace(" / ","_"))
+        #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
+        #     gc.collect()
+
+        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+        # for i in range(1, len(df)):
+        #    df[i-1].to_excel(writer, sheetName[i-1])
+        # writer.save()
+        # print("Exitosos:" + format(intentosExistosos))
+        # print("Fallidos:" + format(intentosFallidos))
+        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+    #terminado
 
     # Elektra(Expandir para mas info)
     #No terminado
@@ -1233,5 +1432,11 @@ def findItems(soup, item, attType, attName):
     #Guateclic
         #base = "https://www.guateclic.com/"
     #No terminado
+
+    #Imeqmo
     #https://www.imeqmo.com/
+    #No terminado
+
+    #Office Depot
     #https://www.officedepot.com.gt/
+    #No terminado
