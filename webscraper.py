@@ -1,3 +1,4 @@
+from os import link
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -877,7 +878,6 @@ def findItems(soup, item, attType, attName):
                 # print("Fallidos:" + format(intentosFallidos))
                 # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #No terminado(Postponer)
-
     # Macrosistemas(Expandir para mas info)
 
         #base = "https://www.macrosistemas.com"
@@ -1080,6 +1080,38 @@ def findItems(soup, item, attType, attName):
     #Terminado
 
     # Elektra(Expandir para mas info)
+base = "https://www.elektra.com.gt"
+soup = getUrl(base)
+categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
+level0 = {}
+for cat in categorias:
+    name0 = cat.text
+    link0 = findItem(cat,'a',None,None).get('href')
+    soup = getUrl(base + link0)
+    level1 = {}
+    nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
+    iter = 1
+
+    while iter!=0:
+        link = format(base + link0) +"?page="+ str(iter)
+        print(link)
+        soup = getUrl(link)
+        productos = findItems(soup,'section','class','vtex-product-summary-2-x-container')
+        for p in productos:
+            name1 = findItem(p,'h1',None,None).text.strip()
+            link1 = findItem(p,'a',None,None).get('href')
+            level1[name1] = base + link1
+        nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
+        if nextPage == None:
+            iter = 0
+        else:
+            if nextPage.text == '':
+                iter = 0
+            else:
+                iter+=1
+    level0[name0] = level1
+
+
     #No terminado
 
     # Tecnofacil(Expandir para mas info)
@@ -1533,7 +1565,7 @@ def findItems(soup, item, attType, attName):
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
     #Terminado
-    
+
     #Zukko
         #base = "https://zukko.store/"
     #No terminado
