@@ -4,11 +4,13 @@ import requests
 import json
 import pandas as pd
 import gc
+import time
 
 
 def getUrl(url):
     try:
-        send = requests.get(url,stream=True)
+        send = requests.get(url)
+        time.sleep(1)
     except:
         print("Revise el url, no se proceso correctamente")
         print("Url Fallido:" + url)
@@ -21,7 +23,7 @@ def findItem(soup, item, attType, attName):
         result = soup.find(item, {attType: attName})
     except:
         print("error en la funcion 'findItem'")
-        print("Item Fallido: " + item + " Tipo de Atributo: " + attType + " Nombre del Atributo: " + attName)
+        print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
     else:
         return result
 
@@ -30,7 +32,7 @@ def findItems(soup, item, attType, attName):
         result = soup.find_all(item, {attType: attName})
     except:
         print("error en la funcion 'findItems'")
-        print("Item Fallido: " + item + " Tipo de Atributo: " + attType + " Nombre del Atributo: " + attName)
+        print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
     else:
         return result
 
@@ -1080,39 +1082,126 @@ def findItems(soup, item, attType, attName):
     #Terminado
 
     # Elektra(Expandir para mas info)
-base = "https://www.elektra.com.gt"
-soup = getUrl(base)
-categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
-level0 = {}
-for cat in categorias:
-    name0 = cat.text
-    link0 = findItem(cat,'a',None,None).get('href')
-    soup = getUrl(base + link0)
-    level1 = {}
-    nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-    iter = 1
+        #base = "https://www.elektra.com.gt"
+        # soup = getUrl(base)
+        # categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
+        # level0 = {}
+        # for cat in categorias:
+        #     name0 = cat.text
+        #     link0 = findItem(cat,'a',None,None).get('href')
+        #     soup = getUrl(base + link0)
+        #     level1 = {}
+        #     nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
+        #     iter = 1
 
-    while iter!=0:
-        link = format(base + link0) +"?page="+ str(iter)
-        print(link)
-        soup = getUrl(link)
-        productos = findItems(soup,'section','class','vtex-product-summary-2-x-container')
-        for p in productos:
-            name1 = findItem(p,'h1',None,None).text.strip()
-            link1 = findItem(p,'a',None,None).get('href')
-            level1[name1] = base + link1
-        nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-        if nextPage == None:
-            iter = 0
-        else:
-            if nextPage.text == '':
-                iter = 0
-            else:
-                iter+=1
-    level0[name0] = level1
+        #     while iter!=0:
+        #         link = format(base + link0) +"?page="+ str(iter)
+        #         soup = getUrl(link)
+        #         productos = findItems(soup,'section','class','vtex-product-summary-2-x-container')
+        #         for p in productos:
+        #             name1 = findItem(p,'h1',None,None).text.strip()
+        #             link1 = findItem(p,'a',None,None).get('href')
+        #             level1[name1] = base + link1
+        #         nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
+        #         if nextPage == None:
+        #             iter = 0
+        #         else:
+        #             if nextPage.text == '':
+        #                 iter = 0
+        #             else:
+        #                 iter+=1
+        #     level0[name0] = level1
+        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraJson.json",'w') as file:
+        #     json.dump(level0,file)
+        # file.close()
 
+        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraJson.json",)
+        # jsonData = json.load(file)
+        # intentosFallidos = 0
+        # intentosExistosos = 0
+        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraProducts.xlsx'
+        # sheetName = []
+        # df = []
 
-    #No terminado
+        # for j in jsonData:
+        #     codigo = []
+        #     nombre = []
+        #     precio = []
+        #     oferta = []
+        #     categoria = []
+        #     detalles = []
+        #     garantia = []
+        #     for k in jsonData[j]:
+        #         try:
+        #             soup = getUrl(jsonData[j][k])
+        #             #print(jsonData[j][k])
+        #             #------Codigo del Producto-------#
+        #             codigos = (soup.find('div',{'class':'ektguatemala-ektgt-components-0-x-pdpSku'}))
+        #             if codigos == None:
+        #                 continue
+        #             else:            
+        #                 codigo.append(codigos.text.strip()[4:])
+        #             #------Nombre del Producto-------#
+        #             title = (soup.find('h1',{'class':'vtex-store-components-3-x-productNameContainer'}))
+        #             if title == None:
+        #                 del codigo[-1]
+        #                 continue
+        #             else:
+        #                 nombre.append(title.text.strip())
+        #             divPrecio = findItems(soup,'div','class','vtex-flex-layout-0-x-flexRow--pdpTotal')
+        #             precios = findItems(divPrecio[0],'span',None,None)
+        #             #------Precio Viejo-------#
+        #             precioO = precios[0].span.span.text
+        #             precio.append(precioO)
+        #             #------Precio de Ofertas-------#
+        #             precioOferta = precios[1].span.span
+        #             if precioOferta == None:
+        #                 precioOferta = "N/A"
+        #                 oferta.append(precioOferta)
+        #             else:
+        #                 oferta.append(precioOferta)
+        #             #------Detalles de Productos-------#
+        #             des = findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText')
+        #             if des == None:
+        #                 descripcion = "N/A"
+        #                 detalles.append(descripcion)
+        #             else:
+        #                 detalles.append(des.text)
+        #             #------Categorias-------#
+        #             categoria.append(format(j)+"-"+format(k))
+        #             #---------Garantias---------#
+        #             garantiaP = "12 meses"
+        #             garantia.append(garantiaP)
+        #         except:
+        #             print(format(jsonData[j][k]) + " --> Status: Fallido!")
+        #             intentosFallidos+=1
+        #             del codigo[-1]
+        #             del nombre[-1]
+        #         else:
+        #             intentosExistosos+=1
+        #             print(format(jsonData[j][k]) + " --> Status: Existoso!")
+        #     productInfo = {
+        #         "codigo": codigo,
+        #         "nombre": nombre,
+        #         "precio": precio,
+        #         "oferta": oferta,
+        #         "categoria": categoria,
+        #         "detalles": detalles,
+        #         "garantia": garantia
+        #     }
+        #     sheetName.append(format(j).replace(" / ","_"))
+        #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
+        #     soup.decompose()
+        #     gc.collect()
+
+        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
+        # for i in range(1, len(df)):
+        #    df[i-1].to_excel(writer, sheetName[i-1])
+        # writer.save()
+        # print("Exitosos:" + format(intentosExistosos))
+        # print("Fallidos:" + format(intentosFallidos))
+        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+    #Terminado
 
     # Tecnofacil(Expandir para mas info)
     #No terminado
