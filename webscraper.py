@@ -1776,9 +1776,18 @@ def findItems(soup, item, attType, attName):
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
     #Terminado (Falta poner paginaciones, debido a los pocos articulos que tiene)
-    
+
     #Guateclic
-        #base = "https://www.guateclic.com/"
+# base = "https://www.guateclic.com"
+# soup = getUrl(base)
+# menu = findItems(soup,'div','class','col-sm-3')
+# categorias = findItems(menu[1],'a','class','whitetext')
+# level0 = {}
+# for cat in categorias:
+#     name0 = cat.text
+#     link0 = base + cat.get('href')
+#     level0[name0] = link0
+# print(level0)  
     #No terminado
 
     #Imeqmo
