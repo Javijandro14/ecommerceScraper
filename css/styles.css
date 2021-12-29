@@ -33,7 +33,7 @@ td{
     text-align: center;
 }
 .links{
-    color: red;
+    color: white;
     font-weight: 100;
     text-decoration-line: none;
 }
@@ -48,13 +48,24 @@ td{
     align-items: baseline;
 }
 
-.category-button{
-    background-color: black;
+.store-options{
+    width: 95%;
+    margin-bottom: 2%;
+    padding: 1% 1% 1% 0;
+    border-style: hidden;
 }
-
-.products{
-    display:
-    width: 20%;
-    height: 50px;
-    padding-bottom: 10px;
+.lista, .content, .products{
+    height: 100%;
+    border-style: hidden;
+}
+.lista{
+    background-color: gray;
+}
+.category-button{
+    border-style: hidden;
+    padding: 1% 1% 1% 0;
+    font-size: larger;
+}
+.category-button:hover{
+    background-color: blue;
 }
