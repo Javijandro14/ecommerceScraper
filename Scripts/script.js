@@ -1,43 +1,63 @@
-function informacion(a) {
-  var cliente = document.createElement("h1");
-  cliente.innerHTML = a;
-  //document.getElementsByClassName(a)[0].appendChild(cliente);
-  console.log(a);
-  cliente = "";
+function loads(json) {
+  datos = json
+  iter = 3
+  var table = document.createElement("table");
+  table.setAttribute("class", "products");
+  for (let i in datos) {
+    var link = document.createElement("a");
+    var cat = document.createElement("td");
+
+    if (iter == 3) {
+      var fila = document.createElement("tr");
+      iter = 0
+      table.append(fila);
+    }
+    cat.setAttribute("class", "category-button")
+    link.setAttribute("class", "links");
+    link.innerHTML = i
+    cat.append(link)
+    fila.append(cat)
+    iter += 1;
+
+  }
+  res = JSON.stringify(json);
+  document.getElementsByClassName("content")[0].append(table);
+  // document.getElementsByClassName("products")[0].innerHTML = res;
 }
 
-function nuevoTelefono() {
-  var form = document.createElement("form");
-  form.setAttribute("class", "formulario");
+function loadJson(tienda) {
+  resp = "Intelaf"
+  // switch (resp) {
+  //   case "Intelaf":
+  fetch('EcommerceData/Guatemala/intelaf/intelafJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/click/clickJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  //   // break;
+  // // case "Intelaf":
+  fetch('EcommerceData/Guatemala/elektra/elektraJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  //   // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/spiritcomputacion/spiritJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/max/maxJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/macrosistemas/macroJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/kemik/kemikJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/goatshop/goatshopJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/funky/funkyJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  // case "Intelaf":
+  fetch('EcommerceData/Guatemala/click/clickJson.json').then(resp => resp.json()).then(resp => loads(resp))
+  // break;
+  //}
 
-  var lbl1 = document.createElement("h3");
-  lbl1.innerHTML = "Nuevo Telefono"
-
-  var tel = document.createElement("input")
-  tel.setAttribute("type", "text");
-  tel.setAttribute("placeholder", "Numero de telefono");
-
-  var cliente = document.createElement("input")
-  cliente.setAttribute("type", "text");
-  cliente.setAttribute("placeholder", "Nombre Cliente");
-
-  var corte = document.createElement("select");
-  var opcion = document.createElement("option");
-  opcion.setAttribute("disabled", "true");
-  opcion.setAttribute("selected", "true");
-  opcion.innerHTML = "Dia de Corte";
-  corte.appendChild(opcion);
-
-  for (var i = 1; i <= 31; i++) {
-    var opciones = document.createElement("option");
-    opciones.setAttribute("value", i);
-    opciones.innerHTML = i;
-    corte.appendChild(opciones);
-  }
-  var s = document.createElement("button");
-  s.setAttribute("type", "submit");
-
-  form.append(lbl1, tel, cliente, corte);
-  document.getElementsByTagName("body")[0].appendChild(form);
-  form.append(s);
 }

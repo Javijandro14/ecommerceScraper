@@ -39,11 +39,22 @@ td{
 }
 .links:hover{
     color: black;
-    font-weight: 1000;
+    font-weight: 500;
     text-decoration-line: none;
 }
 
 .product-sku{
     display: flex;
     align-items: baseline;
+}
+
+.category-button{
+    background-color: black;
+}
+
+.products{
+    display:
+    width: 20%;
+    height: 50px;
+    padding-bottom: 10px;
 }
