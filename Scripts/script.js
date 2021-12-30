@@ -20,8 +20,13 @@ function loads(json) {
     }
     cat.setAttribute("class", "category-button")
     link.setAttribute("class", "links");
+    if(typeof(datos[i]) == "object"){
     link.setAttribute("onclick","loads(datos['"+i+"'])")
     link.innerHTML = i
+    }else if(typeof(datos[i]) == "string"){
+      link.setAttribute("href","descriptionProd.html")
+      link.innerHTML = i
+    }
     cat.append(link)
     fila.append(cat)
     iter += 1;
@@ -33,7 +38,6 @@ function loads(json) {
 }
 
 function loadJson(tienda) {
-  
   resp = tienda;
   switch (resp) {
     case "Intelaf":
@@ -66,3 +70,4 @@ function loadJson(tienda) {
   }
 
 }
+

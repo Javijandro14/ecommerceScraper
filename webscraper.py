@@ -1,4 +1,3 @@
-from os import link
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -35,6 +34,256 @@ def findItems(soup, item, attType, attName):
         print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
     else:
         return result
+
+def data(jsonData,store):
+    intentosExitosos = 0
+    intentosFallidos = 0
+    for j in jsonData:
+        print("Current Category:" + format(j))
+        if isinstance(jsonData[j],dict):
+            for k in jsonData[j]:
+                if isinstance(jsonData[j][k],dict):
+                    for l in jsonData[j][k]:
+                        if isinstance(jsonData[j][k][l],dict):
+                            for m in jsonData[j][k][l]:
+                                if isinstance(jsonData[j][k][l][m],dict):
+                                    for n in jsonData[j][k][l][m]:#jsonData[j][k][l][m][n]
+                                        try:
+                                            link = jsonData[j][k][l][m][n]
+                                            cat = format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)+"-"+format(n)
+                                            productInfo = buscarProd(link,cat,store)
+                                        except:
+                                            print(format(link) + " --> Status: Fallido!")
+                                            intentosFallidos += 1
+                                        else:
+                                            intentosExitosos += 1
+                                            print(format(link) + " --> Status: Existoso!")
+                                            jsonData[j][k][l][m][n] = productInfo
+                                else:#jsonData[j][k][l][m]
+                                    try:
+                                        link = jsonData[j][k][l][m]
+                                        cat = format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)
+                                        productInfo = buscarProd(link,cat,store)
+                                    except:
+                                        print(format(link) + " --> Status: Fallido!")
+                                        intentosFallidos += 1
+                                    else:
+                                        intentosExitosos += 1
+                                        print(format(link) + " --> Status: Existoso!")
+                                        jsonData[j][k][l][m] = productInfo
+                        else:#jsonData[j][k][l]
+                            try:
+                                link = jsonData[j][k][l]
+                                cat = format(j)+"-"+format(k)+"-"+format(l)
+                                productInfo = buscarProd(link,cat,store)
+                            except:
+                                print(format(link) + " --> Status: Fallido!")
+                                intentosFallidos += 1
+                            else:
+                                intentosExitosos += 1
+                                print(format(link) + " --> Status: Existoso!")
+                                jsonData[j][k][l] = productInfo
+                else:#jsonData[j][k]
+                    try:
+                        link = jsonData[j][k]
+                        cat = format(j)+"-"+format(k)
+                        productInfo = buscarProd(link,cat,store)
+                    except:
+                        print(format(link) + " --> Status: Fallido!")
+                        intentosFallidos += 1
+                    else:
+                        intentosExitosos += 1
+                        print(format(link) + " --> Status: Existoso!")
+                        jsonData[j][k] = productInfo
+        else:#jsonData[j]
+            try:
+                link = jsonData[j]
+                cat = format(j)+"-"+format(k)
+                productInfo = buscarProd(link,cat,store)
+            except:
+                print(format(link) + " --> Status: Fallido!")
+                intentosFallidos += 1
+            else:
+                intentosExitosos += 1
+                print(format(link) + " --> Status: Existoso!")
+                jsonData[j] = productInfo
+    print("Exitosos:" + format(intentosExitosos))
+    print("Fallidos:" + format(intentosFallidos))
+    print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
+    return jsonData
+
+def buscarProd(link,cat,store):
+    if store == "Intelaf":
+        soup = getUrl(link)
+        paginaProducto = findItem(soup,'div','class','row cuerpo')
+        #------Codigo del Producto-------#
+        codigos = findItem(paginaProducto,'p','class','codigo')
+        if codigos == None:
+            return Exception
+        else:            
+            codigo = ((codigos.text)[16:])
+        #------Nombre del Producto-------#
+        title = findItem(paginaProducto,'h1',None,None).text
+        if title == None:
+            return Exception
+        else:
+            nombre = (title)
+        #------Precio Viejo-------#
+        precios = findItem(paginaProducto,'p','class','precio_normal')
+        if precios == None:
+            precios = "N/A"
+            precio = (precios)
+        else:
+            precio = ((precios.text)[17:])
+        #------Precio de Ofertas-------#
+        precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
+        if precioOferta == None:
+            return Exception
+        else:
+            oferta = ((precioOferta.text)[21:])
+        #------Detalles de Productos-------#
+        detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
+        if detalle == None:
+            detalle = "N/A"
+            detalles = (detalle)
+        else:
+            d = [i.text for i in detalle]
+            detalles = (""+format(d)+"")
+        #------Categorias-------#
+        categoria = (cat)
+        #------Garantias-------#
+        garantias = findItem(paginaProducto,'p','class','garantia')
+        if garantias == None:
+            garantias = "N/A"
+            garantia = (garantias)
+        else:
+            garantia = (garantias.text[9:])
+        productInfo = {
+            "codigo": codigo,
+            "nombre": nombre,
+            "precio": precio,
+            "oferta": oferta,
+            "categoria": categoria,
+            "detalles": detalles,
+            "garantia": garantia,
+            "link" : link
+        }
+        return productInfo
+    elif store == "Max":
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        codigos = findItem(soup, 'div', 'itemprop', 'sku')
+        if codigos == None:
+            return Exception
+        else:            
+            codigo=(codigos.text)
+        #------Nombre del Producto-------#
+        title = findItem(soup, 'h1', 'class', 'page-title')
+        if title == None:
+            return Exception
+        else:
+            nombre = (title.text)
+
+        #------Precio Viejo-------#
+        precios = findItem(soup, 'span', 'data-price-type', 'oldPrice')
+        if precios == None:
+            precios = "N/A"
+            precio = (precios)
+        else:
+            precio = ((precios.text)[1:])
+
+        #------Precio de Ofertas-------#
+        precioOferta = findItem(soup, 'span', 'data-price-type', 'finalPrice')
+        if precioOferta == None:
+            return Exception
+        else:
+            oferta = ((precioOferta.text)[1:])
+
+        #------Detalles de Productos-------#
+        detalle = findItems(soup, 'tr', None, None)
+        d = [i.text for i in detalle]
+        if detalle == None:
+            detalles = "N/A"
+        else:
+            detalles = (""+format(d)+"")
+
+        #------Categorias-------#
+        categoria = (cat)
+
+        #------Garantias-------#
+        garantias = findItem(soup, 'td', 'data-th', 'Garantía')
+        if garantias == None:
+            garantias = "N/A"
+            garantia = (garantias)
+        else:
+            garantia = (garantias.text)
+        productInfo = {
+            "codigo": codigo,
+            "nombre": nombre,
+            "precio": precio,
+            "oferta": oferta,
+            "categoria": categoria,
+            "detalles": detalles,
+            "garantia": garantia,
+            "link" : link
+           }
+        return productInfo
+    elif store == "Goat":
+        send = requests.get(jsonData[j][k], headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
+        soup = BeautifulSoup(send.text,'html.parser')
+        #------Codigo del Producto-------#
+        codigos = findItem(soup,'span','class','sku')
+        if codigos == None:
+            raise Exception
+        else:            
+            codigo.append(codigos.text.strip())
+        #------Nombre del Producto-------#
+        title = soup.find('h1',{'class':'product_title'})
+        if title == None:
+            codigo.remove(codigos.text.strip())
+            raise Exception
+        else:
+            nombre.append(title.text)
+        #------Precio Viejo-------#
+        precioO = soup.find('del')
+        if precioO == None:
+            precioO="N/A"
+            precio.append(precioO)
+        else:
+            precio.append(precioO.text)
+        #------Precio de Ofertas-------#
+        precioOferta = soup.find('bdi')
+        if precioOferta == None:
+            precioOferta = "N/A"
+            oferta.append(precioOferta)
+        else:
+            oferta.append(precioOferta.text)
+        #------Detalles de Productos-------#
+        descripcion = soup.find('ul',{'class':'a-unordered-list'})
+        if descripcion == None:
+            descripcion = "N/A"
+            detalles.append(descripcion)
+            
+        else:
+            detalles.append(descripcion.text.strip())
+        #------Categorias-------#
+        categoria.append(format(j))
+        #---------Garantias---------#
+        garantiaP = "N/A"
+        garantia.append(garantiaP)
+        
+        productInfo = {
+            "codigo": codigo,
+            "nombre": nombre,
+            "precio": precio,
+            "oferta": oferta,
+            "categoria": categoria,
+            "detalles": detalles,
+            "garantia": garantia,
+            "link" : link
+        }
+        return productInfo
+
 
 # Estados Unidos(Expandir para mas info)
     # 1 Amazon(Expandir para mas info)
@@ -148,267 +397,12 @@ def findItems(soup, item, attType, attName):
         #Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
         #y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
 
-        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",)
+        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
         # jsonData = json.load(file)
-        # intentosExitosos = 0
-        # intentosFallidos = 0
-
-        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafProducts.xlsx'
-        # sheetName = []
-        # df = []
-        # for j in jsonData:
-        # print("Current Category:" + format(j))
-        # codigo = []
-        # nombre = []
-        # precio = []
-        # oferta = []
-        # categoria = []
-        # detalles = []
-        # garantia = []
-        # for k in jsonData[j]:
-        #     if isinstance(jsonData[j][k],dict):
-        #         for l in jsonData[j][k]:
-        #             if isinstance(jsonData[j][k][l],dict):
-        #                 for m in jsonData[j][k][l]:
-        #                     if isinstance(jsonData[j][k][l][m],dict):
-        #                         for n in jsonData[j][k][l][m]:#jsonData[j][k][l][m][n]
-        #                             try:
-        #                                 link = jsonData[j][k][l][m][n]
-        #                                 soup = getUrl(link)
-        #                                 paginaProducto = findItem(soup,'div','class','row cuerpo')
-        #                                 #------Codigo del Producto-------#
-        #                                 codigos = findItem(paginaProducto,'p','class','codigo')
-        #                                 if codigos == None:
-        #                                     continue
-        #                                 else:            
-        #                                     codigo.append((codigos.text)[16:])
-        #                                 #------Nombre del Producto-------#
-        #                                 title = findItem(paginaProducto,'h1',None,None).text
-        #                                 if title == None:
-        #                                     continue
-        #                                 else:
-        #                                     nombre.append(title)
-        #                                 #------Precio Viejo-------#
-        #                                 precios = findItem(paginaProducto,'p','class','precio_normal')
-        #                                 if precios == None:
-        #                                     precios = "N/A"
-        #                                     precio.append(precios)
-        #                                 else:
-        #                                     precio.append((precios.text)[17:])
-        #                                 #------Precio de Ofertas-------#
-        #                                 precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
-        #                                 if precioOferta == None:
-        #                                     continue
-        #                                 else:
-        #                                     oferta.append((precioOferta.text)[21:])
-        #                                 #------Detalles de Productos-------#
-        #                                 detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-        #                                 if detalle == None:
-        #                                     detalle = "N/A"
-        #                                     detalles.append(detalle)
-        #                                 else:
-        #                                     d = [i.text for i in detalle]
-        #                                     detalles.append(""+format(d)+"")
-        #                                 #------Categorias-------#
-        #                                 categoria.append(format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)+"-"+format(n))
-        #                                 #------Garantias-------#
-        #                                 garantias = findItem(paginaProducto,'p','class','garantia')
-        #                                 if garantias == None:
-        #                                     garantias = "N/A"
-        #                                     garantia.append(garantia)
-        #                                 else:
-        #                                     garantia.append(garantias.text[9:])
-        #                             except:
-        #                                 print(format(link) + " --> Status: Fallido!")
-        #                                 intentosFallidos += 1
-        #                             else:
-        #                                 intentosExitosos += 1
-        #                                 print(format(link) + " --> Status: Existoso!")
-        #                                 soup.decompose()
-        #                     else:#jsonData[j][k][l][m]
-        #                         try:
-        #                             link = jsonData[j][k][l][m]
-        #                             soup = getUrl(link)
-        #                             paginaProducto = findItem(soup,'div','class','row cuerpo')
-        #                             #------Codigo del Producto-------#
-        #                             codigos = findItem(paginaProducto,'p','class','codigo')
-        #                             if codigos == None:
-        #                                 continue
-        #                             else:            
-        #                                 codigo.append((codigos.text)[16:])
-        #                             #------Nombre del Producto-------#
-        #                             title = findItem(paginaProducto,'h1',None,None).text
-        #                             if title == None:
-        #                                 continue
-        #                             else:
-        #                                 nombre.append(title)
-        #                             #------Precio Viejo-------#
-        #                             precios = findItem(paginaProducto,'p','class','precio_normal')
-        #                             if precios == None:
-        #                                 precios = "N/A"
-        #                                 precio.append(precios)
-        #                             else:
-        #                                 precio.append((precios.text)[17:])
-        #                             #------Precio de Ofertas-------#
-        #                             precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
-        #                             if precioOferta == None:
-        #                                 continue
-        #                             else:
-        #                                 oferta.append((precioOferta.text)[21:])
-        #                             #------Detalles de Productos-------#
-        #                             detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-        #                             if detalle == None:
-        #                                 detalle = "N/A"
-        #                                 detalles.append(detalle)
-        #                             else:
-        #                                 d = [i.text for i in detalle]
-        #                                 detalles.append(""+format(d)+"")
-        #                             #------Categorias-------#
-        #                             categoria.append(format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m))
-        #                             #------Garantias-------#
-        #                             garantias = findItem(paginaProducto,'p','class','garantia')
-        #                             if garantias == None:
-        #                                 garantias = "N/A"
-        #                                 garantia.append(garantia)
-        #                             else:
-        #                                 garantia.append(garantias.text[9:])
-        #                         except:
-        #                             print(format(link) + " --> Status: Fallido!")
-        #                             intentosFallidos += 1
-        #                         else:
-        #                             intentosExitosos += 1
-        #                             print(format(link) + " --> Status: Existoso!")
-        #                             soup.decompose()
-        #             else:#jsonData[j][k][l]
-        #                 try:
-        #                     link = jsonData[j][k][l]
-        #                     soup = getUrl(link)
-        #                     paginaProducto = findItem(soup,'div','class','row cuerpo')
-        #                     #------Codigo del Producto-------#
-        #                     codigos = findItem(paginaProducto,'p','class','codigo')
-        #                     if codigos == None:
-        #                         continue
-        #                     else:            
-        #                         codigo.append((codigos.text)[16:])
-        #                     #------Nombre del Producto-------#
-        #                     title = findItem(paginaProducto,'h1',None,None).text
-        #                     if title == None:
-        #                         continue
-        #                     else:
-        #                         nombre.append(title)
-        #                     #------Precio Viejo-------#
-        #                     precios = findItem(paginaProducto,'p','class','precio_normal')
-        #                     if precios == None:
-        #                         precios = "N/A"
-        #                         precio.append(precios)
-        #                     else:
-        #                         precio.append((precios.text)[17:])
-        #                     #------Precio de Ofertas-------#
-        #                     precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
-        #                     if precioOferta == None:
-        #                         continue
-        #                     else:
-        #                         oferta.append((precioOferta.text)[21:])
-        #                     #------Detalles de Productos-------#
-        #                     detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-        #                     if detalle == None:
-        #                         detalle = "N/A"
-        #                         detalles.append(detalle)
-        #                     else:
-        #                         d = [i.text for i in detalle]
-        #                         detalles.append(""+format(d)+"")
-        #                     #------Categorias-------#
-        #                     categoria.append(format(j)+"-"+format(k)+"-"+format(l))
-        #                     #------Garantias-------#
-        #                     garantias = findItem(paginaProducto,'p','class','garantia')
-        #                     if garantias == None:
-        #                         garantias = "N/A"
-        #                         garantia.append(garantia)
-        #                     else:
-        #                         garantia.append(garantias.text[9:])
-        #                 except:
-        #                     print(format(link) + " --> Status: Fallido!")
-        #                     intentosFallidos += 1
-        #                 else:
-        #                     intentosExitosos += 1
-        #                     print(format(link) + " --> Status: Existoso!")
-        #                     soup.decompose()
-        #     else:#jsonData[j][k]
-        #         try:
-        #             link = jsonData[j][k]
-        #             soup = getUrl(link)
-        #             paginaProducto = findItem(soup,'div','class','row cuerpo')
-        #             #------Codigo del Producto-------#
-        #             codigos = findItem(paginaProducto,'p','class','codigo')
-        #             if codigos == None:
-        #                 continue
-        #             else:            
-        #                 codigo.append((codigos.text)[16:])
-        #             #------Nombre del Producto-------#
-        #             title = findItem(paginaProducto,'h1',None,None).text
-        #             if title == None:
-        #                 continue
-        #             else:
-        #                 nombre.append(title)
-        #             #------Precio Viejo-------#
-        #             precios = findItem(paginaProducto,'p','class','precio_normal')
-        #             if precios == None:
-        #                 precios = "N/A"
-        #                 precio.append(precios)
-        #             else:
-        #                 precio.append((precios.text)[17:])
-        #             #------Precio de Ofertas-------#
-        #             precioOferta = findItem(paginaProducto,'p','class','beneficio_efectivo')
-        #             if precioOferta == None:
-        #                 continue
-        #             else:
-        #                 oferta.append((precioOferta.text)[21:])
-        #             #------Detalles de Productos-------#
-        #             detalle = paginaProducto.find_all('div',attrs = {'id' :'c1' , 'class':'col-xs-12'})
-        #             if detalle == None:
-        #                 detalle = "N/A"
-        #                 detalles.append(detalle)
-        #             else:
-        #                 d = [i.text for i in detalle]
-        #                 detalles.append(""+format(d)+"")
-        #             #------Categorias-------#
-        #             categoria.append(format(j)+"-"+format(k))
-        #             #------Garantias-------#
-        #             garantias = findItem(paginaProducto,'p','class','garantia')
-        #             if garantias == None:
-        #                 garantias = "N/A"
-        #                 garantia.append(garantia)
-        #             else:
-        #                 garantia.append(garantias.text[9:])
-        #         except:
-        #             print(format(link) + " --> Status: Fallido!")
-        #             intentosFallidos += 1
-        #         else:
-        #             intentosExitosos += 1
-        #             print(format(link) + " --> Status: Existoso!")
-        #             soup.decompose()
-        # productInfo = {
-        #     "codigo": codigo,
-        #     "nombre": nombre,
-        #     "precio": precio,
-        #     "oferta": oferta,
-        #     "categoria": categoria,
-        #     "detalles": detalles,
-        #     "garantia": garantia
-        # }
-        # sheetName.append((format(j))[:29])#Hubo un error de pasar a una hoja excel porque excedia de los 31 caracteres, puse esto para todas las hojas excel
-        # df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
-        # gc.collect()
-
-
-        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
-        # for i in range(1, len(df)):
-        # df[i-1].to_excel(writer, sheetName[i-1])
-        # writer.save()
-
-        # print("Exitosos:" + format(intentosExitosos))
-        # print("Fallidos:" + format(intentosFallidos))
-        # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
+        # products = data(jsonData,"Intelaf")
+        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelafproducts.json",'w') as file:
+        #     json.dump(products,file)
+        # file.close()
 
         # Existencias del Producto
             # Falta terminar esta parte
@@ -422,6 +416,7 @@ def findItems(soup, item, attType, attName):
             #     existencias[tienda[0].text] = tienda[1] .text
             # print(existencias)
     #Terminado(Faltan Existencias, pero eso se vera luego)
+
     # Click(Expandir para mas info)
         # base = "https://www.click.gt"
         # soup = getUrl(base)
@@ -622,6 +617,7 @@ def findItems(soup, item, attType, attName):
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #Terminado
+    
     # Kemik
         # base = "https://www.kemik.gt"
         # soup = getUrl(base)
@@ -1401,108 +1397,12 @@ def findItems(soup, item, attType, attName):
         # # Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
         # # y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
 
-        ##
-        ##file = open("maxJson.json",)
-        ##jsonData = json.load(file)
-        ### print(jsonData['Televisores'])
-        ##intentosExitosos = 0
-        ##intentosFallidos = 0
-        ##
-        ##directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/max/MaxProducts.xlsx'
-        ##sheetName = []
-        ##df = []
-        ##for j in jsonData:
-        ##        codigo = []
-        ##        nombre = []
-        ##        precio = []
-        ##        oferta = []
-        ##        categoria = []
-        ##        detalles = []
-        ##        garantia = []
-        ##    for k in jsonData[j]:
-        ##        for l in jsonData[j][k]:
-        ##            link = jsonData[j][k][l]
-        ##            try:
-        ##                soup = getUrl(link)
-        ##
-        ##                #------Codigo del Producto-------#
-        ##                codigos = findItem(soup, 'div', 'itemprop', 'sku')
-        ##                if codigos == None:
-        ##                    continue
-        ##                else:            
-        ##                    codigo.append(codigos.text)
-        ##                #------Nombre del Producto-------#
-        ##                title = findItem(soup, 'h1', 'class', 'page-title')
-        ##                if title == None:
-        ##                    continue
-        ##                else:
-        ##                    nombre.append(title.text)
-        ##
-        ##                #------Precio Viejo-------#
-        ##                precios = findItem(soup, 'span', 'data-price-type', 'oldPrice')
-        ##                if precios == None:
-        ##                    precios = "N/A"
-        ##                    precio.append(precios)
-        ##                else:
-        ##                    precio.append((precios.text)[1:])
-        ##
-        ##                #------Precio de Ofertas-------#
-        ##                precioOferta = findItem(soup, 'span', 'data-price-type', 'finalPrice')
-        ##                if precioOferta == None:
-        ##                    continue
-        ##                else:
-        ##                    oferta.append((precioOferta.text)[1:])
-        ##
-        ##                #------Detalles de Productos-------#
-        ##                detalle = findItems(soup, 'tr', None, None)
-        ##                d = [i.text for i in detalle]
-        ##                if detalles == None:
-        ##                    detalles = "N/A"
-        ##                else:
-        ##                    detalles.append(""+format(d)+"")
-        ##
-        ##                #------Categorias-------#
-        ##                categoria.append(format(j) + "/" + format(k))
-        ##
-        ##                #------Garantias-------#
-        ##                garantias = findItem(soup, 'td', 'data-th', 'Garantía')
-        ##                if garantias == None:
-        ##                    garantias = "N/A"
-        ##                    garantia.append(garantia)
-        ##                else:
-        ##                    garantia.append(garantias.text)
-        ##            except:
-        ##                print(link + " --> Status: Fallido!")
-        ##                intentosFallidos += 1
-        ##                break
-        ##            else:
-        ##                intentosExitosos += 1
-        ##                print(link + " --> Status: Existoso!")
-        ##                soup.decompose()
-        ##
-        ##    productInfo = {
-        ##        "codigo": codigo,
-        ##        "nombre": nombre,
-        ##        "precio": precio,
-        ##        "oferta": oferta,
-        ##        "categoria": categoria,
-        ##        "detalles": detalles,
-        ##        "garantia": garantia
-        ##    }
-        ##    sheetName.append(format(j))
-        ##    df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
-        ##    gc.collect()
-        ##
-        ##
-        ##writer = pd.ExcelWriter(directory, engine='xlsxwriter')
-        ##for i in range(1, len(df)):
-        ##    df[i-1].to_excel(writer, sheetName[i-1])
-        ##writer.save()
-        ##
-        ##print("Exitosos:" + format(intentosExitosos))
-        ##print("Fallidos:" + format(intentosFallidos))
-        ##print("Porcentaje de Exito:" + format(intentosExitosos /
-        ##      (intentosFallidos+intentosExitosos)))
+        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxJson.json",)
+        # jsonData = json.load(file)
+        # products = data(jsonData,"Max")
+        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxproducts.json",'w') as file:
+        #     json.dump(products,file)
+        # file.close()
     #Terminado
 
     # Pacifiko(Expandir para mas info)
@@ -1566,93 +1466,13 @@ def findItems(soup, item, attType, attName):
         # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/goatshop/goatshopJson.json",)
         # jsonData = json.load(file)
 
+file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
+jsonData = json.load(file)
+products = data(jsonData,"Goat")
+with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
+    json.dump(products,file)
+file.close()
 
-        # intentosFallidos = 0
-        # intentosExistosos = 0
-        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/goatshop/goatshopProducts.xlsx'
-        # sheetName = []
-        # df = []
-        # for j in jsonData:
-        #     codigo = []
-        #     nombre = []
-        #     precio = []
-        #     oferta = []
-        #     categoria = []
-        #     detalles = []
-        #     garantia = []
-        #     for k in jsonData[j]:
-        #         try:
-        #             send = requests.get(jsonData[j][k], headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
-        #             soup = BeautifulSoup(send.text,'html.parser')
-        #             #------Codigo del Producto-------#
-        #             codigos = findItem(soup,'span','class','sku')
-        #             if codigos == None:
-        #                 continue
-        #             else:            
-        #                 codigo.append(codigos.text.strip())
-        #             #------Nombre del Producto-------#
-        #             title = soup.find('h1',{'class':'product_title'})
-        #             if title == None:
-        #                 codigo.remove(codigos.text.strip())
-        #                 continue
-        #             else:
-        #                 nombre.append(title.text)
-        #             #------Precio Viejo-------#
-        #             precioO = soup.find('del')
-        #             if precioO == None:
-        #                 precioO="N/A"
-        #                 precio.append(precioO)
-        #             else:
-        #                 precio.append(precioO.text)
-        #             #------Precio de Ofertas-------#
-        #             precioOferta = soup.find('bdi')
-        #             if precioOferta == None:
-        #                 precioOferta = "N/A"
-        #                 oferta.append(precioOferta)
-        #             else:
-        #                 oferta.append(precioOferta.text)
-        #             #------Detalles de Productos-------#
-        #             descripcion = soup.find('ul',{'class':'a-unordered-list'})
-        #             if descripcion == None:
-        #                 descripcion = "N/A"
-        #                 detalles.append(descripcion)
-                        
-        #             else:
-        #                 detalles.append(descripcion.text.strip())
-        #             #------Categorias-------#
-        #             categoria.append(format(j))
-        #             #---------Garantias---------#
-        #             garantiaP = "N/A"
-        #             garantia.append(garantiaP)
-        #         except:
-        #             print(format(jsonData[j][k]) + " --> Status: Fallido!")
-        #             intentosFallidos+=1
-        #         else:
-        #             intentosExistosos+=1
-        #             print(format(jsonData[j][k]) + " --> Status: Existoso!")
-                    
-        #     productInfo = {
-        #         "codigo": codigo,
-        #         "nombre": nombre,
-        #         "precio": precio,
-        #         "oferta": oferta,
-        #         "categoria": categoria,
-        #         "detalles": detalles,
-        #         "garantia": garantia
-        #     }
-        #     sheetName.append(j)
-        #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
-        #     soup.decompose()
-        #     gc.collect()
-
-        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
-        # for i in range(1, len(df)+1):
-        #     df[i-1].to_excel(writer, sheetName[i-1])
-        # writer.save()
-
-        # print("Exitosos:" + format(intentosExistosos))
-        # print("Fallidos:" + format(intentosFallidos))
-        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
     #Terminado
 
     #Zukko
@@ -1778,16 +1598,16 @@ def findItems(soup, item, attType, attName):
     #Terminado (Falta poner paginaciones, debido a los pocos articulos que tiene)
 
     #Guateclic
-# base = "https://www.guateclic.com"
-# soup = getUrl(base)
-# menu = findItems(soup,'div','class','col-sm-3')
-# categorias = findItems(menu[1],'a','class','whitetext')
-# level0 = {}
-# for cat in categorias:
-#     name0 = cat.text
-#     link0 = base + cat.get('href')
-#     level0[name0] = link0
-# print(level0)  
+        # base = "https://www.guateclic.com"
+        # soup = getUrl(base)
+        # menu = findItems(soup,'div','class','col-sm-3')
+        # categorias = findItems(menu[1],'a','class','whitetext')
+        # level0 = {}
+        # for cat in categorias:
+        #     name0 = cat.text
+        #     link0 = base + cat.get('href')
+        #     level0[name0] = link0
+        # print(level0)  
     #No terminado
 
     #Imeqmo
