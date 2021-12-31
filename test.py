@@ -87,20 +87,20 @@ def getCategorias(link,store):
                     else:
                         level3 = {}
                         for r3 in res3:
-                            #print(r3.text)
-                            link = base + "/" + r3.get('href')
-                            soup = getUrl(link)
+                            name3 = getProdInfo(r3,store,"name")
+                            link3 = getProdInfo(r3,store,"linkProd")
+                            soup = getUrl(link3)
                             res4 = getProdInfo(soup,store,"item")
                             if not res4:
-                                print("No hay productos en: " + r3.get('href'))
+                                print("No hay productos en: " + link3)
                             else:
                                 level4 = {}
                                 for r4 in res4:
-                                    nombre = (findItem(r4,'button','class','btn_cotiza')).get('name')
-                                    link = base + "/" + (findItem(r4,'button','class','btn_mas_info')).get('name')
-                                    level4[nombre] = link
-                                level3[r3.text] = level4
-                        level2[r2.text] = level3
+                                    name4 = getProdInfo(r4,store,"name")
+                                    link4 = getProdInfo(r4,store,"linkProd")
+                                    level4[name4] = link4
+                                level3[name3] = level4
+                        level2[name2] = level3
             level1[name1] = level2
     level0 = level1  
     return level0

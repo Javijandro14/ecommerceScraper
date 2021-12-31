@@ -1,14 +1,11 @@
 #navbar-home{
-    background-color: darkblue;
-    border-bottom: cornflowerblue;
+    background-color:olivedrab;
     justify-content: center;
     border-style: solid;
     vertical-align: center;
-    display: flex;
-    flex-flow: wrap;
 }
 body{
-    background-color:darkgray;
+    background-color:gainsboro;
 }
 .navbar-nav {
     width: 100%;
@@ -34,12 +31,12 @@ td{
 }
 .links{
     color: white;
-    font-weight: 100;
+    font-weight: 600;
     text-decoration-line: none;
 }
 .links:hover{
     color: black;
-    font-weight: 500;
+    font-weight: 750;
     text-decoration-line: none;
 }
 
@@ -68,4 +65,5 @@ td{
 }
 .category-button:hover{
     background-color: blue;
+    
 }
