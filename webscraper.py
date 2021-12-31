@@ -229,48 +229,48 @@ def buscarProd(link,cat,store):
            }
         return productInfo
     elif store == "Goat":
-        send = requests.get(jsonData[j][k], headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
+        send = requests.get(link, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
         soup = BeautifulSoup(send.text,'html.parser')
         #------Codigo del Producto-------#
         codigos = findItem(soup,'span','class','sku')
         if codigos == None:
             raise Exception
         else:            
-            codigo.append(codigos.text.strip())
+            codigo = (codigos.text.strip())
         #------Nombre del Producto-------#
         title = soup.find('h1',{'class':'product_title'})
         if title == None:
             codigo.remove(codigos.text.strip())
             raise Exception
         else:
-            nombre.append(title.text)
+            nombre = (title.text)
         #------Precio Viejo-------#
         precioO = soup.find('del')
         if precioO == None:
             precioO="N/A"
-            precio.append(precioO)
+            precio = (precioO)
         else:
-            precio.append(precioO.text)
+            precio = (precioO.text)
         #------Precio de Ofertas-------#
         precioOferta = soup.find('bdi')
         if precioOferta == None:
             precioOferta = "N/A"
-            oferta.append(precioOferta)
+            oferta = (precioOferta)
         else:
-            oferta.append(precioOferta.text)
+            oferta = (precioOferta.text)
         #------Detalles de Productos-------#
         descripcion = soup.find('ul',{'class':'a-unordered-list'})
         if descripcion == None:
             descripcion = "N/A"
-            detalles.append(descripcion)
+            detalles = (descripcion)
             
         else:
-            detalles.append(descripcion.text.strip())
+            detalles = (descripcion.text.strip())
         #------Categorias-------#
-        categoria.append(format(j))
+        categoria = (cat)
         #---------Garantias---------#
         garantiaP = "N/A"
-        garantia.append(garantiaP)
+        garantia = (garantiaP)
         
         productInfo = {
             "codigo": codigo,
@@ -283,7 +283,56 @@ def buscarProd(link,cat,store):
             "link" : link
         }
         return productInfo
+    elif store == "Elektra":
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        codigos = (soup.find('div',{'class':'ektguatemala-ektgt-components-0-x-pdpSku'}))
+        if codigos == None:
+            raise Exception
+        else:            
+            codigo = (codigos.text.strip()[4:])
+        #------Nombre del Producto-------#
+        title = (soup.find('h1',{'class':'vtex-store-components-3-x-productNameContainer'}))
+        if title == None:
+            del codigo[-1]
+            raise Exception
+        else:
+            nombre = (title.text.strip())
+        divPrecio = findItems(soup,'div','class','vtex-flex-layout-0-x-flexRow--pdpTotal')
+        precios = findItems(divPrecio[0],'span',None,None)
+        #------Precio Viejo-------#
+        precioO = precios[0].span.span.text
+        precio = (precioO)
+        #------Precio de Ofertas-------#
+        precioOferta = precios[1].span.span
+        if precioOferta == None:
+            precioOferta = "N/A"
+            oferta = (precioOferta)
+        else:
+            oferta = (precioOferta)
+        #------Detalles de Productos-------#
+        des = findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText')
+        if des == None:
+            descripcion = "N/A"
+            detalles = (descripcion)
+        else:
+            detalles = (des.text)
+        #------Categorias-------#
+        categoria = (cat)
+        #---------Garantias---------#
+        garantiaP = "12 meses"
+        garantia = (garantiaP)
 
+        productInfo = {
+            "codigo": codigo,
+            "nombre": nombre,
+            "precio": precio,
+            "oferta": oferta,
+            "categoria": categoria,
+            "detalles": detalles,
+            "garantia": garantia,
+            "link" : link
+        }
 
 # Estados Unidos(Expandir para mas info)
     # 1 Amazon(Expandir para mas info)
@@ -397,12 +446,12 @@ def buscarProd(link,cat,store):
         #Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
         #y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
 
-        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
-        # jsonData = json.load(file)
-        # products = data(jsonData,"Intelaf")
-        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelafproducts.json",'w') as file:
-        #     json.dump(products,file)
-        # file.close()
+file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
+jsonData = json.load(file)
+products = data(jsonData,"Intelaf")
+with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file:
+    json.dump(products,file)
+file.close()
 
         # Existencias del Producto
             # Falta terminar esta parte
@@ -617,7 +666,7 @@ def buscarProd(link,cat,store):
         # print("Fallidos:" + format(intentosFallidos))
         # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #Terminado
-    
+
     # Kemik
         # base = "https://www.kemik.gt"
         # soup = getUrl(base)
@@ -1111,92 +1160,12 @@ def buscarProd(link,cat,store):
         #     json.dump(level0,file)
         # file.close()
 
-        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraJson.json",)
+        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
         # jsonData = json.load(file)
-        # intentosFallidos = 0
-        # intentosExistosos = 0
-        # directory = 'C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraProducts.xlsx'
-        # sheetName = []
-        # df = []
-
-        # for j in jsonData:
-        #     codigo = []
-        #     nombre = []
-        #     precio = []
-        #     oferta = []
-        #     categoria = []
-        #     detalles = []
-        #     garantia = []
-        #     for k in jsonData[j]:
-        #         try:
-        #             soup = getUrl(jsonData[j][k])
-        #             #print(jsonData[j][k])
-        #             #------Codigo del Producto-------#
-        #             codigos = (soup.find('div',{'class':'ektguatemala-ektgt-components-0-x-pdpSku'}))
-        #             if codigos == None:
-        #                 continue
-        #             else:            
-        #                 codigo.append(codigos.text.strip()[4:])
-        #             #------Nombre del Producto-------#
-        #             title = (soup.find('h1',{'class':'vtex-store-components-3-x-productNameContainer'}))
-        #             if title == None:
-        #                 del codigo[-1]
-        #                 continue
-        #             else:
-        #                 nombre.append(title.text.strip())
-        #             divPrecio = findItems(soup,'div','class','vtex-flex-layout-0-x-flexRow--pdpTotal')
-        #             precios = findItems(divPrecio[0],'span',None,None)
-        #             #------Precio Viejo-------#
-        #             precioO = precios[0].span.span.text
-        #             precio.append(precioO)
-        #             #------Precio de Ofertas-------#
-        #             precioOferta = precios[1].span.span
-        #             if precioOferta == None:
-        #                 precioOferta = "N/A"
-        #                 oferta.append(precioOferta)
-        #             else:
-        #                 oferta.append(precioOferta)
-        #             #------Detalles de Productos-------#
-        #             des = findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText')
-        #             if des == None:
-        #                 descripcion = "N/A"
-        #                 detalles.append(descripcion)
-        #             else:
-        #                 detalles.append(des.text)
-        #             #------Categorias-------#
-        #             categoria.append(format(j)+"-"+format(k))
-        #             #---------Garantias---------#
-        #             garantiaP = "12 meses"
-        #             garantia.append(garantiaP)
-        #         except:
-        #             print(format(jsonData[j][k]) + " --> Status: Fallido!")
-        #             intentosFallidos+=1
-        #             del codigo[-1]
-        #             del nombre[-1]
-        #         else:
-        #             intentosExistosos+=1
-        #             print(format(jsonData[j][k]) + " --> Status: Existoso!")
-        #     productInfo = {
-        #         "codigo": codigo,
-        #         "nombre": nombre,
-        #         "precio": precio,
-        #         "oferta": oferta,
-        #         "categoria": categoria,
-        #         "detalles": detalles,
-        #         "garantia": garantia
-        #     }
-        #     sheetName.append(format(j).replace(" / ","_"))
-        #     df.append(pd.DataFrame(productInfo, columns = ["codigo", "nombre", "precio","oferta", "categoria", "detalles", "garantia"]))
-        #     soup.decompose()
-        #     gc.collect()
-
-        # writer = pd.ExcelWriter(directory, engine='xlsxwriter')
-        # for i in range(1, len(df)):
-        #    df[i-1].to_excel(writer, sheetName[i-1])
-        # writer.save()
-        # print("Exitosos:" + format(intentosExistosos))
-        # print("Fallidos:" + format(intentosFallidos))
-        # print("Porcentaje de Exito:" + format(intentosExistosos/(intentosFallidos+intentosExistosos)))
+        # products = data(jsonData,"Elektra")
+        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
+        #     json.dump(products,file)
+        # file.close()
     #Terminado
 
     # Tecnofacil(Expandir para mas info)
@@ -1400,7 +1369,7 @@ def buscarProd(link,cat,store):
         # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxJson.json",)
         # jsonData = json.load(file)
         # products = data(jsonData,"Max")
-        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxproducts.json",'w') as file:
+        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxProducts.json",'w') as file:
         #     json.dump(products,file)
         # file.close()
     #Terminado
@@ -1463,15 +1432,12 @@ def buscarProd(link,cat,store):
         #     json.dump(level0,file)
         # file.close()
 
-        # file = open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/goatshop/goatshopJson.json",)
+        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
         # jsonData = json.load(file)
-
-file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
-jsonData = json.load(file)
-products = data(jsonData,"Goat")
-with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
-    json.dump(products,file)
-file.close()
+        # products = data(jsonData,"Goat")
+        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
+        #     json.dump(products,file)
+        # file.close()
 
     #Terminado
 

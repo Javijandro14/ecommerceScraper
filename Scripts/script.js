@@ -1,11 +1,11 @@
-function loads(json) {
+function loads(json, tienda) {
   var tabla = document.getElementsByClassName("lista")[0]
-  if (typeof(tabla) != 'undefined'){
+  if (typeof (tabla) != 'undefined') {
     tabla.remove();
   }
 
   datos = json
-  
+
   iter = 3
   var table = document.createElement("table");
   table.setAttribute("class", "lista");
@@ -20,11 +20,12 @@ function loads(json) {
     }
     cat.setAttribute("class", "category-button")
     link.setAttribute("class", "links");
-    if(typeof(datos[i]) == "object"){
-    link.setAttribute("onclick","loads(datos['"+i+"'])")
-    link.innerHTML = i
-    }else if(typeof(datos[i]) == "string"){
-      link.setAttribute("href","descriptionProd.html")
+    if (typeof (datos[i]) == "object") {
+      link.setAttribute("onclick", "loads(datos['" + i + "'],'" + tienda + "')")
+      link.innerHTML = i
+    } else if (typeof (datos[i]) == "string") {
+      url = "descriptionProd.html?tienda=" + tienda + "&codigo=" + i
+      link.setAttribute("href", url)
       link.innerHTML = i
     }
     cat.append(link)
@@ -37,37 +38,187 @@ function loads(json) {
   // document.getElementsByClassName("products")[0].innerHTML = res;
 }
 
-function loadJson(tienda) {
-  resp = tienda;
-  switch (resp) {
+function loadCategoria(tienda) {
+  switch (tienda) {
     case "Intelaf":
-      fetch('EcommerceData/Guatemala/intelaf/intelafJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/intelaf/intelafJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Click":
-      fetch('EcommerceData/Guatemala/click/clickJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/click/clickJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Elektra":
-      fetch('EcommerceData/Guatemala/elektra/elektraJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/elektra/elektraJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Spirit":
-      fetch('EcommerceData/Guatemala/spiritcomputacion/spiritJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/spiritcomputacion/spiritJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Max":
-      fetch('EcommerceData/Guatemala/max/maxJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/max/maxJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Macro":
-      fetch('EcommerceData/Guatemala/macrosistemas/macroJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/macrosistemas/macroJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Kemik":
-      fetch('EcommerceData/Guatemala/kemik/kemikJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/kemik/kemikJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Goat":
-      fetch('EcommerceData/Guatemala/goatshop/goatshopJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/goatshop/goatshopJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Funky":
-      fetch('EcommerceData/Guatemala/funky/funkyJson.json').then(resp => resp.json()).then(resp => loads(resp))
+      var res = tienda;
+      fetch('EcommerceData/Guatemala/funky/funkyJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
   }
 
 }
 
+function getParams() {
+  var url_string = window.location.href
+  var url = new URL(url_string);
+  var tienda = url.searchParams.get("tienda");
+  var codigo = url.searchParams.get("codigo");
+  switch (tienda) {
+    case "Intelaf":
+      fetch('EcommerceData/Guatemala/intelaf/intelafProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Click":
+      fetch('EcommerceData/Guatemala/click/clickProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Elektra":
+      fetch('EcommerceData/Guatemala/elektra/elektraProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Spirit":
+      fetch('EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Max":
+      fetch('EcommerceData/Guatemala/max/maxProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Macro":
+      fetch('EcommerceData/Guatemala/macrosistemas/macroProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Kemik":
+      fetch('EcommerceData/Guatemala/kemik/kemikProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Goat":
+      fetch('EcommerceData/Guatemala/goatshop/goatshopProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+    case "Funky":
+      fetch('EcommerceData/Guatemala/funky/funkyProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
+      break;
+  }
+}
+function loadProduct(codigo, json) {
+  var products = json;
+  search = false;
+  while (!search) {
+    if (search == false) {
+      for (let i in products) {
+        if (codigo == i) {
+          console.log("Product Found!");
+          var codigos = products[i]["codigo"]
+          var name = products[i]["nombre"]
+          var precio = products[i]["precio"]
+          var oferta = products[i]["oferta"]
+          var cat = products[i]["categoria"]
+          var detalle = products[i]["detalles"]
+          var garantia = products[i]["garantia"]
+          var link = products[i]["link"]
+          showProd(codigos, name, precio, oferta, cat, detalle, garantia, link);
+          search = true;
+          break;
+        } else {
+          if (search == false) {
+            for (let j in products[i]) {
+              if (codigo == j) {
+                console.log("Product Found!");
+                var codigos = products[i][j]["codigo"]
+                var name = products[i][j]["nombre"]
+                var precio = products[i][j]["precio"]
+                var oferta = products[i][j]["oferta"]
+                var cat = products[i][j]["categoria"]
+                var detalle = products[i][j]["detalles"]
+                var garantia = products[i][j]["garantia"]
+                var link = products[i][j]["link"]
+                showProd(codigos, name, precio, oferta, cat, detalle, garantia, link);
+                //console.log(codigos,name,precio,oferta,cat,detalle,garantia,link)
+                search = true;
+                break;
+              } else {
+                if (search == false) {
+                  for (let k in products[i][j]) {
+                    if (codigo == k) {
+                      console.log("Product Found!");
+                      var codigos = products[i][j][k]["codigo"]
+                      var name = products[i][j][k]["nombre"]
+                      var precio = products[i][j][k]["precio"]
+                      var oferta = products[i][j][k]["oferta"]
+                      var cat = products[i][j][k]["categoria"]
+                      var detalle = products[i][j][k]["detalles"]
+                      var garantia = products[i][j][k]["garantia"]
+                      var link = products[i][j][k]["link"]
+                      showProd(codigos, name, precio, oferta, cat, detalle, garantia, link);
+                      search = true;
+                      break;
+                    } else {
+                      if (search == false) {
+                        for (let l in products[i][j][k]) {
+                          if (codigo == l) {
+                            console.log("Product Found!");
+                            var codigos = products[i][j][k][l]["codigo"]
+                            var name = products[i][j][k][l]["nombre"]
+                            var precio = products[i][j][k][l]["precio"]
+                            var oferta = products[i][j][k][l]["oferta"]
+                            var cat = products[i][j][k][l]["categoria"]
+                            var detalle = products[i][j][k][l]["detalles"]
+                            var garantia = products[i][j][k][l]["garantia"]
+                            var link = products[i][j][k][l]["link"]
+                            showProd(codigos, name, precio, oferta, cat, detalle, garantia, link);
+                            search = true;
+                            break;
+                          }
+                        }
+                      } else {
+                        break;
+                      }
+                    }
+                  }
+                } else {
+                  break;
+                }
+              }
+            }
+          } else {
+            break;
+          }
+        }
+      }
+    } else {
+      break;
+    }
+  }
+  return products;
+}
+
+function showProd(codigos, name, precio, oferta, cat, detalle, garantia, link) {
+  document.getElementsByClassName("sku")[1].innerHTML = codigos
+  document.getElementsByClassName("product-title")[0].innerHTML = name
+  document.getElementsByClassName("oldprice")[0].innerHTML = "Q" + precio
+  document.getElementsByClassName("newprice")[0].innerHTML = "Q" + oferta
+  document.getElementsByClassName("cat")[0].innerHTML = cat
+  document.getElementsByClassName("description")[0].innerHTML = detalle
+  document.getElementsByClassName("garantia")[0].innerHTML = garantia
+  var direct = document.getElementsByClassName("linktienda")[0]
+  direct.setAttribute("href", link)
+  direct.innerHTML = "Link";
+
+}
+
+//function findSimilarProd(){}

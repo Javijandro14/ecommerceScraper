@@ -140,9 +140,7 @@ for info in menu:
     categorias['Area']= getCategorias(base + url, "Intelaf")
 
 
-        # #Se imprime 2 archivos, uno de texto y otro JSON, solo es de preuba el de txt, para ver que si nos sale el resultado deseado, la que nos importa seria JSON
-        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",'w') as file:
-        #     json.dump(level0,file)
-        # file.close()
-        #Cerramos este fragmento de codigo porque lo queremos volver como funcion si es posible, porque queremos dar la opcion de solo analizar los links
-        #y de ponerlo en un archivo por separado y no tener que consultar cada vez que se entra a la pagina
+
+with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/intelaf/intelafJson.json",'w') as file:
+    json.dump(categorias,file)
+file.close()

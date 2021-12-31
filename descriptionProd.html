@@ -13,7 +13,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+<body onload="getParams()">
     <nav class="navbar navbar-expand-sm" id="navbar-home">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -63,6 +63,7 @@
             <h4><strong>Codigo Pre-asignado:</strong> <span class="sku">JSJ32DK232</span></h5>
         </div>
         <h2>Ver datos de diferentes tiendas:</h2>
+        <h3>Categoria en tienda: <h4 class="cat"></h4></h3>
         <div class="changeStore">
             <button>Intelaf</button>
             <button>Kemik</button>
@@ -72,31 +73,24 @@
             <button>tienda6</button>
             <button>tienda7</button>
         </div>
-        <div class="skuorignal">
+        <div class="infoTienda">
             <h4><strong>Codigo de pagina de </strong><span class="sku">Q:</span></h4>
+            <h3 class="paglink">Link del Articulo en su Pagina: <a href="" class="linktienda"></a></h3>
         </div>
         <div class="desPrice">
             <h4 class="price">Antes: <span class="oldprice">Q.1,000.00 </span></h4>
             <h3 class="price">Oferta: <span class="newprice">Q.759.00 </span></h3>
         </div>
-        <p class="product-descripcion">Esto es un producto, tiene varias caracteristicas, y tambien otras
-            caracteristicas <br><br>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa adipisci qui explicabo impedit aspernatur, in
-            vitae libero voluptatem.
-            Nostrum voluptatem amet tempore quibusdam porro, exercitationem ad veniam est harum nihil. Lorem, ipsum
-            dolor sit amet consectetur adipisicing elit
-            possimus. Ducimus harum quod ut ea qui delectus eius minus placeat quo veritatis? Nisi facilis quas
-            molestias nulla omnis voluptates of
-            ficia. Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores rerum, facere amet unde quibusdam
-            odit ullam possimus error ad
-            perferendis modi nostrum earum. Dignissimos libero, aspernatur doloremque numquam labore recusandae!
-            <br><br>
-            Lorem ipsum, dolor sit amet
-            consectetur adipisicing elit. Voluptas iure pariatur placeat sed error itaque, ipsa cupiditate animi ab,
-            voluptatum tempora quos asperiores,
-            corrupti veniam modi nostrum officia earum. Minus!
+        <p class="description">Esto es un producto, tiene varias caracteristicas, y tambien otras
+            caracteristicas <br>
         </p>
+        <h3>Garantia:</h3>
+        <h4 class="garantia"></h4>
+
     </div>
+    <script src="./Scripts/bootstrap.bundle.js"></script>
+    <script src="./Scripts/bootstrap.min.js"></script>
+    <script src="Scripts/script.js"></script>
 </body>
 
 </html>
