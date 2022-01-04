@@ -157,18 +157,7 @@ def buscarProd(link,cat,store):
             garantias = "N/A"
             garantia = (garantias)
         else:
-            garantia = (garantias.text[9:])
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
+            garantia = (garantias.text[9:])  
     elif store == "Max":
         soup = getUrl(link)
         #------Codigo del Producto-------#
@@ -183,7 +172,6 @@ def buscarProd(link,cat,store):
             return Exception
         else:
             nombre = (title.text)
-
         #------Precio Viejo-------#
         precios = findItem(soup, 'span', 'data-price-type', 'oldPrice')
         if precios == None:
@@ -191,14 +179,12 @@ def buscarProd(link,cat,store):
             precio = (precios)
         else:
             precio = ((precios.text)[1:])
-
         #------Precio de Ofertas-------#
         precioOferta = findItem(soup, 'span', 'data-price-type', 'finalPrice')
         if precioOferta == None:
             return Exception
         else:
             oferta = ((precioOferta.text)[1:])
-
         #------Detalles de Productos-------#
         detalle = findItems(soup, 'tr', None, None)
         d = [i.text for i in detalle]
@@ -206,10 +192,8 @@ def buscarProd(link,cat,store):
             detalles = "N/A"
         else:
             detalles = (""+format(d)+"")
-
         #------Categorias-------#
         categoria = (cat)
-
         #------Garantias-------#
         garantias = findItem(soup, 'td', 'data-th', 'Garantía')
         if garantias == None:
@@ -217,17 +201,6 @@ def buscarProd(link,cat,store):
             garantia = (garantias)
         else:
             garantia = (garantias.text)
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-           }
-        return productInfo
     elif store == "Goat":
         send = requests.get(link, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
         soup = BeautifulSoup(send.text,'html.parser')
@@ -271,18 +244,6 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantiaP = "N/A"
         garantia = (garantiaP)
-        
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
     elif store == "Elektra":
         soup = getUrl(link)
         #------Codigo del Producto-------#
@@ -322,18 +283,6 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantiaP = "12 meses"
         garantia = (garantiaP)
-
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
     elif store == "Click":
         soup = getUrl(link)
         paginaProducto = findItem(soup,'section','class','text-center')
@@ -372,18 +321,6 @@ def buscarProd(link,cat,store):
             raise
         else:
             detalles = (especificar.text).strip()
-    
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
     elif store == "Spirit":
         base = "https://spiritcomputacion.com/"
         soup = getUrl(base + link)
@@ -421,17 +358,6 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantiaP = "N/A"
         garantia = garantiaP
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
     elif store == "Macro":
         soup = getUrl(link)
         #------Codigo del Producto-------#
@@ -469,17 +395,6 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantiaP = "N/A"
         garantia = garantiaP
-        productInfo = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "precio": precio,
-            "oferta": oferta,
-            "categoria": categoria,
-            "detalles": detalles,
-            "garantia": garantia,
-            "link" : link
-        }
-        return productInfo
     elif store == "Funky":
         send = requests.get(link, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
         soup = BeautifulSoup(send.text,'html.parser')
@@ -515,7 +430,6 @@ def buscarProd(link,cat,store):
         if descripcion == None:
             descripcion = "N/A"
             detalles = descripcion
-            
         else:
             detalles = descripcion.text.strip()
         #------Categorias-------#
@@ -523,7 +437,7 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantiaP = "N/A"
         garantia = garantiaP
-        productInfo = {
+    productInfo = {
             "codigo": codigo,
             "nombre": nombre,
             "precio": precio,
@@ -532,9 +446,8 @@ def buscarProd(link,cat,store):
             "detalles": detalles,
             "garantia": garantia,
             "link" : link
-        }
-        return productInfo
-
+    }
+    return productInfo
 
 # Estados Unidos(Expandir para mas info)
     # 1 Amazon(Expandir para mas info)
@@ -1159,12 +1072,12 @@ def buscarProd(link,cat,store):
         #     json.dump(level0,file)
         # file.close()
 
-file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
-jsonData = json.load(file)
-products = data(jsonData,"Elektra")
-with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
-    json.dump(products,file)
-file.close()
+# file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
+# jsonData = json.load(file)
+# products = data(jsonData,"Elektra")
+# with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
+#     json.dump(products,file)
+# file.close()
 
     #Terminado
 
