@@ -42,39 +42,39 @@ function loadCategoria(tienda) {
   switch (tienda) {
     case "Intelaf":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/intelaf/intelafJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/intelaf/intelaf.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Click":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/click/clickJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/click/click.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Elektra":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/elektra/elektraJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/elektra/elektra.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Spirit":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/spiritcomputacion/spiritJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/spiritcomputacion/spirit.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Max":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/max/maxJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/max/max.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Macro":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/macrosistemas/macroJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/macrosistemas/macro.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Kemik":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/kemik/kemikJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/kemik/kemik.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Goat":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/goatshop/goatshopJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/goatshop/goatshop.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Funky":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/funky/funkyJson.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/funky/funky.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
   }
 
