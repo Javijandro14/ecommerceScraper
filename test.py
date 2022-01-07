@@ -239,19 +239,69 @@ def getProdInfo(soup,store,item):
             pass
     elif "Click" == store:
         if item == "cat":
-            pass
+            lists = []
+            menu = findItem(soup,'ul','class',['justify-content-center','container','d-flex','align-items-center','mb-0','mt-0','pr-4'])
+            lists = findItems(menu,'li','class','nav-item')
+            for l in lists:
+                name = l.a.get('href')
+                if name == None:
+                    name = l.a.text.strip("(current)",).lower().replace("ó","o")
+                    ul = findItem(soup,'div','aria-labelledby',name)
+                    listar = findItems(ul,'li',None,None)
+                    lists.extend(listar)
+            return lists
         elif item == "prod":
-            pass
+            products = findItems(soup,'div','class','pt-2')
+            return products
         elif item == "name":
-            pass
+            name = soup.a.get('href')
+            if name == None:
+                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
+                ul = findItem(soup,'div','aria-labelledby',name)
+                listar = findItems(ul,'li',None,None)
+                for l in listar:
+                    return l.a.get('href').replace("/productos/","")
+            else:
+                return name.replace("/productos/","")
         elif item == "linkCat":
-            pass
+            link = soup.a.get('href')
+            if link == None:
+                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
+                ul = findItem(soup,'div','aria-labelledby',name)
+                listar = findItems(ul,'li',None,None)
+                for l in listar:
+                    linkl = base + l.a.get('href')
+                    return linkl
+            return base + link
         elif item == "nameProd":
-            pass
+            name = soup.h5.text +'-'+soup.textarea.text
+            return name
         elif item == "linkProd":
-            pass
+            link = soup.a.get('href')
+            return link
         elif item == "pag":
-            pass
+            tempsoup = getUrl(soup)
+            links =[]
+            pagination = findItems(tempsoup,'button','class','page-link')
+            if len(pagination) == 0:
+                res = soup
+                links.append(res)
+            elif len(pagination) == 2:
+                paginas = int(pagination[0].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            elif len(pagination) == 3:
+                paginas = int(pagination[-2].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            else:
+                paginas = int(pagination[-2].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            return links
     elif "Spirit" == store:
         if item == "cat":
             pass
@@ -309,7 +359,6 @@ def getProdInfo(soup,store,item):
                 elif pag >1:
                     links.append(format(soup)+"?start="+str((pag-1)*24))
             return links
-                
     elif "Funky" == store:        
         if item == "cat":
             menu = soup.find('ul',{'class':'sub-menu'})
@@ -370,6 +419,9 @@ while opcion != 9:
         base = "https://www.click.gt"
         categorias = getCategorias(base,"Click")
         print(categorias)
+        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/click.json",'w') as file:
+            json.dump(categorias,file)
+        file.close()
     #Funky
     elif opcion == 3:
         categorias = {}
@@ -402,8 +454,7 @@ while opcion != 9:
         categorias = {}
         base = "https://www.macrosistemas.com"
         categorias = getCategorias(base,"Macro")
-        print(categorias)
-        with open("C:/Users/javie/Desktop//ecommerceScraper/EcommerceData/Guatemala/macrosistemas/macro.json",'w') as file:
+        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/macrosistemas/macro.json",'w') as file:
             json.dump(categorias,file)
         file.close()
     #Salir
