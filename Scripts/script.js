@@ -46,35 +46,35 @@ function loadCategoria(tienda) {
       break;
     case "Click":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/click/click.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/click/Click.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Elektra":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/elektra/elektra.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/elektra/Elektra.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Spirit":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/spiritcomputacion/spirit.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/spiritcomputacion/Spirit.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Max":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/max/max.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/max/Max.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Macro":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/macrosistemas/macro.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/macrosistemas/Macro.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Kemik":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/kemik/kemik.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/kemik/Kemik.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Goat":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/goatshop/goatshop.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/goatshop/Goatshop.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Funky":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/funky/funky.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/funky/Funky.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
   }
 
