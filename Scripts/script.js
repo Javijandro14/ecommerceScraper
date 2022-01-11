@@ -42,7 +42,7 @@ function loadCategoria(tienda) {
   switch (tienda) {
     case "Intelaf":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/intelaf/intelaf.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/intelaf/Intelaf.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Click":
       var res = tienda;

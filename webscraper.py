@@ -675,8 +675,6 @@ def getProdInfo(soup,store,item):
                 else:
                     running = False
             return links
-
-
     elif "Click" == store:
         if item == "cat":
             lists = []
@@ -744,19 +742,36 @@ def getProdInfo(soup,store,item):
             return links
     elif "Spirit" == store:
         if item == "cat":
-            pass
+            categorias = findItems(soup,'div','class','vertical-separator')
+            if not categorias:
+                categorias = findItems(soup,'li','class','vm-categories-wall-catwrapper')
+            return categorias
         elif item == "prod":
-            pass
+            productos = findItems(soup,'a','class','item-title')
+            return productos
         elif item == "name":
-            pass
+            name = soup.a.text.strip()
+            return name
         elif item == "linkCat":
-            pass
+            link = base + soup.a.get('href')
+            return link
         elif item == "nameProd":
-            pass
+            name = soup.text.strip().replace("\n","").replace(" ","-")
+            return name
         elif item == "linkProd":
-            pass
+            link = base + soup.get('href')
+            return link
         elif item == "pag":
-            pass
+            links = []
+            tempsoup = getUrl(soup)
+            # paginacion = findItem(tempsoup,'div','class',['vm-pagination','vm-pagination-bottom'])
+            paginas = findItems(tempsoup,'a','class','pagenav')
+            if not paginas:
+                links.append(soup)
+            else:
+                links = [base + i.get('href') for i in paginas[:-2]]
+                links.insert(0,soup)
+            return links
     elif "Macro" == store:
         if item == "cat":
             subcategorias = findItem(soup,'ul','class',['nav','menu-left','mod-list'])
@@ -916,7 +931,11 @@ while opcion != 9:
         file.close()
     #Spirit
     elif opcion == 7:
-        pass
+        base = "https://spiritcomputacion.com"
+        categorias = getCategorias(base, "Spirit")
+        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spirit.json",'w') as file:
+            json.dump(categorias,file)
+        file.close()
     #Macro
     elif opcion == 8:
         categorias = {}
