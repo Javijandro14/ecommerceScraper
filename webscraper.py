@@ -1,14 +1,13 @@
 from bs4 import BeautifulSoup
 import requests
 import json
-import pandas as pd
-import gc
 import time
 
 
 def getUrl(url):
     try:
         send = requests.get(url)
+        # send = requests.get(format(base)+"tienda/", headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
         time.sleep(1)
     except:
         print("Revise el url, no se proceso correctamente")
@@ -864,110 +863,163 @@ def getProdInfo(soup,store,item):
 # China(Expandir para mas info)
 
 # Guatemala(Expandir para mas info)
-opcion = 0
-while opcion != 9:
-    categorias = {}
-    opcion = int(input("Ingrese una Opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
-    #Intelaf
-    if opcion == 1:
-        url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
-        base = "https://www.intelaf.com"
-        res = getUrl(url)
-        data = json.loads(res.text)
-        menu = data['menu_sub_1s']
-        categorias = {}
-        for info in menu:
-            area = info['Area']
-            url = info['url']
-            categorias[area.replace(" ","-")]= getCategorias(base + url, "Intelaf")
-        #Si quiero ver solo una categoria, solo poner comentario la de arriba y quitar comentarios abajo
-        #     categorias[area.replace(" ","-")] = base + url
-        # categorias['Audio'] = getCategorias(categorias['Audio'],"Intelaf")
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Click
-    elif opcion == 2:
-        categorias = {}
-        base = "https://www.click.gt"
-        categorias = getCategorias(base,"Click")
-        print(categorias)
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/click.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Funky
-    elif opcion == 3:
-        categorias = {}
-        base = "https://storefunky.com"
-        categorias = getCategorias(base,"Funky")
-        #print(categorias)
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Max
-    elif opcion == 4:
-        base = "https://www.max.com.gt/"
-        categorias = getCategorias(base,"Max")
-        print(categorias)
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/max.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Goat No esta terminado
-    elif opcion == 5:
-        categorias = {}
-        base = "https://goatshopgt.com/"
-        categorias = getCategorias(base,"Goat")
-        print(categorias)
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goat.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Elektra
-    elif opcion == 6:
-        base = "https://www.elektra.com.gt"
-        categorias = getCategorias(base, "Elektra")
-        print(categorias)
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektra.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Spirit
-    elif opcion == 7:
-        base = "https://spiritcomputacion.com"
-        categorias = getCategorias(base, "Spirit")
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spirit.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Macro
-    elif opcion == 8:
-        categorias = {}
-        base = "https://www.macrosistemas.com"
-        categorias = getCategorias(base,"Macro")
-        with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/macrosistemas/macro.json",'w') as file:
-            json.dump(categorias,file)
-        file.close()
-    #Salir
-    elif opcion == 9:
+opcion1 = 0
+while opcion1 != 3:
+    opcion1 = int(input("Ingrese el servicio que desee hacer: \n1.Actualizar lista de categorias y productos \n2.Actualizar informacion de productos \n3.Salir \n"))
+    if opcion1 == 1: #Actualizar lista de categorias y productos
+        opcion2 = 0
+        while opcion2 != 9:
+            categorias = {}
+            opcion2 = int(input("Ingrese una opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
+            #Intelaf
+            if opcion2 == 1:
+                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
+                base = "https://www.intelaf.com"
+                res = getUrl(url)
+                data = json.loads(res.text)
+                menu = data['menu_sub_1s']
+                categorias = {}
+                for info in menu:
+                    area = info['Area']
+                    url = info['url']
+                    categorias[area.replace(" ","-")]= getCategorias(base + url, "Intelaf")
+                #Si quiero ver solo una categoria, solo poner comentario la de arriba y quitar comentarios abajo
+                #     categorias[area.replace(" ","-")] = base + url
+                # categorias['Audio'] = getCategorias(categorias['Audio'],"Intelaf")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Click
+            elif opcion2 == 2:
+                categorias = {}
+                base = "https://www.click.gt"
+                categorias = getCategorias(base,"Click")
+                print(categorias)
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/click.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Funky
+            elif opcion2 == 3:
+                categorias = {}
+                base = "https://storefunky.com"
+                categorias = getCategorias(base,"Funky")
+                #print(categorias)
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Max
+            elif opcion2 == 4:
+                base = "https://www.max.com.gt/"
+                categorias = getCategorias(base,"Max")
+                print(categorias)
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/max.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Goat No esta terminado
+            elif opcion2 == 5:
+                categorias = {}
+                base = "https://goatshopgt.com/"
+                categorias = getCategorias(base,"Goat")
+                print(categorias)
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goat.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Elektra
+            elif opcion2 == 6:
+                base = "https://www.elektra.com.gt"
+                categorias = getCategorias(base, "Elektra")
+                print(categorias)
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektra.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Spirit
+            elif opcion2 == 7:
+                base = "https://spiritcomputacion.com"
+                categorias = getCategorias(base, "Spirit")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spirit.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Macro
+            elif opcion2 == 8:
+                categorias = {}
+                base = "https://www.macrosistemas.com"
+                categorias = getCategorias(base,"Macro")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/macrosistemas/macro.json",'w') as file:
+                    json.dump(categorias,file)
+                file.close()
+            #Salir
+            elif opcion2 == 9:
+                pass
+    elif opcion1 == 2:
+        opcion2 = 0
+        while opcion2 != 9:
+            opcion2 = int(input("Ingrese una opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
+            #Intelaf
+            if opcion2 == 1:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Intelaf")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Click
+            elif opcion2 == 2:
+                pass
+            #Funky
+            elif opcion2 == 3:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Funky")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/funkyProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Max
+            elif opcion2 == 4:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxJson.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Max")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Goat No esta terminado
+            elif opcion2 == 5:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Goat")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Elektra
+            elif opcion2 == 6:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Elektra")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Spirit
+            elif opcion2 == 7:
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritJson.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Spirit")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
+            #Macro
+            elif opcion2 == 8:
+                pass
+            #Salir
+            elif opcion2 == 9:
+                pass
+    elif opcion1 == 3:
         print("Adios")
 
-    # Intelaf(Expandir para comentarios)
-        #New Code Incoming
-# file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
-# jsonData = json.load(file)
-# products = data(jsonData,"Intelaf")
-# with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file:
-#     json.dump(products,file)
-# file.close()
-        # Existencias del Producto
-            # Falta terminar esta parte
-            #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
-            #     tiendas = disp.find_all('div',{'class':'div_stock_sucu'})
-            #     existencias = {}
-            #     existencias["codigo"] = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
-            #     existencias["VentaLinea"] = disp.find('div',{'class':'col-xs-1'}).text
-            # for j in tiendas:
-            #     tienda = j.find_all('div')
-            #     existencias[tienda[0].text] = tienda[1] .text
-            # print(existencias)
-    #Terminado(Faltan Existencias, pero eso se vera luego)
+
+            
+
+            
+            
+
 
     # Kemik
         # base = "https://www.kemik.gt"
@@ -1228,116 +1280,10 @@ while opcion != 9:
                 # print("Porcentaje de Exito:" + format(intentosExitosos /(intentosFallidos+intentosExitosos)))
     #No terminado(Postponer)
 
-    # Elektra(Expandir para mas info)
-        #base = "https://www.elektra.com.gt"
-        # soup = getUrl(base)
-        # categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
-        # level0 = {}
-        # for cat in categorias:
-        #     name0 = cat.text
-        #     link0 = findItem(cat,'a',None,None).get('href')
-        #     soup = getUrl(base + link0)
-        #     level1 = {}
-        #     nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-        #     iter = 1
-
-        #     while iter!=0:
-        #         link = format(base + link0) +"?page="+ str(iter)
-        #         soup = getUrl(link)
-        #         productos = findItems(soup,'section','class','vtex-product-summary-2-x-container')
-        #         for p in productos:
-        #             name1 = findItem(p,'h1',None,None).text.strip()
-        #             link1 = findItem(p,'a',None,None).get('href')
-        #             level1[name1] = base + link1
-        #         nextPage = soup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-        #         if nextPage == None:
-        #             iter = 0
-        #         else:
-        #             if nextPage.text == '':
-        #                 iter = 0
-        #             else:
-        #                 iter+=1
-        #     level0[name0] = level1
-        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/elektra/elektraJson.json",'w') as file:
-        #     json.dump(level0,file)
-        # file.close()
-
-        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
-        # jsonData = json.load(file)
-        # products = data(jsonData,"Elektra")
-        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
-        #     json.dump(products,file)
-        # file.close()
-    #Terminado
-
     #Tecnofacil(Expandir para mas info)
     #No terminado
 
-    # SpiritComputacion(Expandir para mas info)
-        #base = "https://spiritcomputacion.com"
-        # soup = getUrl(base)
-        # categorias = findItems(soup,'li','class',['vm-categories-wall-catwrapper','floatleft','width25'])
-        # level0 = {}
-        # for cat in categorias:
-        #     name0 = (findItem(cat,'a',None,None).text).strip("\n")
-        #     link0 = (findItem(cat,'a',None,None).get('href'))
-        #     soup = getUrl(base + link0)
-        #     res0 = findItems(soup,'div','class','spacer')
-        #     level1 = {}
-        #     for r0 in res0:
-        #         name1 = (findItem(r0,'a',None,None).get('title'))
-        #         link1 = (findItem(r0,'a',None,None).get('href'))
-        #         soup = getUrl(base+link1)
-        #         div = findItem(soup,'div','class',['vm-pagination','vm-pagination-bottom'])
-        #         paginacion = findItems(div,'li',None,None)
-        #         level2={}
-        #         if not paginacion:
-        #             soup = getUrl(base+link1)
-        #             res = soup.find_all('a',{'class':'item-title'})
-        #             for r in res:
-        #                 name2 = r.text
-        #                 link2 = r.get('href')
-        #                 level2[name2] = link2
-        #         else:
-        #             for p in paginacion[2:-3]:
-        #                 a = findItem(p,'a',None,None)
-        #                 if a == None:
-        #                     soup = getUrl(base+link1)
-        #                     res = soup.find_all('a',{'class':'item-title'})
-        #                     for r in res:
-        #                         name2 = r.text
-        #                         link2 = r.get('href')
-        #                         level2[name2] = link2
-        #                 else:
-        #                     soup = getUrl(base+a.get('href'))
-        #                     res = soup.find_all('a',{'class':'item-title'})
-        #                     for r in res:
-        #                         name2 = r.text
-        #                         link2 = r.get('href')
-        #                         level2[name2] = link2
-        #         level1[name1] = level2        
-        #     level0[name0] = level1
 
-        # with open("C:/Users/javie/Desktop/EcommerceWebscraper/Guatemala/spiritcomputacion/spiritJson.json",'w') as file:
-        #     json.dump(level0,file)
-        # file.close()
-        # file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritJson.json",)
-        # jsonData = json.load(file)
-        # products = data(jsonData,"Spirit")
-        # with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
-        #     json.dump(products,file)
-        # file.close()
-    #Terminado
-
-    # Max(Expandir para mas info)
-# base = "https://www.max.com.gt"
-# file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxJson.json",)
-# jsonData = json.load(file)
-# products = data(jsonData,"Max")
-# with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxProducts.json",'w') as file:
-#     json.dump(products,file)
-# file.close()
-    #Terminado
 
     # Pacifiko(Expandir para mas info)
         # def getUrl(url):
@@ -1374,16 +1320,9 @@ while opcion != 9:
         #     print((oferta.text).strip())
     #No terminado
 
-    #GoatShop
-#base = "https://goatshopgt.com/"
-# send = requests.get(format(base)+"tienda/", headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
+   
 
-# file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
-# jsonData = json.load(file)
-# products = data(jsonData,"Goat")
-# with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
-#     json.dump(products,file)
-# file.close()
+
     #Terminado
 
     #Zukko
@@ -1391,14 +1330,7 @@ while opcion != 9:
         #soup = getUrl("https://app.ecwid.com/categories.js?ownerid=50367225&lang=es_419&jsonp=menu.fill")
     #No terminado
 
-    #Funky
-# file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",)
-# jsonData = json.load(file)
-# products = data(jsonData,"Funky")
-# with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/funkyProducts.json",'w') as file:
-#     json.dump(products,file)
-# file.close()
-    #Terminado
+    
 
     #Guateclic
 # base = "https://www.guateclic.com"
@@ -1420,3 +1352,16 @@ while opcion != 9:
     #Office Depot
 #https://www.officedepot.com.gt/
     #No terminado
+
+        # Existencias del Producto
+            # Falta terminar esta parte
+            #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
+            #     tiendas = disp.find_all('div',{'class':'div_stock_sucu'})
+            #     existencias = {}
+            #     existencias["codigo"] = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
+            #     existencias["VentaLinea"] = disp.find('div',{'class':'col-xs-1'}).text
+            # for j in tiendas:
+            #     tienda = j.find_all('div')
+            #     existencias[tienda[0].text] = tienda[1] .text
+            # print(existencias)
+    #Terminado(Faltan Existencias, pero eso se vera luego)
