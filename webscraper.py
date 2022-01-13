@@ -1,3 +1,12 @@
+# =============================================================== #
+#             Project Name: WebScraping Website service           #
+#               Author: Javier Alejandro Diaz Portillo            #
+#   Descripcion: Programa sirve para extraer links necesarios,    #
+#       y tambien para extaer los datos de cada productos         #
+# =============================================================== #
+
+# Mi forma de resolver este problema es hacer 2 tipos de archivos JSON: uno para conseguir los links, otra para los datos de productos #
+
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -49,7 +58,7 @@ def data(jsonData,store):
                                     for n in jsonData[j][k][l][m]:#jsonData[j][k][l][m][n]
                                         try:
                                             link = jsonData[j][k][l][m][n]
-                                            cat = format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)+"-"+format(n)
+                                            cat = format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)
                                             productInfo = buscarProd(link,cat,store)
                                         except:
                                             print(format(link) + " --> Status: Fallido!")
@@ -61,7 +70,7 @@ def data(jsonData,store):
                                 else:#jsonData[j][k][l][m]
                                     try:
                                         link = jsonData[j][k][l][m]
-                                        cat = format(j)+"-"+format(k)+"-"+format(l)+"-"+format(m)
+                                        cat = format(j)+"-"+format(k)+"-"+format(l)
                                         productInfo = buscarProd(link,cat,store)
                                     except:
                                         print(format(link) + " --> Status: Fallido!")
@@ -73,7 +82,7 @@ def data(jsonData,store):
                         else:#jsonData[j][k][l]
                             try:
                                 link = jsonData[j][k][l]
-                                cat = format(j)+"-"+format(k)+"-"+format(l)
+                                cat = format(j)+"-"+format(k)
                                 productInfo = buscarProd(link,cat,store)
                             except:
                                 print(format(link) + " --> Status: Fallido!")
@@ -85,7 +94,7 @@ def data(jsonData,store):
                 else:#jsonData[j][k]
                     try:
                         link = jsonData[j][k]
-                        cat = format(j)+"-"+format(k)
+                        cat = format(j)
                         productInfo = buscarProd(link,cat,store)
                     except:
                         print(format(link) + " --> Status: Fallido!")
@@ -97,7 +106,7 @@ def data(jsonData,store):
         else:#jsonData[j]
             try:
                 link = jsonData[j]
-                cat = format(j)+"-"+format(k)
+                cat = format(j)
                 productInfo = buscarProd(link,cat,store)
             except:
                 print(format(link) + " --> Status: Fallido!")
@@ -921,7 +930,7 @@ while opcion1 != 3:
                 base = "https://goatshopgt.com/"
                 categorias = getCategorias(base,"Goat")
                 print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goat.json",'w') as file:
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/Goat.json",'w') as file:
                     json.dump(categorias,file)
                 file.close()
             #Elektra
@@ -956,15 +965,20 @@ while opcion1 != 3:
             opcion2 = int(input("Ingrese una opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
             #Intelaf
             if opcion2 == 1:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/intelafJson.json",)
+                file1 = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",)
                 jsonData = json.load(file)
                 products = data(jsonData,"Intelaf")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file2:
+                    json.dump(products,file2)
+                file2.close()
             #Click
             elif opcion2 == 2:
-                pass
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/Click.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Click")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/ClickProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
             #Funky
             elif opcion2 == 3:
                 file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",)
@@ -975,7 +989,7 @@ while opcion1 != 3:
                 file.close()
             #Max
             elif opcion2 == 4:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxJson.json",)
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/Max.json",)
                 jsonData = json.load(file)
                 products = data(jsonData,"Max")
                 with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxProducts.json",'w') as file:
@@ -983,7 +997,7 @@ while opcion1 != 3:
                 file.close()
             #Goat No esta terminado
             elif opcion2 == 5:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopJson.json",)
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/Goatshop.json",)
                 jsonData = json.load(file)
                 products = data(jsonData,"Goat")
                 with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
@@ -991,7 +1005,7 @@ while opcion1 != 3:
                 file.close()
             #Elektra
             elif opcion2 == 6:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraJson.json",)
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/Elektra.json",)
                 jsonData = json.load(file)
                 products = data(jsonData,"Elektra")
                 with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
@@ -999,7 +1013,7 @@ while opcion1 != 3:
                 file.close()
             #Spirit
             elif opcion2 == 7:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritJson.json",)
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/Spirit.json",)
                 jsonData = json.load(file)
                 products = data(jsonData,"Spirit")
                 with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
@@ -1007,7 +1021,12 @@ while opcion1 != 3:
                 file.close()
             #Macro
             elif opcion2 == 8:
-                pass
+                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/Spirit.json",)
+                jsonData = json.load(file)
+                products = data(jsonData,"Spirit")
+                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
+                    json.dump(products,file)
+                file.close()
             #Salir
             elif opcion2 == 9:
                 pass

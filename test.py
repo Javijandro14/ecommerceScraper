@@ -52,7 +52,6 @@ def getCategorias(link,store):
     else: # Si tiene categorias, buscara subcategorias
         for r1 in res1:
             name1 = getProdInfo(r1,store,"name").replace(" ","-")
-            print(name1)
             link1 = getProdInfo(r1,store,"linkCat")
             #level1[name1]=link1
             soup = getUrl(link1)
@@ -150,11 +149,15 @@ def getProdInfo(soup,store,item):
                 for c in cat:
                     name = c.next_sibling
                     if name != None:
-                        categorias.extend(findItems(name.next_sibling,'a',None,None))
+                        temp = findItems(name.next_sibling,'a',None,None)
+                        for t in temp:
+                            t.attrs = {'href' : t['href']}
+                            categorias.append(t)
                     else:
+                        c.attrs ={'href': c['href']}                        
                         categorias.append(c)
                 #print(categorias)
-                return categorias
+                return categorias[:-1]
             else:
                 #print(subcat)
                 sc = [i.a for i in subcat]
@@ -165,6 +168,7 @@ def getProdInfo(soup,store,item):
             return productos
         elif item == "name":
             name = soup.text.strip()
+            print(name)
             return name
         elif item == "linkCat":
             link = soup.get('href')

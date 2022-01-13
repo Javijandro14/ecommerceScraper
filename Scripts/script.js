@@ -1,3 +1,15 @@
+/*
+
+# =============================================================== #
+#             Project Name: WebScraping Website service           #
+#               Author: Javier Alejandro Diaz Portillo            #
+#          Descripcion: Script para mostrar las categorias        #
+#                    y productos de cada tienda,                  #
+#            tambien para mostrar los datos de productos          #
+# =============================================================== #
+
+*/
+
 function loads(json, tienda) {
   var tabla = document.getElementsByClassName("lista")[0]
   if (typeof (tabla) != 'undefined') {
@@ -70,7 +82,7 @@ function loadCategoria(tienda) {
       break;
     case "Goat":
       var res = tienda;
-      fetch('EcommerceData/Guatemala/goatshop/Goatshop.json').then(resp => resp.json()).then(resp => loads(resp, res))
+      fetch('EcommerceData/Guatemala/goatshop/Goat.json').then(resp => resp.json()).then(resp => loads(resp, res))
       break;
     case "Funky":
       var res = tienda;
