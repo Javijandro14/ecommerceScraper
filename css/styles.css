@@ -1,11 +1,11 @@
 #navbar-home{
-    background-color:olivedrab;
+    background-color: #07221C;
     justify-content: center;
     border-style: solid;
     vertical-align: center;
 }
 body{
-    background-color:gainsboro;
+    background-color: #136451;
 }
 .navbar-nav {
     width: 100%;
@@ -24,7 +24,7 @@ body{
 }
 td{
     width: 400px;
-    border: 1px solid black;
+    border: 1px solid #48857A;
     border-collapse:separate;
     flex-flow: wrap;
     text-align: center;
