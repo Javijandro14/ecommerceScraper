@@ -1042,7 +1042,7 @@ while opcion1 != 3:
             #Intelaf
             if opcion2 == 1:
                 file1 = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",)
-                jsonData = json.load(file)
+                jsonData = json.load(file1)
                 products = data(jsonData,"Intelaf")
                 with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file2:
                     json.dump(products,file2)

@@ -20,19 +20,16 @@ body{
 }
 .quick-table{
     width: 100%;
-    display: flex;
 }
 td{
-    width: 400px;
-    border: 1px solid #48857A;
-    border-collapse:separate;
-    flex-flow: wrap;
+    border: 2px solid #bececc;
     text-align: center;
 }
 .links{
     color: white;
     font-weight: 600;
     text-decoration-line: none;
+    
 }
 .links:hover{
     color: black;
@@ -46,17 +43,27 @@ td{
 }
 
 .store-options{
-    width: 95%;
-    margin-bottom: 2%;
-    padding: 1% 1% 1% 0;
+    width: 200px;
+    font-size: 18px;
     border-style: hidden;
+    color:white;
 }
-.lista, .content, .products{
+.store-options:hover{
+    font-weight: 600;
+    text-decoration: none;
+    color:white;
+}
+.content, #products{
     height: 100%;
     border-style: hidden;
+    vertical-align:super;
 }
-.lista{
+.list{
     background-color: gray;
+    width: 100%;
+}
+.lists{
+    background-color: #07221C;
 }
 .category-button{
     border-style: hidden;

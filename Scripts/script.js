@@ -9,124 +9,142 @@
 # =============================================================== #
 
 */
+function getJson(json, item) {
+  if (json == undefined || json == null) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "testing.json", false);
+    //xhttp.open("GET", "EcommerceData/Guatemala/intelaf/Intelaf.json", false);
+    xhttp.send();
+    json = JSON.parse(xhttp.responseText);
+    if (item != undefined || item != null) {
+      return json[item]
+    } else {
+      return json
+    }
+  } else {
+    if (item != undefined || item != null) {
+      return json[item]
+    } else {
+      return json
+    }
+  }
+}
+function getParams(item) {
+  var url_string = window.location.href
+  var url = new URL(url_string);
+  var params = url.searchParams.get(item);
+  if (params != null || params != undefined) {
+    return getJson(null, params)
+  }
+  else {
+    return getJson(null, null)
+  }
+}
 
-function loads(json, tienda) {
-  var tabla = document.getElementsByClassName("lista")[0]
+function loadFilters(json, item) {
+  var tabla = document.getElementsByClassName("lists")[0]
   if (typeof (tabla) != 'undefined') {
     tabla.remove();
   }
+  if (json == null || json == undefined) {
+    var jsonRes = getJson(null, item);
+  } else {
+    var jsonRes = JSON.parse(json);
+  }
+  var filter = document.createElement("div");
+  filter.setAttribute("class", "lists");
+  for (let i in jsonRes) {
+    var button = document.createElement("button");
+    send = JSON.stringify(jsonRes[i]["categorias"])
+    button.setAttribute("class", "lists store-options");
+    if (send == undefined || send == null) {
+      send = JSON.stringify(jsonRes[i])
+    }
+      button.setAttribute("onclick", "loadCategoria('" + send + "')");
+      button.innerHTML = i;
+      filter.append(button);
+  }
+  document.getElementById("filters").append(filter);
+}
 
-  datos = json
+function loadCategoria(json) {
 
-  iter = 3
+  var tabla = document.getElementsByClassName("list")[0]
+  if (typeof (tabla) != 'undefined') {
+    tabla.remove();
+  }
+  jsonRes = JSON.parse(json);
+  console.log(jsonRes);
+
   var table = document.createElement("table");
-  table.setAttribute("class", "lista");
-  for (let i in datos) {
-    var link = document.createElement("a");
+  iter = 3
+  table.setAttribute("class", "list");
+  if (typeof (jsonRes) == "string") {
     var cat = document.createElement("td");
+    cat.setAttribute("class", "category-button")
+    cat.innerHTML = "<a class='links'>" + jsonRes + "</a>";
+    table.append(cat);
+  } else {
+    for (let i in jsonRes) {
+      var link = document.createElement("a");
+      var cat = document.createElement("td");
 
+      if (iter == 3) {
+        var fila = document.createElement("tr");
+        iter = 0
+        table.append(fila);
+      }
+      cat.setAttribute("class", "category-button")
+      link.setAttribute("class", "links");
+      if (typeof (jsonRes[i]) == "object") {
+        if (jsonRes[i]["codigo"] != undefined) {
+          url = "descriptionProd.html?item=" + jsonRes[i]["codigo"];
+          link.setAttribute("href", url)
+          link.innerHTML = i
+        }
+        link.setAttribute("onclick", "loadFilters('" + JSON.stringify(jsonRes) + "'); loadCategoria('" + JSON.stringify(jsonRes[i]) + "');")
+        link.innerHTML = i
+      }
+      cat.append(link)
+      fila.append(cat)
+      iter += 1;
+
+    }
+  }
+  document.getElementById("products").append(table);
+}
+
+function loadTable(json) {
+  var table = document.getElementsByClassName("quick-table")[0];
+  console.log(json)
+  iter = 3
+  for (let i in json) {
+    var cat = document.createElement("td");
+    cat.setAttribute("class", "categories");
+    cat.style.height = "100%";
     if (iter == 3) {
       var fila = document.createElement("tr");
       iter = 0
       table.append(fila);
     }
-    cat.setAttribute("class", "category-button")
-    link.setAttribute("class", "links");
-    if (typeof (datos[i]) == "object") {
-      link.setAttribute("onclick", "loads(datos['" + i + "'],'" + tienda + "')")
-      link.innerHTML = i
-    } else if (typeof (datos[i]) == "string") {
-      url = "descriptionProd.html?tienda=" + tienda + "&codigo=" + i
-      link.setAttribute("href", url)
-      link.innerHTML = i
-    }
-    cat.append(link)
-    fila.append(cat)
+    cat.innerHTML = '<a class="store-options" href="searchingProd.html?json=' + i + '">' + i + '</a>'
+    fila.append(cat);
     iter += 1;
-
-  }
-  res = JSON.stringify(json);
-  document.getElementsByClassName("products")[0].append(table);
-  // document.getElementsByClassName("products")[0].innerHTML = res;
-}
-
-function loadCategoria(tienda) {
-  switch (tienda) {
-    case "Intelaf":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/intelaf/Intelaf.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Click":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/click/Click.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Elektra":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/elektra/Elektra.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Spirit":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/spiritcomputacion/Spirit.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Max":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/max/Max.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Macro":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/macrosistemas/Macro.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Kemik":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/kemik/Kemik.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Goat":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/goatshop/Goat.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
-    case "Funky":
-      var res = tienda;
-      fetch('EcommerceData/Guatemala/funky/Funky.json').then(resp => resp.json()).then(resp => loads(resp, res))
-      break;
   }
 
 }
 
-function getParams() {
-  var url_string = window.location.href
-  var url = new URL(url_string);
-  var tienda = url.searchParams.get("tienda");
-  var codigo = url.searchParams.get("codigo");
-  switch (tienda) {
-    case "Intelaf":
-      fetch('EcommerceData/Guatemala/intelaf/intelafProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Click":
-      fetch('EcommerceData/Guatemala/click/clickProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Elektra":
-      fetch('EcommerceData/Guatemala/elektra/elektraProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Spirit":
-      fetch('EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Max":
-      fetch('EcommerceData/Guatemala/max/maxProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Macro":
-      fetch('EcommerceData/Guatemala/macrosistemas/macroProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Kemik":
-      fetch('EcommerceData/Guatemala/kemik/kemikProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Goat":
-      fetch('EcommerceData/Guatemala/goatshop/goatshopProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
-    case "Funky":
-      fetch('EcommerceData/Guatemala/funky/funkyProducts.json').then(resp => resp.json()).then(resp => loadProduct(codigo, resp));
-      break;
+function loadList(){
+  var list = document.getElementsByClassName("dropdown-menu")[0];
+  var json = getJson();
+  for(let i in json){
+    var item = document.createElement("li");
+    item.innerHTML= '<a class="links" href="searchingProd.html?json='+i+'"> '+i+ '</a>';
+    list.append(item);
   }
 }
+
+/*
 function loadProduct(codigo, json) {
   var products = json;
   search = false;
@@ -232,5 +250,5 @@ function showProd(codigos, name, precio, oferta, cat, detalle, garantia, link) {
   direct.innerHTML = "Link";
 
 }
-
+*/
 //function findSimilarProd(){}

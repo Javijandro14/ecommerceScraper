@@ -13,7 +13,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+<body onload="loadTable(getJson()); loadList()">
     <nav class="navbar navbar-expand-sm" id="navbar-home">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -22,87 +22,27 @@
             <li class="nav-item">
                 <a class="nav-link links" href="index.html">Inicio</a>
             </li>
-            <li class="nav-item dropdown" id="cat">
-                <a class="nav-link dropdown-toggle links" href="#" role="button"
-                    data-bs-toggle="dropdown">Categorias</a>
-                <ul class="dropdown-menu">
-                    <!--<li><a class="links" href="#"> Categoria #1 </a></li>-->
-                </ul>
-            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle links" href="#" role="button" data-bs-toggle="dropdown">Tiendas en
                     Linea</a>
                 <ul class="dropdown-menu">
-                    <li><a type="submit" class="links" value="Intelaf">Intelaf</button></li>
-                    <li><a class="links" href="#"> Tienda #2 </a></li>
-                    <li><a class="links" href="#"> Tienda #3 </a></li>
-                    <li><a class="links" href="#"> Tienda #4 </a></li>
-                    <li><a class="links" href="#"> Tienda #5 </a></li>
-                    <li><a class="links" href="#"> Tienda #6 </a></li>
-                    <li><a class="links" href="#"> Tienda #7 </a></li>
-                    <li><a class="links" href="#"> Tienda #8 </a></li>
-                    <li><a class="links" href="#"> Tienda #9 </a></li>
-                    <li><a class="links" href="#"> Tienda #10 </a></li>
-                    <li><a class="links" href="#"> Tienda #11 </a></li>
+                    
                 </ul>
             </li>
             <li class="nav-item">
-                <input type="search" name="search" id="searchBar" placeholder="Buscar Articulo">
+                <input type="search" name="search" id="searchBar" placeholder="Buscar codigo">
                 <a class="links" id="navbtn" value="submit">Buscar</button>
             </li>
             <li class="nav-item">
                 <a class="search" id="navbtn" value="submit">
                     <a href="#" class="links">Login</a>
-                </button>
+                    </button>
             </li>
         </ul>
     </nav>
     <div class="container" style="height: 100%;">
-        <h1 style="color: #48857A;">Price Comparison Website</h1>
+        <h1 style="color: #02111a; font-weight: 800;">Price Comparison Website</h1>
         <table class="quick-table" style="height: 90%;">
-            <tr style="height: 100%;">
-                <td class="categories" style="height: 100%;">
-                    <a class="store-options" href="searchingProd.html">Intelaf</a>
-                    <img src="img/image.jpg" alt="image1">
-                </td>
-                <td class="categories"style="height: 100%;">
-                    <a class="store-options" onclick="searchingProd.html">Click</a>
-                    <img src="img/image.jpg" alt="image2">
-                </td>
-                <td class="categories"style="height: 100%;">
-                    <a class="store-options" onclick="searchingProd.html">Elektra</a>
-                    <img src="img/image.jpg" alt="image3">
-                </td>
-            </tr>
-            <tr style="height: 100%;">
-                <td class="categories" style="height: 100%;">
-                    <a class="store-options" onclick="searchingProd.html">Spirit</a>
-                    <img src="img/image.jpg" alt="image4">
-                </td>
-                <td class="categories">
-                    <a class="store-options" onclick="searchingProd.html">Max</a>
-                    <img src="img/image.jpg" alt="image5">
-                </td>
-                <td class="categories">
-                    <a class="store-options" onclick="searchingProd.html">Macro</a>
-                    <img src="img/image.jpg" alt="image6">
-                </td>
-            </tr>
-            <tr>
-                <td class="categories">
-                    <a class="store-options" onclick="searchingProd.html">Kemik</a>
-                    
-                    <img src="img/image.jpg" alt="image7">
-                </td>
-                <td class="categories">
-                    <a class="store-options" onclick="searchingProd.html">Goat</a>
-                    <img src="img/image.jpg" alt="image8">
-                </td>
-                <td class="categories">
-                    <a class="store-options" onclick="searchingProd.html">Funky</a>
-                    <img src="img/image.jpg" alt="image9">
-                </td>
-            </tr>
         </table>
         <a href="/searchingProd.html">Buscar productos</a>
     </div>
