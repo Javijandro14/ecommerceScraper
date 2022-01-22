@@ -9,6 +9,7 @@
 # =============================================================== #
 
 */
+
 function getJson(json, item) {
   if (json == undefined || json == null) {
     var xhttp = new XMLHttpRequest();
@@ -17,75 +18,160 @@ function getJson(json, item) {
     xhttp.send();
     json = JSON.parse(xhttp.responseText);
     if (item != undefined || item != null) {
-      return json[item]
+      return json[item];
     } else {
-      return json
+      return json;
     }
   } else {
     if (item != undefined || item != null) {
-      return json[item]
+      return json[item];
     } else {
-      return json
+      return json;
     }
-  }
-}
-function getParams(item) {
-  var url_string = window.location.href
-  var url = new URL(url_string);
-  var params = url.searchParams.get(item);
-  if (params != null || params != undefined) {
-    return getJson(null, params)
-  }
-  else {
-    return getJson(null, null)
   }
 }
 
-function loadFilters(json, item) {
-  var tabla = document.getElementsByClassName("lists")[0]
+function getParams(item) {
+  var url_string = window.location.href;
+  var url = new URL(url_string);
+  var params = url.searchParams.get(item);
+  if (params != null || params != undefined) {
+    return params;
+  }
+  else {
+    return null;
+  }
+}
+
+function loadTable(json) {
+  var table = document.getElementsByClassName("quick-table")[0];
+  console.log(json);
+  var iter = 3;
+  for (var i in json) {
+    var cat = document.createElement("td");
+    cat.setAttribute("class", "categories");
+    cat.style.height = "100%";
+    if (iter == 3) {
+      var fila = document.createElement("tr");
+      iter = 0;
+      table.append(fila);
+    }
+    cat.innerHTML = '<a class="store-options" href="searchingProd.html?json=' + i + '">' + i + '</a>';
+    fila.append(cat);
+    iter += 1;
+  }
+  loadList(json);
+}
+
+function loadList(json) {
+  var list = document.getElementsByClassName("dropdown-menu")[0];
+  for (var i in json) {
+    var item = document.createElement("li");
+    item.innerHTML = '<a class="links" href="searchingProd.html?json=' + i + '"> ' + i + '</a>';
+    list.append(item);
+  }
+}
+
+function getMenu() {
+  var json = getJson(null, null);
+  loadList(json);
+  var item = getParams('json');
+  //console.log(item);
+  if (item != undefined || item != null) {
+    loadFilters(getJson(json, item));
+    loadCategoria(getJson(json[item], "categorias"));
+  } else {
+    loadFilters(getJson(json, null));
+  }
+}
+function loadFilters(json) {
+  var tabla = document.getElementsByClassName("lists")[0];
   if (typeof (tabla) != 'undefined') {
     tabla.remove();
   }
-  if (json == null || json == undefined) {
-    var jsonRes = getJson(null, item);
-  } else {
-    var jsonRes = JSON.parse(json);
-  }
+
   var filter = document.createElement("div");
   filter.setAttribute("class", "lists");
-  for (let i in jsonRes) {
-    var button = document.createElement("button");
-    send = JSON.stringify(jsonRes[i]["categorias"])
-    button.setAttribute("class", "lists store-options");
-    if (send == undefined || send == null) {
-      send = JSON.stringify(jsonRes[i])
-    }
-      button.setAttribute("onclick", "loadCategoria('" + send + "')");
+  for (var i in json) {
+    var jsonRes = getJson(json, i);
+    if (typeof (jsonRes) == 'object') {
+      var button = document.createElement("button");
+      button.setAttribute("class", "lists store-options");
+      button.setAttribute("onclick", "loadCategoria('" + JSON.stringify(jsonRes) + "')");
+      //console.log(JSON.stringify(json));
       button.innerHTML = i;
       filter.append(button);
+    }
   }
   document.getElementById("filters").append(filter);
 }
 
 function loadCategoria(json) {
+  var tabla = document.getElementsByClassName("list")[0];
+  if (typeof (tabla) != 'undefined') {
+    tabla.remove();
+  }
+  var table = document.createElement("table");
+  var iter = 3;
+  table.setAttribute("class", "list");
+  for (var i in JSON.parse(json)) {
+    if (typeof (getJson(JSON.parse(json), i)) == "string") {
+      //console.log(typeof (getJson(JSON.parse(json),i)));
+    } else if (typeof (getJson(JSON.parse(json), i)) == "object") {
+      for (var j in getJson(JSON.parse(json), i)) {
+        console.log(j);
+      }
+    }
+  }
+  document.getElementById("products").append(table);
+}
 
+
+
+/*
+function loadFilters(json) {
+  var tabla = document.getElementsByClassName("lists")[0]
+  if (typeof (tabla) != 'undefined') {
+    tabla.remove();
+  }
+  var jsonRes = json;
+
+
+  var filter = document.createElement("div");
+  filter.setAttribute("class", "lists");
+  for (var i in jsonRes) {
+    var button = document.createElement("button");
+    button.setAttribute("class", "lists store-options");
+    button.setAttribute("onclick", "loadCategoria(" + JSON.stringify(jsonRes[i]) +",'categorias')");
+    //button.onclick(loadCategoria(jsonRes[item],item));
+    //button.addEventListener("click", loadCategoria(JSON.stringify(jsonRes[i]), "categorias"));
+    button.innerHTML = i;
+    filter.append(button);
+  }
+  document.getElementById("filters").append(filter);
+}
+function loadCategoria(json, item) {
   var tabla = document.getElementsByClassName("list")[0]
   if (typeof (tabla) != 'undefined') {
     tabla.remove();
   }
-  jsonRes = JSON.parse(json);
-  console.log(jsonRes);
-
+  // if (json == null || json == undefined) {
+  //   var jsonRes = getJson(null, item);
+  // } else {
+  var jsonRes = JSON.parse(json)[item];
+  // }
+  //console.log(json);
   var table = document.createElement("table");
   iter = 3
   table.setAttribute("class", "list");
   if (typeof (jsonRes) == "string") {
     var cat = document.createElement("td");
     cat.setAttribute("class", "category-button")
-    cat.innerHTML = "<a class='links'>" + jsonRes + "</a>";
+    cat.innerHTML = "<a class='links'>" + json + "</a>";
     table.append(cat);
   } else {
-    for (let i in jsonRes) {
+    for (var i in jsonRes) {
+      console.log(i);
       var link = document.createElement("a");
       var cat = document.createElement("td");
 
@@ -96,13 +182,13 @@ function loadCategoria(json) {
       }
       cat.setAttribute("class", "category-button")
       link.setAttribute("class", "links");
-      if (typeof (jsonRes[i]) == "object") {
-        if (jsonRes[i]["codigo"] != undefined) {
+      if (typeof (json[item]) == "object") {
+        if (json[i]["codigo"] != undefined) {
           url = "descriptionProd.html?item=" + jsonRes[i]["codigo"];
           link.setAttribute("href", url)
           link.innerHTML = i
         }
-        link.setAttribute("onclick", "loadFilters('" + JSON.stringify(jsonRes) + "'); loadCategoria('" + JSON.stringify(jsonRes[i]) + "');")
+        link.setAttribute("onclick", "loadFilters(" + JSON.stringify(json) + "); loadCategoria(" + JSON.stringify(json[i]) + ")")
         link.innerHTML = i
       }
       cat.append(link)
@@ -113,44 +199,14 @@ function loadCategoria(json) {
   }
   document.getElementById("products").append(table);
 }
-
-function loadTable(json) {
-  var table = document.getElementsByClassName("quick-table")[0];
-  console.log(json)
-  iter = 3
-  for (let i in json) {
-    var cat = document.createElement("td");
-    cat.setAttribute("class", "categories");
-    cat.style.height = "100%";
-    if (iter == 3) {
-      var fila = document.createElement("tr");
-      iter = 0
-      table.append(fila);
-    }
-    cat.innerHTML = '<a class="store-options" href="searchingProd.html?json=' + i + '">' + i + '</a>'
-    fila.append(cat);
-    iter += 1;
-  }
-
-}
-
-function loadList(){
-  var list = document.getElementsByClassName("dropdown-menu")[0];
-  var json = getJson();
-  for(let i in json){
-    var item = document.createElement("li");
-    item.innerHTML= '<a class="links" href="searchingProd.html?json='+i+'"> '+i+ '</a>';
-    list.append(item);
-  }
-}
-
+*/
 /*
 function loadProduct(codigo, json) {
   var products = json;
   search = false;
   while (!search) {
     if (search == false) {
-      for (let i in products) {
+      for (var i in products) {
         if (codigo == i) {
           console.log("Product Found!");
           var codigos = products[i]["codigo"]
@@ -166,7 +222,7 @@ function loadProduct(codigo, json) {
           break;
         } else {
           if (search == false) {
-            for (let j in products[i]) {
+            for (var j in products[i]) {
               if (codigo == j) {
                 console.log("Product Found!");
                 var codigos = products[i][j]["codigo"]
@@ -183,7 +239,7 @@ function loadProduct(codigo, json) {
                 break;
               } else {
                 if (search == false) {
-                  for (let k in products[i][j]) {
+                  for (var k in products[i][j]) {
                     if (codigo == k) {
                       console.log("Product Found!");
                       var codigos = products[i][j][k]["codigo"]
@@ -199,7 +255,7 @@ function loadProduct(codigo, json) {
                       break;
                     } else {
                       if (search == false) {
-                        for (let l in products[i][j][k]) {
+                        for (var l in products[i][j][k]) {
                           if (codigo == l) {
                             console.log("Product Found!");
                             var codigos = products[i][j][k][l]["codigo"]

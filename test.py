@@ -500,6 +500,7 @@ def getCategorias(link,store,res,codigo):
         code = 0
         for r1 in res1:
             name1 = getProdInfo(r1,store,"name").replace(" ","-")
+            print(name1)
             link1 = getProdInfo(r1,store,"linkCat")
             code+=1
             level1[name1] = getCategorias(link1,store,res,codigo+"{:02d}".format(code))
@@ -690,9 +691,10 @@ def getProdInfo(soup,store,item):
                 links.append(link)
                 tempsoup = getUrl(link)
                 nextPage = tempsoup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-                if nextPage.button != None:
-                    page+=1
-                    link = soup +"?page="+str(page)
+                if nextPage != None:
+                    if nextPage.button != None:
+                        page+=1
+                        link = soup +"?page="+str(page)
                 else:
                     running = False
             return links
