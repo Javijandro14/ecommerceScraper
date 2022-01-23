@@ -6,12 +6,11 @@
 # =============================================================== #
 
 # Mi forma de resolver este problema es hacer 2 tipos de archivos JSON: uno para conseguir los links, otra para los datos de productos #
-
+from datetime import date
 from bs4 import BeautifulSoup
 import requests
 import json
 import time
-
 
 def getUrl(url):
     try:
@@ -456,12 +455,24 @@ def buscarProd(link,cat,store):
     }
     return productInfo
 
-def getCategorias(link,store):
+def checkMenu(resList, res1):
+    if resList == None or not resList:
+        return False
+    else:
+        for r in resList:
+            for r1 in res1:
+                if r == r1:
+                    return True
+        else:
+            return False
+        
+def getCategorias(link,store,res,codigo):
     level0 = {}
     soup = getUrl(link)
     res1 = getProdInfo(soup,store,"cat")
     level1 = {}
-    if not res1:#Si no tiene categorias, buscara paginacion y articulos
+    same = checkMenu(res,res1)
+    if not res1 or same==True:#Si no tiene categorias, buscara paginacion y articulos
         pag = getProdInfo(link,store,"pag")
         for p in pag: #Lista links en la categorias
             soup = getUrl(p)
@@ -469,96 +480,22 @@ def getCategorias(link,store):
             if not res1: 
                 print("no hay productos en " + p)
             else:
+                codeProd = 0
                 for r1 in res1:
                     name1 = getProdInfo(r1,store,"nameProd")
                     link1 = getProdInfo(r1,store,"linkProd")
-                    level1[name1] = link1
+                    codeProd +=1
+                    #print(codigo+"{:02d}".format(codeProd))
+                    level1[name1] = { "codigo": codigo+"{:02d}".format(codeProd),"link" : link1}
     else: # Si tiene categorias, buscara subcategorias
+        res.extend(res1)
+        code = 0
         for r1 in res1:
             name1 = getProdInfo(r1,store,"name").replace(" ","-")
+            print(name1)
             link1 = getProdInfo(r1,store,"linkCat")
-            #level1[name1]=link1
-            soup = getUrl(link1)
-            res2 = getProdInfo(soup,store,"cat")
-            level2 = {}
-            if not res2 or res2 == res1:#Si no hay SubCategorias, buscara productos
-                pag = getProdInfo(link1,store,"pag")
-                for p in pag: #Lista links en la categorias
-                    soup = getUrl(p)
-                    res2 = getProdInfo(soup,store,"prod")
-                    if not res2: 
-                        print("no hay productos en " + p)
-                    else:
-                        for r2 in res2:
-                            name2 = getProdInfo(r2,store,"nameProd")
-                            link2 = getProdInfo(r2,store,"linkProd")
-                            level2[name2] = link2
-            else: #Si hay SubCategorias, buscara subcategorias dentro de si mismos
-                for r2 in res2:
-                    name2 = getProdInfo(r2,store,"name").replace(" ","-")
-                    link2 = getProdInfo(r2,store,"linkCat")
-                    soup = getUrl(link2)
-                    res3 = getProdInfo(soup,store,"cat")
-                    level3 = {}
-                    if not res3 or res3 == res1 or res3 == res2: #Si no hay Sub-SubCategorias, buscara productos
-                        pag = getProdInfo(link2,store,"pag")
-                        for p in pag: #Lista links en la categorias
-                            soup = getUrl(p)
-                            res3 = getProdInfo(soup,store,"prod")
-                            if not res3:
-                                print("No hay productos en: " + p)
-                            else:
-                                for r3 in res3:
-                                    name3 = getProdInfo(r3,store,"nameProd")
-                                    link3 = getProdInfo(r3,store,"linkProd")
-                                    level3[name3] = link3
-                    else: #Si hay Sub-SubCategorias, se buscara dentro de si mismo mas SubCategorias
-                        level3 = {}
-                        for r3 in res3:
-                            name3 = getProdInfo(r3,store,"name").replace(" ","-")
-                            link3 = getProdInfo(r3,store,"linkCat")
-                            soup = getUrl(link3)
-                            res4 = getProdInfo(soup,store,"cat")
-                            level4 = {}
-                            if not res4 or res4 == res1 or res4 == res2 or res4==res3:
-                                pag = getProdInfo(link3,store,"pag")
-                                for p in pag: #Lista links en la categorias
-                                    soup = getUrl(p)    
-                                    res4 = getProdInfo(soup,store,"prod")
-                                    if not res4:
-                                        print("No hay productos en: " + p)
-                                    else:
-                                        for r4 in res4:
-                                            name4 = getProdInfo(r4,store,"nameProd")
-                                            link4 = getProdInfo(r4,store,"linkProd")
-                                            level4[name4] = link4
-                            else:
-                                for r4 in res4:
-                                    name4 = getProdInfo(r4,store,"name").replace(" ","-")
-                                    link4 = getProdInfo(r4,store,"linkCat")
-                                    soup = getUrl(link4)
-                                    #Ultimo nivel, si hay mas subcategorias, se deberia implementar mas codigo para que se busque lo que necesitamos
-                                    res5 = getProdInfo(soup,store,"cat")
-                                    level5 = {}
-                                    if not res5 or res5 == res4 or res5 == res3 or res5 == res2 or res5 == res1:
-                                        pag = getProdInfo(link4,store,"pag")
-                                        for p in pag: #Lista links en la categorias
-                                            soup = getUrl(p)
-                                            res5 = getProdInfo(soup,store,"prod")
-                                            if not res5:
-                                                print("No hay productos en: " + p)
-                                            else:
-                                                for r5 in res5:
-                                                    name5 = getProdInfo(r5,store,"nameProd")
-                                                    link5 = getProdInfo(r5,store,"linkProd")
-                                                    level5[name5] = link5
-                                    else:
-                                        print("No se puede ir mas a fondo")
-                                        break
-                                    level4[name4] = level5
-                            level3[name3] = level4
-                    level2[name2] = level3
-            level1[name1] = level2
+            code+=1
+            level1[name1] = getCategorias(link1,store,res,codigo+"{:02d}".format(code))
     level0 = level1  
     return level0
 
@@ -619,10 +556,25 @@ def getProdInfo(soup,store,item):
     elif "Intelaf" == store:
         if item == "cat":
             cat = findItems(soup,'a','class','hover_effect')
-            return cat
+            if not cat:
+                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
+                res = getUrl(url)
+                data = json.loads(res.text)
+                menu = data['menu_sub_1s']
+                categorias = []
+                for info in menu:
+                    area = info['Area']
+                    url = info['url']
+                    tag = BeautifulSoup('<a href="'+ url +'">'+area.replace(" ","-")+ '</a>','html.parser')
+                    categorias.append(tag)
+                #print(categorias)
+                return categorias
+            else:
+                return cat
         elif item == "prod":
             return findItems(soup,'div','class','zoom_info')
         elif item == "name":
+            #print(soup)
             name = (findItem(soup,'div','class','image-area'))
             if name == None:
                 name = soup.text
@@ -630,7 +582,10 @@ def getProdInfo(soup,store,item):
             else:
                 return name.get('title')
         elif item == "linkCat":
-            link = base+ "/" + soup.get('href')
+            if soup.get('href') == None:
+                link = base+ "/" + soup.a['href']
+            else:
+                link = base+ "/" + soup.get('href')
             return link
         elif item == "nameProd":
             return (findItem(soup,'button','class','btn_cotiza')).get('name')
@@ -654,7 +609,6 @@ def getProdInfo(soup,store,item):
             products = findItems(container,'a','class','product-item-link')
             return products
         elif item == "name":
-            print(soup.text.strip())
             return soup.text.strip()
         elif item == "linkCat":
             return soup.get('href')
@@ -729,9 +683,10 @@ def getProdInfo(soup,store,item):
                 links.append(link)
                 tempsoup = getUrl(link)
                 nextPage = tempsoup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-                if nextPage.button != None:
-                    page+=1
-                    link = soup +"?page="+str(page)
+                if nextPage != None:
+                    if nextPage.button != None:
+                        page+=1
+                        link = soup +"?page="+str(page)
                 else:
                     running = False
             return links
@@ -832,7 +787,7 @@ def getProdInfo(soup,store,item):
                 links = [base + i.get('href') for i in paginas[:-2]]
                 links.insert(0,soup)
             return links
-    elif "Macro" == store:
+    elif "MacroSistemas" == store:
         if item == "cat":
             subcategorias = findItem(soup,'ul','class',['nav','menu-left','mod-list'])
             if subcategorias != None:
@@ -907,299 +862,60 @@ def getProdInfo(soup,store,item):
             else:
                 return [soup]  
 
-def elegirCat(jsonData):
-    level = {}
-    cat = []
-    iter = 1
-    for j in jsonData:
-        if isinstance(jsonData[j],dict) and bool(jsonData[j]) != False:
-            cat.append(j)
-            print(str(iter) +". "+ j)
-            iter+=1
-        else:
-            level[j] = jsonData[j]
-            break
-    if cat:
-        ingreso = input("(Separe sus opciones por medio de espacios y luego ingrese enter) \n")
-        opcion = {""}
-        opcion.update(ingreso.split(" "))
-        opcion.remove("")
-        for op in opcion:
-            if int(op) <= len(cat):
-                level[cat[int(op)-1]] = elegirCat(jsonData[cat[int(op)-1]])
-            else:
-                print("'"+op+"' esta fuera de rango, por lo tanto no se tomara en cuenta")
-    return level
-          
-# Estados Unidos(Expandir para mas info)
-    # 1 Amazon(Expandir para mas info)
-        # amazon = "https://www.amazon.com/"
-        # send = requests.get(amazon)
-        # soup = BeautifulSoup(send.text,'html.parser')
-        # links = soup.find_all('')
-        # for i in links:
-        #     link = i
-        #     print(link)
-    # 2 Ebay(Expandir para mas info)
-    # 3 Best Buy(Expandir para mas info)
-    # 4 NewEgg(Expandir para mas info)
-    # 5 Gearbest(Expandir para mas info)
+def checkJsonFile():
+    try:
+        file = open("C:/Users/javie/Desktop/ecommercescraper/testing.json","r")
+        jsonData = json.load(file)
+    except:
+        print("No hubo archivo, se creara uno nuevo")
+        products = {
+            "Kemik": {"link": "https://www.kemik.gt", "categorias":{}},
+            "Intelaf": {"link":"https://www.intelaf.com", "categorias":{}},
+            "Click": {"link":"https://click.gt", "categorias":{}},
+            "Funky": {"link": "https://storefunky.com", "categorias":{}},
+            "Max": {"link":"https://www.max.com.gt", "categorias":{}},
+            "Goat": {"link":"https://goatshopgt.com", "categorias":{}},
+            "Elektra": {"link":"https://www.elektra.com.gt", "categorias":{}},
+            "Spirit": {"link":"https://spiritcomputacion.com","categorias":{}},
+            "MacroSistemas": {"link":"https://www.macrosistemas.com","categorias":{}},
+            "TecnoFacil": {"link":"https://www.tecnofacil.com.gt","categorias":{}},
+            "Pacifiko": {"link":"https://www.pacifiko.com","categorias":{}},
+            "Zukko": {"link":"https://zukko.store","categorias":{}},
+            "Guateclic": {"link":"https://www.guateclic.com","categorias":{}},
+            "Imeqmo": {"link":"https://www.imeqmo.com","categorias":{}},
+            "Office Depot": {"link":"https://www.officedepot.com.gt","categorias":{}}
+        }
+        return products
+    else:
+        file.close()
+        return jsonData
 
-# China(Expandir para mas info)
+def newJsonCatFile(jsonData):
+    file = open("C:/Users/javie/Desktop/ecommercescraper/testing.json", 'w')
+    json.dump(jsonData, file)
+    file.close()
 
-# Guatemala(Expandir para mas info)
-opcion1 = 0
-while opcion1 != 3:
-    opcion1 = int(input("Ingrese el servicio que desee hacer: \n1.Actualizar lista de categorias y productos \n2.Actualizar informacion de productos \n3.Salir \n"))
-    if opcion1 == 1: #Actualizar lista de categorias y productos
-        opcion2 = 0
-        while opcion2 != 9:
-            categorias = {}
-            opcion2 = int(input("Ingrese una opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
-            #Intelaf
-            if opcion2 == 1:
-                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
-                base = "https://www.intelaf.com"
-                res = getUrl(url)
-                data = json.loads(res.text)
-                menu = data['menu_sub_1s']
-                categorias = {}
-                for info in menu:
-                    area = info['Area']
-                    url = info['url']
-                    categorias[area.replace(" ","-")]= getCategorias(base + url, "Intelaf")
-                #Si quiero ver solo una categoria, solo poner comentario la de arriba y quitar comentarios abajo
-                #     categorias[area.replace(" ","-")] = base + url
-                # categorias['Audio'] = getCategorias(categorias['Audio'],"Intelaf")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Click
-            elif opcion2 == 2:
-                categorias = {}
-                base = "https://www.click.gt"
-                categorias = getCategorias(base,"Click")
-                print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/click.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Funky
-            elif opcion2 == 3:
-                categorias = {}
-                base = "https://storefunky.com"
-                categorias = getCategorias(base,"Funky")
-                #print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Max
-            elif opcion2 == 4:
-                base = "https://www.max.com.gt/"
-                categorias = getCategorias(base,"Max")
-                print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/max.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Goat No esta terminado
-            elif opcion2 == 5:
-                categorias = {}
-                base = "https://goatshopgt.com/"
-                categorias = getCategorias(base,"Goat")
-                print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/Goat.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Elektra
-            elif opcion2 == 6:
-                base = "https://www.elektra.com.gt"
-                categorias = getCategorias(base, "Elektra")
-                print(categorias)
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektra.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Spirit
-            elif opcion2 == 7:
-                base = "https://spiritcomputacion.com"
-                categorias = getCategorias(base, "Spirit")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spirit.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Macro
-            elif opcion2 == 8:
-                categorias = {}
-                base = "https://www.macrosistemas.com"
-                categorias = getCategorias(base,"Macro")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/macrosistemas/macro.json",'w') as file:
-                    json.dump(categorias,file)
-                file.close()
-            #Salir
-            elif opcion2 == 9:
-                pass
-    elif opcion1 == 2:
-        opcion2 = 0
-        while opcion2 != 9:
-            opcion2 = int(input("Ingrese una opcion que desee ver: \n1.Intelaf \n2.Click \n3.Funky \n4.Max \n5.Goat \n6.Elektra \n7.Spirit \n8.MacroSistemas \n9.Salir \n"))
-            #Intelaf
-            if opcion2 == 1:
-                file1 = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/Intelaf.json",)
-                jsonData = json.load(file1)
-                products = data(jsonData,"Intelaf")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/intelaf/IntelafProducts.json",'w') as file2:
-                    json.dump(products,file2)
-                file2.close()
-            #Click
-            elif opcion2 == 2:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/Click.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Click")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/click/ClickProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Funky
-            elif opcion2 == 3:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/Funky.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Funky")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/funky/funkyProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Max
-            elif opcion2 == 4:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/Max.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Max")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/max/maxProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Goat No esta terminado
-            elif opcion2 == 5:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/Goatshop.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Goat")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/goatshop/goatshopProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Elektra
-            elif opcion2 == 6:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/Elektra.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Elektra")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/elektra/elektraProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Spirit
-            elif opcion2 == 7:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/Spirit.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Spirit")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Macro
-            elif opcion2 == 8:
-                file = open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/Spirit.json",)
-                jsonData = json.load(file)
-                products = data(jsonData,"Spirit")
-                with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/spiritcomputacion/spiritProducts.json",'w') as file:
-                    json.dump(products,file)
-                file.close()
-            #Salir
-            elif opcion2 == 9:
-                pass
-    elif opcion1 == 3:
-        print("Adios")
-
-# Kemik
-base = "https://www.kemik.gt"
-categorias = getCategorias(base,"Kemik")
-print(categorias)
-with open("C:/Users/javie/Desktop/ecommerceScraper/EcommerceData/Guatemala/kemik/Kemik.json",'w') as file:
-    json.dump(categorias,file)
-file.close()
-
-
-            
-
-            
-        
-    #Tecnofacil(Expandir para mas info)
-    #No terminado
-
-
-
-    # Pacifiko(Expandir para mas info)
-        # def getUrl(url):
-        #     try:
-        #         request = requests.Session()
-        #         send = request.get(url)
-        #     except:
-        #         print("Revise el url, no se proceso correctamente")
-        #         print("Url Fallido:" + url)
-        #     else:
-        #         soup = BeautifulSoup(send.text, 'html.parser')
-        #         return soup
-
-        # base = "https://www.pacifiko.com/"
-
-        # test = "https://www.pacifiko.com/compras-en-linea/bateria-de-reemplazo-para-samsung-s6-edge-steren&pid=MGFkZjNhOT"
-
-        # soup = getUrl(test)
-
-        # codigo = soup.find('span',{'class':'propery-des'})
-        # print(codigo.text)
-
-        # title = soup.find('h1')
-        # print(title.text)
-
-        # precioO = soup.find('span',{'id':'price-old'})
-        # print((precioO.text).strip())
-
-        # oferta = soup.find('span',{'id':'price-special'})
-        # if oferta == None:
-        #     oferta = "N/A"
-        #     print(oferta)
-        # else:
-        #     print((oferta.text).strip())
-    #No terminado
-
-   
-
-
-    #Terminado
-
-    #Zukko
-        #base = "https://zukko.store/"
-        #soup = getUrl("https://app.ecwid.com/categories.js?ownerid=50367225&lang=es_419&jsonp=menu.fill")
-    #No terminado
-
-    
-
-    #Guateclic
-
-
-
-
-
-
-# base = "https://www.guateclic.com"
-# soup = getUrl(base)
-# menu = findItems(soup,'div','class','col-sm-3')
-# categorias = findItems(menu[1],'a','class','whitetext')
-# level0 = {}
-# for cat in categorias:
-#     name0 = cat.text
-#     link0 = base + cat.get('href')
-#     level0[name0] = link0
-# print(level0)  
-    #No terminado
-
-    #Imeqmo
-#https://www.imeqmo.com/
-    #No terminado
-
-    #Office Depot
-#https://www.officedepot.com.gt/
-    #No terminado
+products = checkJsonFile()
+today = date.today()
+tienda = [i.strip() for i in products.keys()]
+opcion = 0
+print("Elige una opcion:")
+for i in range(0,len(tienda)):
+    print(str(i+1),tienda[i])
+ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
+opciones = ingreso.split(" ")
+for opcion in opciones:
+    if int(opcion) < 16:
+        base = products[tienda[int(opcion)-1]]["link"]
+        store = tienda[int(opcion)-1]
+        print(tienda[int(opcion)-1])
+        products[tienda[int(opcion)-1]]["categorias"] = getCategorias(base,store,[],"{:02d}".format(int(opcion)))
+        products[tienda[int(opcion)-1]]["fechaAct"]= today.strftime("%d-%b-%Y")
+        newJsonCatFile(products)
+    else:
+        print(opcion + " no es una opcion valida, se ira a la siguiente")
+else:
+    print("Adios")
 
         # Existencias del Producto
             # Falta terminar esta parte

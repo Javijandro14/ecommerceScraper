@@ -4,21 +4,6 @@ import requests
 import json
 import time
 
-# Kemik
-# Intelaf
-# Click
-# Funky
-# Max
-# Goat
-# Elektra
-# Spirit
-# MacroSistemas
-# TecnoFacil
-# Pacifiko
-# Zukko
-# Guateclic
-# Imeqmo
-# Office Depot
 
 def getUrl(url):
     try:
@@ -463,24 +448,12 @@ def buscarProd(link,cat,store):
     }
     return productInfo
 
-def checkMenu(resList, res1):
-    if resList == None or not resList:
-        return False
-    else:
-        for r in resList:
-            for r1 in res1:
-                if r == r1:
-                    return True
-        else:
-            return False
-        
-def getCategorias(link,store,res,codigo):
+def getCategorias(link,store):
     level0 = {}
     soup = getUrl(link)
     res1 = getProdInfo(soup,store,"cat")
     level1 = {}
-    same = checkMenu(res,res1)
-    if not res1 or same==True:#Si no tiene categorias, buscara paginacion y articulos
+    if not res1:#Si no tiene categorias, buscara paginacion y articulos
         pag = getProdInfo(link,store,"pag")
         for p in pag: #Lista links en la categorias
             soup = getUrl(p)
@@ -488,22 +461,96 @@ def getCategorias(link,store,res,codigo):
             if not res1: 
                 print("no hay productos en " + p)
             else:
-                codeProd = 0
                 for r1 in res1:
                     name1 = getProdInfo(r1,store,"nameProd")
                     link1 = getProdInfo(r1,store,"linkProd")
-                    codeProd +=1
-                    #print(codigo+"{:02d}".format(codeProd))
-                    level1[name1] = { "codigo": codigo+"{:02d}".format(codeProd),"link" : link1}
+                    level1[name1] = link1
     else: # Si tiene categorias, buscara subcategorias
-        res.extend(res1)
-        code = 0
         for r1 in res1:
             name1 = getProdInfo(r1,store,"name").replace(" ","-")
-            print(name1)
             link1 = getProdInfo(r1,store,"linkCat")
-            code+=1
-            level1[name1] = getCategorias(link1,store,res,codigo+"{:02d}".format(code))
+            #level1[name1]=link1
+            soup = getUrl(link1)
+            res2 = getProdInfo(soup,store,"cat")
+            level2 = {}
+            if not res2 or res2 == res1:#Si no hay SubCategorias, buscara productos
+                pag = getProdInfo(link1,store,"pag")
+                for p in pag: #Lista links en la categorias
+                    soup = getUrl(p)
+                    res2 = getProdInfo(soup,store,"prod")
+                    if not res2: 
+                        print("no hay productos en " + p)
+                    else:
+                        for r2 in res2:
+                            name2 = getProdInfo(r2,store,"nameProd")
+                            link2 = getProdInfo(r2,store,"linkProd")
+                            level2[name2] = link2
+            else: #Si hay SubCategorias, buscara subcategorias dentro de si mismos
+                for r2 in res2:
+                    name2 = getProdInfo(r2,store,"name").replace(" ","-")
+                    link2 = getProdInfo(r2,store,"linkCat")
+                    soup = getUrl(link2)
+                    res3 = getProdInfo(soup,store,"cat")
+                    level3 = {}
+                    if not res3 or res3 == res1 or res3 == res2: #Si no hay Sub-SubCategorias, buscara productos
+                        pag = getProdInfo(link2,store,"pag")
+                        for p in pag: #Lista links en la categorias
+                            soup = getUrl(p)
+                            res3 = getProdInfo(soup,store,"prod")
+                            if not res3:
+                                print("No hay productos en: " + p)
+                            else:
+                                for r3 in res3:
+                                    name3 = getProdInfo(r3,store,"nameProd")
+                                    link3 = getProdInfo(r3,store,"linkProd")
+                                    level3[name3] = link3
+                    else: #Si hay Sub-SubCategorias, se buscara dentro de si mismo mas SubCategorias
+                        level3 = {}
+                        for r3 in res3:
+                            name3 = getProdInfo(r3,store,"name").replace(" ","-")
+                            link3 = getProdInfo(r3,store,"linkCat")
+                            soup = getUrl(link3)
+                            res4 = getProdInfo(soup,store,"cat")
+                            level4 = {}
+                            if not res4 or res4 == res1 or res4 == res2 or res4==res3:
+                                pag = getProdInfo(link3,store,"pag")
+                                for p in pag: #Lista links en la categorias
+                                    soup = getUrl(p)    
+                                    res4 = getProdInfo(soup,store,"prod")
+                                    if not res4:
+                                        print("No hay productos en: " + p)
+                                    else:
+                                        for r4 in res4:
+                                            name4 = getProdInfo(r4,store,"nameProd")
+                                            link4 = getProdInfo(r4,store,"linkProd")
+                                            level4[name4] = link4
+                            else:
+                                for r4 in res4:
+                                    name4 = getProdInfo(r4,store,"name").replace(" ","-")
+                                    link4 = getProdInfo(r4,store,"linkCat")
+                                    soup = getUrl(link4)
+                                    #Ultimo nivel, si hay mas subcategorias, se deberia implementar mas codigo para que se busque lo que necesitamos
+                                    res5 = getProdInfo(soup,store,"cat")
+                                    level5 = {}
+                                    if not res5 or res5 == res4 or res5 == res3 or res5 == res2 or res5 == res1:
+                                        pag = getProdInfo(link4,store,"pag")
+                                        for p in pag: #Lista links en la categorias
+                                            soup = getUrl(p)
+                                            res5 = getProdInfo(soup,store,"prod")
+                                            if not res5:
+                                                print("No hay productos en: " + p)
+                                            else:
+                                                for r5 in res5:
+                                                    name5 = getProdInfo(r5,store,"nameProd")
+                                                    link5 = getProdInfo(r5,store,"linkProd")
+                                                    level5[name5] = link5
+                                    else:
+                                        print("No se puede ir mas a fondo")
+                                        break
+                                    level4[name4] = level5
+                            level3[name3] = level4
+                    level2[name2] = level3
+            level1[name1] = level2
     level0 = level1  
     return level0
 
@@ -564,25 +611,10 @@ def getProdInfo(soup,store,item):
     elif "Intelaf" == store:
         if item == "cat":
             cat = findItems(soup,'a','class','hover_effect')
-            if not cat:
-                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
-                res = getUrl(url)
-                data = json.loads(res.text)
-                menu = data['menu_sub_1s']
-                categorias = []
-                for info in menu:
-                    area = info['Area']
-                    url = info['url']
-                    tag = BeautifulSoup('<a href="'+ url +'">'+area.replace(" ","-")+ '</a>','html.parser')
-                    categorias.append(tag)
-                #print(categorias)
-                return categorias
-            else:
-                return cat
+            return cat
         elif item == "prod":
             return findItems(soup,'div','class','zoom_info')
         elif item == "name":
-            #print(soup)
             name = (findItem(soup,'div','class','image-area'))
             if name == None:
                 name = soup.text
@@ -590,10 +622,7 @@ def getProdInfo(soup,store,item):
             else:
                 return name.get('title')
         elif item == "linkCat":
-            if soup.get('href') == None:
-                link = base+ "/" + soup.a['href']
-            else:
-                link = base+ "/" + soup.get('href')
+            link = base+ "/" + soup.get('href')
             return link
         elif item == "nameProd":
             return (findItem(soup,'button','class','btn_cotiza')).get('name')
@@ -617,6 +646,7 @@ def getProdInfo(soup,store,item):
             products = findItems(container,'a','class','product-item-link')
             return products
         elif item == "name":
+            print(soup.text.strip())
             return soup.text.strip()
         elif item == "linkCat":
             return soup.get('href')
@@ -691,10 +721,9 @@ def getProdInfo(soup,store,item):
                 links.append(link)
                 tempsoup = getUrl(link)
                 nextPage = tempsoup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-                if nextPage != None:
-                    if nextPage.button != None:
-                        page+=1
-                        link = soup +"?page="+str(page)
+                if nextPage.button != None:
+                    page+=1
+                    link = soup +"?page="+str(page)
                 else:
                     running = False
             return links
@@ -795,7 +824,7 @@ def getProdInfo(soup,store,item):
                 links = [base + i.get('href') for i in paginas[:-2]]
                 links.insert(0,soup)
             return links
-    elif "MacroSistemas" == store:
+    elif "Macro" == store:
         if item == "cat":
             subcategorias = findItem(soup,'ul','class',['nav','menu-left','mod-list'])
             if subcategorias != None:
@@ -870,67 +899,45 @@ def getProdInfo(soup,store,item):
             else:
                 return [soup]  
 
-def checkJsonFile():
-    try:
-        file = open("C:/Users/javie/Desktop/ecommercescraper/testing.json","r")
-        jsonData = json.load(file)
-    except:
-        print("No hubo archivo, se creara uno nuevo")
-        products = {
-            "Kemik": {"link": "https://www.kemik.gt", "categorias":{}},
-            "Intelaf": {"link":"https://www.intelaf.com", "categorias":{}},
-            "Click": {"link":"https://click.gt", "categorias":{}},
-            "Funky": {"link": "https://storefunky.com", "categorias":{}},
-            "Max": {"link":"https://www.max.com.gt", "categorias":{}},
-            "Goat": {"link":"https://goatshopgt.com", "categorias":{}},
-            "Elektra": {"link":"https://www.elektra.com.gt", "categorias":{}},
-            "Spirit": {"link":"https://spiritcomputacion.com","categorias":{}},
-            "MacroSistemas": {"link":"https://www.macrosistemas.com","categorias":{}},
-            "TecnoFacil": {"link":"https://www.tecnofacil.com.gt","categorias":{}},
-            "Pacifiko": {"link":"https://www.pacifiko.com","categorias":{}},
-            "Zukko": {"link":"https://zukko.store","categorias":{}},
-            "Guateclic": {"link":"https://www.guateclic.com","categorias":{}},
-            "Imeqmo": {"link":"https://www.imeqmo.com","categorias":{}},
-            "Office Depot": {"link":"https://www.officedepot.com.gt","categorias":{}}
-        }
-        return products
-    else:
-        file.close()
-        return jsonData
+def elegirCat(jsonData):
+    level = {}
+    cat = []
+    iter = 1
+    for j in jsonData:
+        if isinstance(jsonData[j],dict) and bool(jsonData[j]) != False:
+            cat.append(j)
+            print(str(iter) +". "+ j)
+            iter+=1
+        else:
+            level[j] = jsonData[j]
+            break
+    if cat:
+        ingreso = input("(Separe sus opciones por medio de espacios y luego ingrese enter) \n")
+        opcion = {""}
+        opcion.update(ingreso.split(" "))
+        opcion.remove("")
+        for op in opcion:
+            if int(op) <= len(cat):
+                level[cat[int(op)-1]] = elegirCat(jsonData[cat[int(op)-1]])
+            else:
+                print("'"+op+"' esta fuera de rango, por lo tanto no se tomara en cuenta")
+    return level
+         
+# Kemik
+# Intelaf
+# Click
+# Funky
+# Max
+# Goat
+# Elektra
+# Spirit
+# MacroSistemas
+# TecnoFacil
+# Pacifiko
+# Zukko
+# Guateclic
+# Imeqmo
+# Office Depot
 
-def newJsonCatFile(jsonData):
-    file = open("C:/Users/javie/Desktop/ecommercescraper/testing.json", 'w')
-    json.dump(jsonData, file)
-    file.close()
-
-products = checkJsonFile()
-today = date.today()
-tienda = [i.strip() for i in products.keys()]
-opcion = 0
-print("Elige una opcion:")
-for i in range(0,len(tienda)):
-    print(str(i+1),tienda[i])
-ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
-opciones = ingreso.split(" ")
-for opcion in opciones:
-    if int(opcion) < 16:
-        base = products[tienda[int(opcion)-1]]["link"]
-        store = tienda[int(opcion)-1]
-        print(tienda[int(opcion)-1])
-        products[tienda[int(opcion)-1]]["categorias"] = getCategorias(base,store,[],"{:02d}".format(int(opcion)))
-        products[tienda[int(opcion)-1]]["fechaAct"]= today.strftime("%d-%b-%Y")
-        newJsonCatFile(products)
-    else:
-        print(opcion + " no es una opcion valida, se ira a la siguiente")
-else:
-    print("Adios")
-
-
-
-
-
-#file = open("C:/Users/javie/Desktop/testing.json", 'w')
-#jsonData = json.load(file)
-#print(jsonData)
 
 

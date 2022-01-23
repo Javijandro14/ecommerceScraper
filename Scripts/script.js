@@ -94,15 +94,28 @@ function loadFilters(json) {
   filter.setAttribute("class", "lists");
   for (var i in json) {
     var jsonRes = getJson(json, i);
-    if (typeof (jsonRes) == 'object') {
-      var button = document.createElement("button");
-      button.setAttribute("class", "lists store-options");
-      button.setAttribute("onclick", "loadCategoria('" + JSON.stringify(jsonRes) + "')");
-      //console.log(JSON.stringify(json));
-      button.innerHTML = i;
-      filter.append(button);
+    var button = document.createElement("button");
+    button.setAttribute("class", "lists store-options");
+    for (var j in jsonRes) {
+      if (typeof (jsonRes[j]) == 'object') {
+        if (j == 'categorias') {
+          /*console.groupCollapsed(i); 
+          console.log(jsonRes[j]);*/
+          button.setAttribute("onclick", "loadCategoria(" + JSON.stringify(jsonRes[j]) + ")");
+          //console.groupEnd();
+        }
+        else {
+          // console.groupCollapsed(i); 
+          // console.log(jsonRes);
+          button.setAttribute("onclick", "loadCategoria(" + JSON.stringify(jsonRes) + ")");
+          // console.groupEnd();
+        }
+      }
     }
+    button.innerHTML = i;
+    filter.append(button);
   }
+
   document.getElementById("filters").append(filter);
 }
 
@@ -114,14 +127,42 @@ function loadCategoria(json) {
   var table = document.createElement("table");
   var iter = 3;
   table.setAttribute("class", "list");
-  for (var i in JSON.parse(json)) {
-    if (typeof (getJson(JSON.parse(json), i)) == "string") {
-      //console.log(typeof (getJson(JSON.parse(json),i)));
-    } else if (typeof (getJson(JSON.parse(json), i)) == "object") {
-      for (var j in getJson(JSON.parse(json), i)) {
-        console.log(j);
+  for (var i in json) {
+    if (typeof (getJson(json, i)) == "string") {
+      var cat = document.createElement("td");
+      cat.setAttribute("class", "category-button")
+      cat.innerHTML = "<a class='links'>" + (getJson(json, i)) + "</a>";
+      table.append(cat);
+    } else if (typeof (getJson(json, i)) == "object") {
+
+      var link = document.createElement("a");
+      var cat = document.createElement("td");
+
+      if (iter == 3) {
+        var fila = document.createElement("tr");
+        iter = 0
+        table.append(fila);
       }
+      cat.setAttribute("class", "category-button")
+      link.setAttribute("class", "links");
+      //console.groupCollapsed(i);
+      if (typeof (json) == "object") {
+        //console.log(json[i]["codigo"]);
+        if (json[i]["codigo"] != undefined) {
+          url = "descriptionProd.html?item=" + json[i]["codigo"];
+          link.setAttribute("href", url)
+        }
+        else {
+          link.setAttribute("onclick", "loadFilters(" + JSON.stringify(json) + "); loadCategoria(" + JSON.stringify(json[i]) + ")");
+
+        }
+        link.innerHTML = i;
+      }
+      cat.append(link)
+      fila.append(cat)
+      iter += 1;
     }
+    //console.groupEnd();
   }
   document.getElementById("products").append(table);
 }
