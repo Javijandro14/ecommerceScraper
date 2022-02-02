@@ -189,30 +189,13 @@ def buscarProd(link,cat,store):
     elif store == "Elektra":
         soup = getUrl(link)
         #------Codigo del Producto-------#
-        codigos = (soup.find('div',{'class':'ektguatemala-ektgt-components-0-x-pdpSku'}))
-        if codigos == None:
-            raise Exception
-        else:            
-            codigo = (codigos.text.strip()[4:])
+        codigo = findItem(soup,'div','class','ektguatemala-ektgt-components-0-x-pdpSku').text.replace("SKU: ","")
         #------Nombre del Producto-------#
-        title = (soup.find('h1',{'class':'vtex-store-components-3-x-productNameContainer'}))
-        if title == None:
-            del codigo[-1]
-            raise Exception
-        else:
-            nombre = (title.text.strip())
-        divPrecio = findItems(soup,'div','class','vtex-flex-layout-0-x-flexRow--pdpTotal')
-        precios = findItems(divPrecio[0],'span',None,None)
+        nombre = findItem(soup,'h1','class','vtex-store-components-3-x-productNameContainer').text
         #------Precio Viejo-------#
-        precioO = precios[0].span.span.text
-        precio = (precioO)
+        precio = findItem(soup,'span','class','vtex-store-components-3-x-currencyContainer').span.text.replace("Q ","")
         #------Precio de Ofertas-------#
-        precioOferta = precios[1].span.span
-        if precioOferta == None:
-            precioOferta = "N/A"
-            oferta = (precioOferta)
-        else:
-            oferta = (precioOferta)
+        oferta = findItem(soup,'span','class','vtex-store-components-3-x-sellingPrice').span.span.text.replace("Q ","")
         #------Detalles de Productos-------#
         des = findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText')
         if des == None:

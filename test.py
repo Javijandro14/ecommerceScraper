@@ -669,84 +669,189 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantia = "De acuerdo a la tienda, nos muestra que debe reportar alguna falla o daño del articulo en los 24 desde que se recibio el paquete"
     
-    #Not Done
-
     elif store == "Elektra":
         soup = getUrl(link)
         #------Codigo del Producto-------#
-        codigos = (soup.find('div',{'class':'ektguatemala-ektgt-components-0-x-pdpSku'}))
-        if codigos == None:
-            raise Exception
-        else:            
-            codigo = (codigos.text.strip()[4:])
+        try:
+            codigo = findItem(soup,'div','class','ektguatemala-ektgt-components-0-x-pdpSku').text.replace("SKU: ","")
+        except:
+            codigo = "N/A"
         #------Nombre del Producto-------#
-        title = (soup.find('h1',{'class':'vtex-store-components-3-x-productNameContainer'}))
-        if title == None:
-            del codigo[-1]
-            raise Exception
-        else:
-            nombre = (title.text.strip())
-        divPrecio = findItems(soup,'div','class','vtex-flex-layout-0-x-flexRow--pdpTotal')
-        precios = findItems(divPrecio[0],'span',None,None)
+        try:
+            nombre = findItem(soup,'h1','class','vtex-store-components-3-x-productNameContainer').text
+        except:
+            nombre = "N/A"
         #------Precio Viejo-------#
-        precioO = precios[0].span.span.text
-        precio = (precioO)
+        try:
+            precio = findItem(soup,'span','class','vtex-store-components-3-x-currencyContainer').span.text.replace("Q ","")
+        except:
+            precio = "N/A"
         #------Precio de Ofertas-------#
-        precioOferta = precios[1].span.span
-        if precioOferta == None:
-            precioOferta = "N/A"
-            oferta = (precioOferta)
-        else:
-            oferta = (precioOferta)
+        try:
+            oferta = findItem(soup,'span','class','vtex-store-components-3-x-sellingPrice').span.span.text.replace("Q ","")
+        except:
+            oferta = "N/A"
         #------Detalles de Productos-------#
-        des = findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText')
-        if des == None:
-            descripcion = "N/A"
-            detalles = (descripcion)
-        else:
-            detalles = (des.text)
+        try:
+            detalles = []
+            detalles.append(findItem(soup,'div','class','vtex-store-components-3-x-productDescriptionText').text)
+        except:
+            pass
         #------Categorias-------#
         categoria = (cat)
         #---------Garantias---------#
-        garantiaP = "12 meses"
-        garantia = (garantiaP)
+        garantia = "De acuerdo a la tienda, todos los productos tienen 12 meses de garantia"
+    
     elif store == "MacroSistemas":
         soup = getUrl(link)
         #------Codigo del Producto-------#
-        codigos = (soup.find('div',{'class':'sku'}))
-        if codigos == None:
-            raise Exception
-        else:            
-            codigo = codigos.text.strip()[8:]
+        try:
+            codigo = findItem(soup,'div','class','sku').text.strip()[8:]
+        except:
+            codigo = "N/A"
         #------Nombre del Producto-------#
-        title = (soup.find('h1',{'class':'title-product'}))
-        if title == None:
-            raise Exception
-        else:
-            nombre = title.text.strip()
+        try:
+            nombre = findItem(soup,'h1','class','title-product').text.strip()
+        except:
+            nombre = "N/A"
         #------Precio Viejo-------#
-        precioO = (soup.find('span',{'class':'PricesalesPrice'})).text.strip()
-        precio = precioO
+        try:
+            precio = findItem(soup,'span','class','PricesalesPrice').text.replace("Q ","")
+        except:
+            precio = "N/A"
         #------Precio de Ofertas-------#
-        precioOferta = soup.find('div',{'class':'cash'})
-        if precioOferta == None:
-            precioOferta = "N/A"
-            oferta = precioOferta
-        else:
-            oferta = precioOferta.text.strip()[13:]
+        try:
+            oferta = findItem(soup,'div','class','cash').text[15:]
+        except:
+            oferta = "N/A"
         #------Detalles de Productos-------#
-        des = soup.find('div',{'class':'product-description'})
-        if des == None:
-            descripcion = "N/A"
-            detalles = descripcion
-        else:
-            descripcion = des.find_all('tr')
-            detalles = [(i.text.strip()) for i in descripcion]
+        try:
+            desTable = findItem(soup,'div','id','product-description-d')
+            rows = findItems(desTable,'tr',None,None)
+            detalles = [r.text.strip().replace("\n",": ") for r in rows]
+        except:
+            detalles = "N/A"
         #------Categorias-------#
         categoria = cat
         #---------Garantias---------#
-        garantiaP = "N/A"
-        garantia = garantiaP
+        garantia = "N/A"
+
+    elif store == "TecnoFacil":
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        try:
+            codigo = findItem(soup,'h6','class','sku').text
+        except:
+            codigo = "N/A"
+        #------Nombre del Producto-------#
+        try:
+            nombre = findItem(soup,'div','class','product-name').text.strip()
+        except:
+            nombre = "N/A"
+        #------Precio Viejo-------#
+        #------Precio de Ofertas-------#
+        try:
+            precio = findItem(soup,'span','class','regular-price').text.strip()
+            oferta = "N/A"
+        except:
+            precio = findItem(soup,'p','class','old-price').span.next_sibling.next_sibling.text.strip()
+            oferta = findItem(soup,'p','class','special-price').span.next_sibling.next_sibling.text.strip()
+        #------Detalles de Productos-------#
+        detalles = []
+        try:
+            detalles.append(findItem(soup,'div','class','std').text.strip())
+        except:
+            pass
+        try:
+            table = findItems(soup,'tr',None,None)
+            details = [format(t.th.text+": " + t.td.text) for t in table]
+            detalles.extend(details)
+        except:
+            pass
+        #------Categorias-------#
+        categoria = (cat)
+        #------Garantias-------#
+        garantia = "N/A"
+    
+    elif store == "Pacifiko":
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        try:
+            codigo = findItem(soup,'meta','name','external_id')["content"]
+        except:
+            codigo = "N/A"
+        #------Nombre del Producto-------#
+        try:
+            nombre = findItem(soup,'div','class','title-product').text.strip()
+        except:
+            nombre = "N/A"
+        #------Precio Viejo-------#
+        try:
+            precio = findItem(soup,'span','id','price-old').text.strip().replace("Q","")
+        except:
+            precio = "N/A"
+        #------Precio de Ofertas-------#
+        try:
+            oferta = findItem(soup,'span','id','price-special').text.strip().replace("Q","")
+        except:
+            oferta = "N/A"
+        #------Detalles de Productos-------#
+        detalles = []
+        try:
+            detalles.append(findItem(soup,'span','class','product-features').text.strip())
+        except:
+            pass
+        try:
+            detalles.append(findItem(soup,'div','id','tab-description').text.strip())
+        except:
+            pass
+        #------Categorias-------#
+        categoria = cat
+        #---------Garantias---------#
+        garantia = "N/A"
+    
+    #Postponed
+    elif store == "Zukko":
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        try:
+            codigo = findItem(soup,'span','class','codigo').text[16:]
+        except:
+            codigo = "N/A"
+        #------Nombre del Producto-------#
+        try:
+            nombre = findItem(soup,'h1','class','product-details__product-title').text
+        except:
+            nombre = "N/A"
+        #------Precio Viejo-------#
+        #try:
+            #precio = findItem(soup,'span','class','precio_normal').strong.text.replace("Q","")
+        #except:
+            #precio = "N/A"
+        #------Precio de Ofertas-------#
+        try:
+            oferta = findItem(soup,'span','class','details-product-price__value').text.replace("Q","")
+        except:
+            oferta = "N/A"
+        #------Detalles de Productos-------#
+        # try:
+        #     detalles = []
+        #     cuerpo = findItem(soup,'div','id','esp_tec')
+        #     des = findItems(cuerpo,'p',None,None)
+        #     detalles.extend([d.text for d in des])
+        # except:
+        #     detalles = "No se encontro descripcion de este producto en particular"    
+        #------Categorias-------#
+        categoria = (cat)
+        #------Garantias-------#
+        try:
+            garantia = findItem(soup,'span','class','garantia').text[9:-1]
+        except:
+            garantia = "N/A"
+    
+
+    #Not Done
+    
     elif store == "Funky":
         send = requests.get(link, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
         soup = BeautifulSoup(send.text,'html.parser')
@@ -791,19 +896,37 @@ def buscarProd(link,cat,store):
         garantia = garantiaP
 
         pass
-    elif store == "TecnoFacil":
-        pass
-    elif store == "Pacifiko":
-        pass
-    elif store == "Zukko":
-        pass
+
+    
     elif store == "Guateclic":
-        pass
+        soup = getUrl(link)
+        #------Codigo del Producto-------#
+        codigo = findItem(soup,'div','class','deal-content').p.text[findItem(soup,'div','class','deal-content').p.text.find('Cod.')+5:-1]
+        codigo ="N/A"
+        #------Nombre del Producto-------#
+        nombre = findItem(soup,'div','class','deal-content').h3.text
+        nombre = "N/A"
+        #------Precio Viejo-------#
+        precio = findItem(soup,'p','class','value').text.replace("Q","")
+        precio = "N/A"
+        #------Precio de Ofertas-------#
+        oferta = findItem(soup,'h1',None,None).text.replace("Q","")
+        oferta = "N/A"
+        #------Detalles de Productos-------#
+        detalles = []
+        findItem(soup,'div','class','deal-content').p.text
+        #------Categorias-------#
+        categoria = cat
+        #---------Garantias---------#
+        garantia = "N/A"
+    
     elif store == "Imeqmo":
         pass
+    
     elif store == "Office Depot":
         pass
     
+
 
 
     productInfo = {
