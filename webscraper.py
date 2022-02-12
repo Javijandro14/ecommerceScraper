@@ -28,8 +28,9 @@ def findItem(soup, item, attType, attName):
     try:
         result = soup.find(item, {attType: attName})
     except:
-        print("error en la funcion 'findItem'")
-        print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
+        pass
+        #print("error en la funcion 'findItem'")
+        #print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
     else:
         return result
 
@@ -37,8 +38,9 @@ def findItems(soup, item, attType, attName):
     try:
         result = soup.find_all(item, {attType: attName})
     except:
-        print("error en la funcion 'findItems'")
-        print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
+        pass
+        # print("error en la funcion 'findItems'")
+        # print("Item Fallido: " + format(item) + " Tipo de Atributo: " + format(attType) + " Nombre del Atributo: " +format(attName))
     else:
         return result
 
@@ -166,13 +168,25 @@ def buscarProd(link,cat,store):
     elif store == "Max":
         soup = getUrl(link)
         #------Codigo del Producto-------#
-        codigo = findItem(soup, 'div', 'itemprop', 'sku').text
+        try:
+            codigo = findItem(soup, 'div', 'itemprop', 'sku').text
+        except:
+            codigo ="N/A"
         #------Nombre del Producto-------#
-        nombre = findItem(soup, 'h1', 'class', 'page-title').text.strip()
+        try:
+            nombre = findItem(soup, 'h1', 'class', 'page-title').text.strip()
+        except:
+            nombre ="N/A"
         #------Precio Viejo-------#
-        precio = findItem(soup, 'span', 'data-price-type', 'oldPrice').text.strip("Q")
+        try:
+            precio = findItem(soup, 'span', 'data-price-type', 'oldPrice').text.strip("Q")
+        except:
+            precio ="N/A"
         #------Precio de Ofertas-------#
-        oferta = findItem(soup, 'span', 'data-price-type', 'finalPrice').text.strip("Q")
+        try:
+            oferta = findItem(soup, 'span', 'data-price-type', 'finalPrice').text.strip("Q")
+        except:
+            oferta = "N/A"
         #------Detalles de Productos-------#
         detalles = []
         try:
@@ -244,8 +258,7 @@ def buscarProd(link,cat,store):
         #---------Garantias---------#
         garantia ="De acuerdo a la tienda, todos los productos tienen 1 año de garantia"
     elif store == "Spirit":
-        base = "https://spiritcomputacion.com/"
-        soup = getUrl(base + link)
+        soup = getUrl(link)
         #------Codigo del Producto-------#
         try:
             codigo = findItem(soup,'div','class','sku').text.strip().replace("Código: ","")
@@ -1066,7 +1079,6 @@ def parseProd(jsonData,cat,store):
         cate = cat.removeprefix("-categorias-")
     else:
         cate = cat
-    print(cate)
     for i in jsonData:
         if isinstance(jsonData[i],dict):
             temp = parseProd(jsonData[i],format(cate+"-"+i),store)
@@ -1149,7 +1161,7 @@ while opcion != 3:
         for o in opciones:
             if int(o) < 16:
                 store = tienda[int(o)-1]
-                #print(store,today)
+                print(store)
                 products.update(parseProd(categories[store],"",store))
                 products["fechaAct"]= today.strftime("%d-%b-%Y")
                 jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","writeJson",products)
