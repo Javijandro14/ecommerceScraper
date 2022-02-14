@@ -12,7 +12,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body onload="loadList(getJson()); loadProduct(getParams('item'));">
+<body onload="loadList(getJson()); loadProduct(getParams('item'));" style="color:black">
     <nav class="navbar navbar-expand-sm" id="navbar-home">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -30,12 +30,12 @@
                 </ul>
             </li>
             <li class="nav-item">
-                <input type="search" name="search" id="searchBar" placeholder="Buscar Articulo">
-                <button class="links" id="navbtn" value="submit">Buscar</button>
+                <input disabled type="search" name="search" id="searchBar" placeholder="Buscar Articulo">
+                <button disabled id="navbtn" value="submit">Buscar</button>
             </li>
             <li class="nav-item">
-                <button class="search" id="navbtn" value="submit">
-                    <a href="#" class="links">Login</a>
+                <button disabled class="search" id="navbtn" value="submit">
+                    Login
                 </button>
             </li>
         </ul>
@@ -46,28 +46,29 @@
             <h4><strong>Codigo Pre-asignado:</strong> <span class="sku">Null</span></h5>
         </div>
         <h2>Ver datos de diferentes tiendas:</h2>
-        <h3>Categoria en tienda: <h4 class="cat"></h4>
-        </h3>
+    
         <div class="changeStore">
-            <button>Intelaf</button>
-            <button>Kemik</button>
-            <button>Click</button>
-            <button>Pacifiko</button>
-            <button>tienda5</button>
-            <button>tienda6</button>
-            <button>tienda7</button>
+            <button disabled style="opacity:40%;">Intelaf</button>
+            <button disabled style="opacity:40%;">Kemik</button>
+            <button disabled style="opacity:40%;">Click</button>
+            <button disabled style="opacity:40%;">Pacifiko</button>
+            <button disabled style="opacity:40%;">tienda5</button>
+            <button disabled style="opacity:40%;">tienda6</button>
+            <button disabled style="opacity:40%;">tienda7</button>
         </div>
+        <h3>Categoria en tienda: <h4 class="cat"></h4>
         <div class="infoTienda">
             <h4><strong>Codigo de tienda: </strong><span class="sku">Null</span></h4>
-            <h3 class="paglink">Link del Articulo en su Pagina: <a href="" class="linktienda"></a></h3>
+            <h3 class="paglink">Link del Articulo: <a href="" class="linktienda"></a></h3>
         </div>
         <div class="desPrice">
-            <h4 class="price">Antes: <span class="oldprice">Q.1,000.00 </span></h4>
-            <h3 class="price">Oferta: <span class="newprice">Q.759.00 </span></h3>
+            <h4 class="price"><strong>Antes:</strong> <strike><span class="oldprice">Q.1,000.00 </span></strike></h4>
+            <h3 class="price"><strong>Oferta:</strong><span class="newprice">Q.759.00 </span></h3>
         </div>
-        <p class="description">Esto es un producto, tiene varias caracteristicas, y tambien otras
+        <h4><strong>Descripcion:</strong></h4>
+        <h4 class="description">Esto es un producto, tiene varias caracteristicas, y tambien otras
             caracteristicas <br>
-        </p>
+        </h4>
         <h3>Garantia:</h3>
         <h4 class="garantia"></h4>
 

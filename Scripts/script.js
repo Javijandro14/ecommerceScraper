@@ -128,7 +128,7 @@ function loadCategoria(json) {
   }
   var table = document.createElement("table");
   var iter = 3;
-  table.setAttribute("class", "list");
+  table.setAttribute("class", "list quick-table");
   for (var i in json) {
     if (typeof (getJson(json, i)) == "string") {
       var cat = document.createElement("td");
@@ -192,10 +192,10 @@ function showProd(codigo,sku, name, precio, oferta, cat, detalle, garantia, link
   document.getElementsByClassName("sku")[0].innerHTML = codigo
   document.getElementsByClassName("sku")[1].innerHTML = sku
   document.getElementsByClassName("product-title")[0].innerHTML = name
-  document.getElementsByClassName("oldprice")[0].innerHTML = precio
-  document.getElementsByClassName("newprice")[0].innerHTML = oferta
+  document.getElementsByClassName("oldprice")[0].innerHTML = "Q"+precio
+  document.getElementsByClassName("newprice")[0].innerHTML = "Q" + oferta
   document.getElementsByClassName("cat")[0].innerHTML = cat
-  document.getElementsByClassName("description")[0].innerHTML = detalle
+  document.getElementsByClassName("description")[0].innerHTML = detalle.replace(/,/g, "\n")
   document.getElementsByClassName("garantia")[0].innerHTML = garantia
   var direct = document.getElementsByClassName("linktienda")[0]
   direct.setAttribute("href", link)
