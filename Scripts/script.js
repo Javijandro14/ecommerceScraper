@@ -195,7 +195,7 @@ function showProd(codigo,sku, name, precio, oferta, cat, detalle, garantia, link
   document.getElementsByClassName("oldprice")[0].innerHTML = "Q"+precio
   document.getElementsByClassName("newprice")[0].innerHTML = "Q" + oferta
   document.getElementsByClassName("cat")[0].innerHTML = cat
-  document.getElementsByClassName("description")[0].innerHTML = detalle.replace(/,/g, "\n")
+  document.getElementsByClassName("description")[0].innerHTML = detalle
   document.getElementsByClassName("garantia")[0].innerHTML = garantia
   var direct = document.getElementsByClassName("linktienda")[0]
   direct.setAttribute("href", link)
