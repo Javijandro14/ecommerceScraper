@@ -16,7 +16,6 @@ import time
 def getUrl(url):
     try:
         send = requests.get(url, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
-        time.sleep(1)
     except:
         print("Revise el url, no se proceso correctamente")
         print("Url Fallido:" + url)
@@ -585,7 +584,6 @@ def getCategorias(link,store,res,codigo):
         code = 0
         for r1 in res1:
             name1 = getProdInfo(r1,store,"name").replace(" ","-")
-            #print(name1)
             link1 = getProdInfo(r1,store,"linkCat")
             code+=1
             level1[name1] = getCategorias(link1,store,res,codigo+"{:02d}".format(code))
@@ -594,6 +592,7 @@ def getCategorias(link,store,res,codigo):
 
 def getProdInfo(soup,store,item):
     if "Kemik" == store:
+        
         if item == "cat":
             subcat = findItems(soup,'div','class','product-category')
             if not subcat:
@@ -616,7 +615,6 @@ def getProdInfo(soup,store,item):
                 #print(subcat)
                 sc = [i.a for i in subcat]
                 return sc
-
         elif item == "prod":
             productos = findItems(soup,'a','class','woocommerce-loop-product__link')
             return productos
@@ -646,6 +644,7 @@ def getProdInfo(soup,store,item):
                 else:
                     stop = True
             return pag
+    
     elif "Intelaf" == store:
         if item == "cat":
             cat = findItems(soup,'a','class','hover_effect')
@@ -1071,8 +1070,6 @@ def getProdInfo(soup,store,item):
     elif store == "Zukko":
        pass
     
-
-
 def parseProd(jsonData,cat,store):
     product={}
     if "-categorias-" in cat:
@@ -1090,7 +1087,6 @@ def parseProd(jsonData,cat,store):
                 product[codigos] = buscarProd(link,cate.removesuffix(i),store)
                 #print(codigo + ": "+ link)
     return product
-
 
 def jsonFile(directory,action,jsonData):
     if action == "newCatJson":
@@ -1149,7 +1145,6 @@ while opcion != 3:
                 jsonFile("C:/Users/javie/Desktop/ecommerceScraper/testing.json","writeJson",categories)
             else:
                 print(o + " no es una opcion valida, se ira a la siguiente")
-
     elif opcion == 2:
         #Menu to find each product
         products = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","getJson",None)
@@ -1161,7 +1156,6 @@ while opcion != 3:
         for o in opciones:
             if int(o) < 16:
                 store = tienda[int(o)-1]
-                print(store)
                 products.update(parseProd(categories[store],"",store))
                 products["fechaAct"]= today.strftime("%d-%b-%Y")
                 jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","writeJson",products)
