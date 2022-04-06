@@ -695,16 +695,16 @@ def instr2(store,opcion):
     today = date.today()
     print("Starting with...",store)
     client = requests.Session()
-    base = categories[store]["link"]
-    categories[store] = {"categorias": getCategorias(base,base,store,[],"{:02d}".format(int(opcion)),client)}
-    categories[store]["fechaAct"] = today.strftime("%d-%b-%Y")
+    base = categories[store]
+    productos.update(parseProd(base,"",store,client))
+    productos[store]["fechaAct"] = today.strftime("%d-%b-%Y")
     categories[store]["Duration"] = str(perf_counter() -start)
-    jsonFile("C:/Users/javie/Desktop/testing.json","writeJson",categories)
+    jsonFile("C:/Users/javie/Desktop/res.json","writeJson",categories)
     client.close()
     stop = perf_counter()
     return store + " Finished || Duration: " +  str(stop-start)
 
-def parseProd(jsonData,cat,store):
+def parseProd(jsonData,cat,store,client):
     product={}
     if "-categorias-" in cat:
         cate = cat.removeprefix("-categorias-")
@@ -718,11 +718,11 @@ def parseProd(jsonData,cat,store):
             codigos = jsonData.get("codigo")
             link = jsonData.get("link")
             if codigos != None and link != None:
-                product[codigos] = buscarProd(link,cate.removesuffix(i),store)
+                product[codigos] = buscarProd(link,cate.removesuffix(i),store,client)
                 #print(codigo + ": "+ link)
     return product
 
-def buscarProd(link,cat,store):
+def buscarProd(link,cat,store,client):
     #Done
     if store == "Kemik":
         soup = getUrl(link)
@@ -1268,7 +1268,7 @@ def menu():
 
 #=========Setup para Programa========#
 #Entrada de Datos
-products = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","getJson",None)
+productos = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","getJson",None)
 categories = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/testing.json","getJson",None)
 #Salida de Datos
 
