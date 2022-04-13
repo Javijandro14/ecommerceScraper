@@ -12,6 +12,7 @@ from datetime import date
 import concurrent.futures as cf
 from time import perf_counter
 from bs4 import BeautifulSoup
+from difflib import get_close_matches as gcm
 
 
 #========Funciones Generales============#
@@ -88,7 +89,6 @@ def jsonFile(directory,action,jsonData):
             json.dump(jsonData,f,ensure_ascii=False)
 
 #=======Funciones para Categorias========#
-
 def instr1(store,opcion):
     start = perf_counter()
     today = date.today()
@@ -98,7 +98,7 @@ def instr1(store,opcion):
     categories[store] = {"categorias": getCategorias(base,base,store,[],"{:02d}".format(int(opcion)),client)}
     categories[store]["fechaAct"] = today.strftime("%d-%b-%Y")
     categories[store]["Duration"] = str(perf_counter() -start)
-    jsonFile("C:/Users/javie/Desktop/testing.json","writeJson",categories)
+    jsonFile(dirCategories,"writeJson",categories)
     client.close()
     stop = perf_counter()
     return store + " Finished || Duration: " +  str(stop-start)
@@ -698,8 +698,8 @@ def instr2(store,opcion):
     base = categories[store]
     productos.update(parseProd(base,"",store,client))
     productos[store]["fechaAct"] = today.strftime("%d-%b-%Y")
-    categories[store]["Duration"] = str(perf_counter() -start)
-    jsonFile("C:/Users/javie/Desktop/res.json","writeJson",categories)
+    productos[store]["Duration"] = str(perf_counter() -start)
+    jsonFile(dirProducts,"writeJson",productos)
     client.close()
     stop = perf_counter()
     return store + " Finished || Duration: " +  str(stop-start)
@@ -712,7 +712,7 @@ def parseProd(jsonData,cat,store,client):
         cate = cat
     for i in jsonData:
         if isinstance(jsonData[i],dict):
-            temp = parseProd(jsonData[i],format(cate+"-"+i),store)
+            temp = parseProd(jsonData[i],format(cate+"-"+i),store,client)
             product.update(temp)
         else:
             codigos = jsonData.get("codigo")
@@ -725,7 +725,7 @@ def parseProd(jsonData,cat,store,client):
 def buscarProd(link,cat,store,client):
     #Done
     if store == "Kemik":
-        soup = getUrl(link)
+        soup = getUrl(link,client)
         #------Codigo del Producto-------#
         try:
             codigo = findItem(soup,'span','class','sku').text
@@ -1225,6 +1225,28 @@ def buscarProd(link,cat,store,client):
     }
     return productInfo
 
+
+#=========Funciones para Comparar============#
+def compareProd():
+    productos.pop("fechaAct")
+
+    result = {}
+    for p in productos:
+        result[p] = p+"|"+productos[p]["nombre"]
+
+    matches = {}
+    #count = 0
+    #apercent = 0
+    #bpercent = apercent
+    for r in result:
+        matches[r]= gcm(result[r],result.values(),cutoff=0.6)
+        # count+=1
+        # apercent = round(count/len(result)*100,None)
+        # if apercent != bpercent:
+        #     print(f"Current percentage {apercent}%")
+        #     bpercent = apercent
+    jsonFile(dirComparacion,"writeJson",matches)
+
 #=================Menu===================#
 def menu():
     tienda = [c.strip() for c in categories]
@@ -1261,6 +1283,8 @@ def menu():
                 run = [executor.submit(instr2, o, opciones[int(store.index(o))]) for o in store ]
                 for r in cf.as_completed(run):
                     print(r.result())
+            
+            compareProd()
         elif opcion == 3:
             pass
         else:
@@ -1268,8 +1292,14 @@ def menu():
 
 #=========Setup para Programa========#
 #Entrada de Datos
-productos = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","getJson",None)
-categories = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/testing.json","getJson",None)
+
+dirProducts = "C:/Users/javie/Desktop/ecommerceScraper/products.json"
+dirCategories = "C:/Users/javie/Desktop/ecommerceScraper/categories.json"
+dirComparacion = "C:/Users/javie/Desktop/ecommerceScraper/comparison.json"
+
+productos = jsonFile(dirProducts,"getJson",None)
+categories = jsonFile(dirCategories,"getJson",None)
+comparacion = jsonFile(dirComparacion,"getJson",None)
 #Salida de Datos
 
 #========Inicio del Programa============#

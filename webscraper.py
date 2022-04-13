@@ -6,16 +6,19 @@
 # =============================================================== #
 
 # Mi forma de resolver este problema es hacer 2 tipos de archivos JSON: uno para conseguir los links, otra para los datos de productos #
-from datetime import date
-from bs4 import BeautifulSoup
-import requests
 import json
-import time
+import requests
+from datetime import date
+import concurrent.futures as cf
+from time import perf_counter
+from bs4 import BeautifulSoup
+from difflib import get_close_matches as gcm
 
-#Fix the headers of the method, also add in sessions
-def getUrl(url):
+
+#========Funciones Generales============#
+def getUrl(url,client):
     try:
-        send = requests.get(url, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
+        send = client.get(url, headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"})
     except:
         print("Revise el url, no se proceso correctamente")
         print("Url Fallido:" + url)
@@ -44,7 +47,7 @@ def findItems(soup, item, attType, attName):
         return result
 
 def checkMenu(resList, res1):
-    if resList == None or not resList:
+    if resList == None or not resList or res1 == None or not res1:
         return False
     else:
         for r in resList:
@@ -53,12 +56,677 @@ def checkMenu(resList, res1):
                     return True
         else:
             return False
+
+def jsonFile(directory,action,jsonData):
+    if action == "newCatJson":
+        products = {
+            "Kemik": {"link": "https://www.kemik.gt", "categorias":{}},
+            "Intelaf": {"link":"https://www.intelaf.com", "categorias":{}},
+            "Click": {"link":"https://click.gt", "categorias":{}},
+            "Funky": {"link": "https://storefunky.com", "categorias":{}},
+            "Max": {"link":"https://www.max.com.gt", "categorias":{}},
+            "Goat": {"link":"https://goatshopgt.com", "categorias":{}},
+            "Elektra": {"link":"https://www.elektra.com.gt", "categorias":{}},
+            "Spirit": {"link":"https://spiritcomputacion.com","categorias":{}},
+            "MacroSistemas": {"link":"https://www.macrosistemas.com","categorias":{}},
+            "TecnoFacil": {"link":"https://www.tecnofacil.com.gt","categorias":{}},
+            "Pacifiko": {"link":"https://www.pacifiko.com","categorias":{}},
+            "Zukko": {"link":"https://zukko.store","categorias":{}},
+            "Guateclic": {"link":"https://www.guateclic.com","categorias":{}},
+            "Imeqmo": {"link":"https://www.imeqmo.com","categorias":{}},
+            "Office Depot": {"link":"https://www.officedepot.com.gt","categorias":{}}
+        }
+        with open(directory,'w',encoding='utf-8') as f:
+            json.dump(jsonData,f,ensure_ascii=False)
+        return products
+    elif action == "getJson":
+        file = open(directory,"r")
+        jsonData = json.load(file)
+        file.close()
+        return jsonData
+    elif action == "writeJson":
+        with open(directory,'w',encoding='utf-8') as f:
+            json.dump(jsonData,f,ensure_ascii=False)
+
+#=======Funciones para Categorias========#
+def instr1(store,opcion):
+    start = perf_counter()
+    today = date.today()
+    print("Starting with...",store)
+    client = requests.Session()
+    base = categories[store]["link"]
+    categories[store] = {"categorias": getCategorias(base,base,store,[],"{:02d}".format(int(opcion)),client)}
+    categories[store]["fechaAct"] = today.strftime("%d-%b-%Y")
+    categories[store]["Duration"] = str(perf_counter() -start)
+    jsonFile(dirCategories,"writeJson",categories)
+    client.close()
+    stop = perf_counter()
+    return store + " Finished || Duration: " +  str(stop-start)
+    
+def getCategorias(base,link,store,res,codigo,client):
+    level0 = {}
+    soup = getUrl(link,client)
+    res1 = getProdInfo(base,soup,store,"cat",client)
+    level1 = {}
+    same = checkMenu(res,res1)
+    if not res1 or same==True:
+        pag = getProdInfo(base,link,store,"pag",client)
+        if not pag:
+            print("No hay productos en " + link)
+        else:
+            for p in pag: #Lista links en la categorias
+                soup = getUrl(p,client)
+                res1 = getProdInfo(base,soup,store,"prod",client)
+                if not res1: 
+                    print("no hay productos en " + p)
+                else:
+                    codeProd = 0
+                    #for r1 in res1:
+                    with cf.ThreadPoolExecutor() as executor:
+                        name1= [executor.submit(getProdInfo,base,r1,store,"nameProd",client) for r1 in res1]
+                        link1= [executor.submit(getProdInfo,base,r1,store,"linkProd",client) for r1 in res1]
+                        for i in range(len(name1)):
+                            codeProd +=1
+                            level1[name1[i].result()] = { "codigo": codigo+"{:02d}".format(codeProd),"link" : link1[i].result()}
+    else:
+        res.extend(res1)
+        code = 0
+        with cf.ThreadPoolExecutor() as executor:            
+            name1= [executor.submit(getProdInfo,base,r1,store,"name",client) for r1 in res1]
+            link1= [executor.submit(getProdInfo,base,r1,store,"linkCat",client) for r1 in res1]
+            for i in range(len(name1)):
+                code+=1
+                print("Store:",store, "Category:", name1[i].result())
+                level1[name1[i].result().replace(" ","-")] = getCategorias(base,link1[i].result(),store,res,codigo+"{:02d}".format(code),client)
+    level0 = level1 
+    return level0
+
+#Make code have less lines
+def getProdInfo(base,soup,store,item,client):
+    if "Kemik" == store:
+        if item == "cat":
+            subcat = findItems(soup,'div','class','product-category')
+            if not subcat:
+                menu = findItem(soup,'div','class','wide-nav')
+                cat = findItems(menu,'a','class','nav-top-link')
+                categorias = []
+                for c in cat:
+                    name = c.next_sibling
+                    if name != None:
+                        temp = findItems(name.next_sibling,'a',None,None)
+                        for t in temp:
+                            t.attrs = {'href' : t['href']}
+                            categorias.append(t)
+                    else:
+                        c.attrs ={'href': c['href']}                        
+                        categorias.append(c)
+                #print(categorias)
+                return categorias[:-1]
+            else:
+                #print(subcat)
+                sc = [i.a for i in subcat]
+                return sc
+        elif item == "prod":
+            productos = findItems(soup,'a','class','woocommerce-loop-product__link')
+            return productos
+        elif item == "name":
+            name = soup.text.strip()
+            #print(name)
+            return name
+        elif item == "linkCat":
+            link = soup.get('href')
+            return link
+        elif item == "nameProd":
+            name = soup.text.strip()
+            return name
+        elif item == "linkProd":
+            link = soup.get('href')
+            return link
+        elif item == "pag":
+            pag = []
+            url = soup
+            stop = False
+            while not stop:
+                pag.append(url)
+                soup = getUrl(url,client)
+                newLink = findItem(soup,'link','rel','next')
+                if newLink != None:
+                    url = newLink.get('href')
+                else:
+                    stop = True
+            return pag 
+    elif "Max" == store:
+        if item == "cat":
+            subcategorias = findItem(soup,'ul','class',['sub-cat-list' ,'slick-initialized' ,'slick-slider'])
+            if subcategorias != None:
+                list = findItems(subcategorias,'li',None,None)
+                categorias = [i.a for i in list]
+            else:
+                menu = findItem(soup,'div','class','content-mega')
+                cat = findItems(menu,'li','class','level2')
+                categorias = [c.a for c in cat]
+            return categorias
+        elif item == "prod":
+            container = findItem(soup,'ol','class',['products','list','items','product-items'])
+            products = findItems(container,'a','class','product-item-link')
+            return products
+        elif item == "name":
+            return soup.text.strip()
+        elif item == "linkCat":
+            return soup.get('href')
+        elif item == "nameProd":
+            return soup.text.strip()
+        elif item == "linkProd":
+            return soup.get('href')
+        elif item == "pag":
+            links = []
+            souptemp = getUrl(soup,client)
+            num = findItem(souptemp,'span','class','toolbar-number')
+            if num != None:
+                noProductos = int(num.text.replace("Productos"," ").replace("Producto"," "))
+                paginas = 0
+                if noProductos >= 30:
+                    paginas = noProductos//30
+                else:
+                    paginas = 0
+                if (noProductos % 30) >= 1:
+                    paginas += 1
+                for iter in range(1,paginas+1):
+                    links.append(format(soup+"?p=" + format(iter) + "&product_list_limit=30"))
+                return links
+            else:
+                return [soup]
+    elif "Click" == store:
+        if item == "cat":
+            lists = []
+            menu = findItem(soup,'ul','class',['justify-content-center','container','d-flex','align-items-center','mb-0','mt-0','pr-4'])
+            lists = findItems(menu,'li','class','nav-item')
+            for l in lists:
+                name = l.a.get('href')
+                if name == None:
+                    name = l.a.text.strip("(current)",).lower().replace("ó","o")
+                    ul = findItem(soup,'div','aria-labelledby',name)
+                    listar = findItems(ul,'li',None,None)
+                    lists.extend(listar)
+            return lists
+        elif item == "prod":
+            products = findItems(soup,'div','class','pt-2')
+            return products
+        elif item == "name":
+            name = soup.a.get('href')
+            if name == None:
+                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
+                ul = findItem(soup,'div','aria-labelledby',name)
+                listar = findItems(ul,'li',None,None)
+                for l in listar:
+                    return l.a.get('href').replace("/productos/","")
+            else:
+                return name.replace("/productos/","")
+        elif item == "linkCat":
+            link = soup.a.get('href')
+            if link == None:
+                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
+                ul = findItem(soup,'div','aria-labelledby',name)
+                listar = findItems(ul,'li',None,None)
+                for l in listar:
+                    linkl = base + l.a.get('href')
+                    return linkl
+            return base + link
+        elif item == "nameProd":
+            name = soup.h5.text +'-'+soup.textarea.text
+            return name
+        elif item == "linkProd":
+            link = base + soup.a.get('href')
+            return link
+        elif item == "pag":
+            tempsoup = getUrl(soup,client)
+            links =[]
+            pagination = findItems(tempsoup,'button','class','page-link')
+            if len(pagination) == 0:
+                res = soup
+                links.append(res)
+            elif len(pagination) == 2:
+                paginas = int(pagination[0].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            elif len(pagination) == 3:
+                paginas = int(pagination[-2].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            else:
+                paginas = int(pagination[-2].text)
+                for i in range(1, paginas+1):
+                    res = soup+"?page="+format(i)
+                    links.append(res)
+            return links
+    elif "Spirit" == store:
+        if item == "cat":
+            categorias = findItems(soup,'div','class','vertical-separator')
+            if not categorias:
+                categorias = findItems(soup,'li','class','vm-categories-wall-catwrapper')
+            return categorias
+        elif item == "prod":
+            productos = findItems(soup,'a','class','item-title')
+            return productos
+        elif item == "name":
+            name = soup.a.text.strip()
+            return name
+        elif item == "linkCat":
+            link = base + soup.a.get('href')
+            return link
+        elif item == "nameProd":
+            name = soup.text.strip().replace("\n","").replace(" ","-")
+            return name
+        elif item == "linkProd":
+            link = base + soup.get('href')
+            return link
+        elif item == "pag":
+            links = []
+            tempsoup = getUrl(soup,client)
+            # paginacion = findItem(tempsoup,'div','class',['vm-pagination','vm-pagination-bottom'])
+            paginas = findItems(tempsoup,'a','class','pagenav')
+            if not paginas:
+                links.append(soup)
+            else:
+                links = [base + i.get('href') for i in paginas[:-2]]
+                links.insert(0,soup)
+            return links
+    elif "MacroSistemas" == store:
+        if item == "cat":
+            subcategorias = findItem(soup,'ul','class',['nav','menu-left','mod-list'])
+            if subcategorias != None:
+                categorias = findItems(subcategorias,'a',None,None)
+            else:
+                menu = findItem(soup,'ul','id','menu_footer')
+                categorias = findItems(menu,'a',None,None)
+            return categorias
+        elif item == "prod":
+            productos = findItems(soup,'div','class','product-inner')
+            return productos
+        elif item == "name":
+            name = soup.text
+            return name
+        elif item == "linkCat":
+            link = base + format(soup.get('href'))
+            return link
+        elif item == "nameProd":
+            name = findItem(soup,'a','class','item-title')
+            return name.text.strip()
+        elif item == "linkProd":
+            link = base + findItem(soup,'a','class','item-title').get('href')
+            return link
+        elif item == "pag":
+            tempsoup = getUrl(soup,client)
+            divpag = findItem(tempsoup,'div','class','vm-pagination')
+            if divpag == None:
+                numeroPag = 1
+            else:
+                paginacion = findItem(divpag,'span','class','vm-page-counter')
+                if paginacion.text=="":
+                    numeroPag = 1
+                else:
+                    numeroPag = int(paginacion.text[-2:])
+            links = []
+            for pag in range(1,(numeroPag+1)):
+                if pag == 1:
+                    links.append(format(soup)+"?start=0")
+                elif pag >1:
+                    links.append(format(soup)+"?start="+str((pag-1)*24))
+            return links
+    elif "Funky" == store:        
+        if item == "cat":
+            menu = soup.find('ul',{'class':'sub-menu'})
+            categorias = menu.find_all('li')
+            cat = [c.a for c in categorias]
+            return cat
+        elif item == "prod":
+            lista = findItem(soup,'ul','class','tablet-columns-2')
+            products = findItems(lista,'div','class','product-loop-content')
+            return products
+        elif item == "name":
+            name = soup.text
+            return name
+        elif item == "linkCat":
+            link = soup.get('href')
+            return link
+        elif item == "nameProd":
+            name = soup.h2.text.strip()
+            return name
+        elif item == "linkProd":
+            link = soup.h2.a.get('href')
+            return link
+        elif item == "pag":
+            lista = findItem(soup,'ul','class','page-numbers')
+            if lista != None:
+                links = findItems(lista,'a','class','page-numbers')
+                newList = [l.get('href') for l in links]
+                newList.insert(0,newList[-1][:-2]+'1/')
+                newList.pop(-1)
+                return newList
+            else:
+                return [soup]    
+    elif "Elektra" == store:
+        if item == "cat":
+            categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
+            return categorias
+        elif item == "prod":
+            productos = findItems(soup,'section','class','vtex-product-summary-2-x-container--shelfPLP')
+            return productos
+        elif item == "name":
+            name = soup.text
+            #print(name)
+            return name
+        elif item == "linkCat":
+            link = soup.a.get('href')
+            return base + link
+        elif item == "nameProd":
+            name = soup.h1.text.strip()
+            return name
+        elif item == "linkProd":
+            link = soup.a.get('href')
+            return base + link
+        elif item == "pag":
+            links = []
+            page = 1
+            running = True
+            link = soup
+            while running:
+                links.append(link)
+                tempsoup = getUrl(link,client)
+                nextPage = tempsoup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
+                if nextPage.button != None:
+                    page+=1
+                    link = soup +"?page="+str(page)
+                else:
+                    running = False
+            return links
+    elif "Goat" == store:
+        if item == "cat":
+            pass
+        elif item == "prod":
+            pass
+        elif item == "name":
+            pass
+        elif item == "linkCat":
+            pass
+        elif item == "nameProd":
+            pass
+        elif item == "linkProd":
+            pass
+        elif item == "pag":
+            pass
+    elif "TecnoFacil" == store:
+        if item == "cat":
+            lists = findItems(soup,'div','class','media-body')
+            cat = []
+            for l in lists:
+                temp = l.a['href'].find("?")
+                if temp == -1:
+                    pass
+                else:
+                    l.a['href'] = l.a['href'][:temp+1].replace("?","")
+                cat.append(l.a)
+            return cat
+        elif item == "prod":
+            prod = findItems(soup,'h2','class','product-name')
+            return prod
+        elif item == "name":
+            name = soup.text.strip()
+            return name
+        elif item == "linkCat":
+            link =soup["href"]
+            return link
+        elif item == "nameProd":
+            name = soup.text
+            return name
+        elif item == "linkProd":
+            link = soup.a["href"]
+            return link
+        elif item == "pag":
+            links = []
+            running = True
+            link = soup
+            #print(soup)
+            while running:
+                links.append(link)
+                tempsoup = getUrl(link,client)
+                nextPage = findItem(tempsoup,'a','title','Siguiente')
+                if nextPage != None:
+                    link = nextPage["href"]
+                else:
+                    running = False
+            return links
+    elif "Pacifiko" == store:
+        if item == "cat":
+            lists = findItems(soup,'div','class','responsiveS')
+            if not lists :
+                lists = []
+                try:
+                    lists.extend(findItems(soup,'a','class','clearfix')[:-1])
+                except:
+                    pass
+                try:
+                    lists.extend(findItems(soup,'a','class','main-menu'))
+                except:
+                    pass
+                return [base + l["href"] for l in lists]
+            else:
+                cat = [l.a["href"] for l in lists]
+                return cat
+        elif item == "prod":
+            try:
+                lists = findItems(soup,'div','class','product-image-container')
+                prod = [l.a for l in lists]
+                return prod
+            except:
+                return None
+        elif item == "name":
+            name = soup.replace("-"," ")
+            return name[name.rfind("/")+1:]
+        elif item == "linkCat":
+            link = soup
+            return link
+        elif item == "nameProd":
+            name = soup["title"]
+            return name
+        elif item == "linkProd":
+            link = soup["href"]
+            return link
+        elif item == "pag":
+            links = []
+            link = getUrl(soup,client)
+            ul = findItem(soup,'ul','class','pagination')
+            if ul == None: return [soup]
+            else:
+                pagination = findItems(ul,'a',None,None)
+                totalpage = pagination[-1]["href"][pagination[-1]["href"].rfind("page=")+5:]
+                for tp in range(int(totalpage),0,-1):
+                    link = pagination[-1]["href"][:pagination[-1]["href"].rfind("page=")+5] + str(tp)
+                    links.append(link)
+            return links
+    elif "Guateclic" == store:
+        if item == "cat":
+            cat = []
+            ul = findItem(soup,'ul','class','navbar-nav')
+            for l in ul.contents:
+                if findItem(l,'ul',None,None) != None:
+                    li = [l.a for l in findItems(l.ul,'li',None,None)]
+                    cat.extend(li)
+                elif findItem(l,'a',None,None) != None and findItem(l,'ul',None,None) == None:
+                    cat.append(l.a)
+            return cat[1:]
+        elif item == "prod":
+            pass
+        elif item == "name":
+            pass
+        elif item == "linkCat":
+            pass
+        elif item == "nameProd":
+            pass
+        elif item == "linkProd":
+            pass
+        elif item == "pag":
+            pass
+    elif  "Imeqmo"== store:
+        if item == "cat":
+            cat = []
+            lists = findItem(soup,'ul','class','nav-pills')
+            if not lists:
+                return None
+            else:
+                for l in lists.contents:
+                    if findItem(l,'ul',None,None) != None:
+                        li = [l.a for l in findItems(l.ul,'li',None,None)]
+                        cat.extend(li)
+                    elif findItem(l,'a',None,None) != None and findItem(l,'ul',None,None) == None:
+                        cat.append(l.a)
+                return cat
+        elif item == "prod":
+            prod = [p.h6.a for p in findItems(soup,'td','class',['oe_product','oe_grid','te_t_image'])]
+            return prod
+        elif item == "name":
+            name = soup.text
+            return name
+        elif item == "linkCat":
+            link = base[:-5] + soup["href"]
+            return link
+        elif item == "nameProd":
+            name = soup.text
+            return name
+        elif item == "linkProd":
+            link = base[:-5] + soup["href"]
+            return link
+        elif item == "pag":
+            running = True
+            links = []
+            while running:
+                links.append(soup)
+                tempsoup = getUrl(soup,client)
+                ul = findItem(tempsoup,'ul','class','pagination')
+                if ul != None:
+                    li = findItem(ul,'li','class',['page-item','disabled'])
+                    if li != None:
+                        running = False
+                        return links
+                    else:
+                        soup = base + li.a["href"]
+                else:
+                    running = False
+                    return links
+            return links
+            
+    elif "Office Depot" == store:
+        if item == "cat":
+            pass
+        elif item == "prod":
+            pass
+        elif item == "name":
+            pass
+        elif item == "linkCat":
+            pass
+        elif item == "nameProd":
+            pass
+        elif item == "linkProd":
+            pass
+        elif item == "pag":
+            pass
+    #Postponed
+    elif "Zukko" == store:
+        if item == "cat":
+            pass
+        elif item == "prod":
+            pass
+        elif item == "name":
+            pass
+        elif item == "linkCat":
+            pass
+        elif item == "nameProd":
+            pass
+        elif item == "linkProd":
+            pass
+        elif item == "pag":
+            pass
+    elif "Intelaf" == store:
+        if item == "cat":
+            cat = findItems(soup,'a','class','hover_effect')
+            if not cat:
+                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
+                res = getUrl(url,client)
+                data = json.loads(res.text)
+                menu = data['menu_sub_1s']
+                categorias = []
+                for info in menu:
+                    area = info['Area']
+                    url = info['url']
+                    tag = BeautifulSoup('<a href="'+ url +'">'+area.replace(" ","-")+ '</a>','html.parser')
+                    categorias.append(tag)
+                #print(categorias)
+                return categorias
+            else:
+                return cat
+        elif item == "prod":
+            return findItems(soup,'div','class','zoom_info')
+        elif item == "name":
+            #print(soup)
+            name = (findItem(soup,'div','class','image-area'))
+            if name == None:
+                name = soup.text
+                return name
+            else:
+                return name.get('title')
+        elif item == "linkCat":
+            if soup.get('href') == None:
+                link = base+ "/" + soup.a['href']
+            else:
+                link = base+ "/" + soup.get('href')
+            return link
+        elif item == "nameProd":
+            return (findItem(soup,'button','class','btn_cotiza')).get('name')
+        elif item == "linkProd":
+            return base + "/" + (findItem(soup,'button','class','btn_mas_info')).get('name')
+        elif item == "pag":
+            return [soup]
  
-#Edit
-def buscarProd(link,cat,store):
+#=========Funciones para Productos=======#
+def instr2(store,opcion):
+    start = perf_counter()
+    today = date.today()
+    print("Starting with...",store)
+    client = requests.Session()
+    base = categories[store]
+    productos.update(parseProd(base,"",store,client))
+    productos[store]["fechaAct"] = today.strftime("%d-%b-%Y")
+    productos[store]["Duration"] = str(perf_counter() -start)
+    jsonFile(dirProducts,"writeJson",productos)
+    client.close()
+    stop = perf_counter()
+    return store + " Finished || Duration: " +  str(stop-start)
+
+def parseProd(jsonData,cat,store,client):
+    product={}
+    if "-categorias-" in cat:
+        cate = cat.removeprefix("-categorias-")
+    else:
+        cate = cat
+    for i in jsonData:
+        if isinstance(jsonData[i],dict):
+            temp = parseProd(jsonData[i],format(cate+"-"+i),store,client)
+            product.update(temp)
+        else:
+            codigos = jsonData.get("codigo")
+            link = jsonData.get("link")
+            if codigos != None and link != None:
+                product[codigos] = buscarProd(link,cate.removesuffix(i),store,client)
+                #print(codigo + ": "+ link)
+                
+    return product
+
+def buscarProd(link,cat,store,client):
     #Done
     if store == "Kemik":
-        soup = getUrl(link)
+        soup = getUrl(link,client)
         #------Codigo del Producto-------#
         try:
             codigo = findItem(soup,'span','class','sku').text
@@ -558,626 +1226,87 @@ def buscarProd(link,cat,store):
     }
     return productInfo
 
-def getCategorias(link,store,res,codigo):
-    level0 = {}
-    soup = getUrl(link)
-    res1 = getProdInfo(soup,store,"cat")
-    level1 = {}
-    same = checkMenu(res,res1)
-    if not res1 or same==True:#Si no tiene categorias, buscara paginacion y articulos
-        pag = getProdInfo(link,store,"pag")
-        for p in pag: #Lista links en la categorias
-            soup = getUrl(p)
-            res1 = getProdInfo(soup,store,"prod")
-            if not res1: 
-                print("no hay productos en " + p)
-            else:
-                codeProd = 0
-                for r1 in res1:
-                    name1 = getProdInfo(r1,store,"nameProd")
-                    link1 = getProdInfo(r1,store,"linkProd")
-                    codeProd +=1
-                    #print(codigo+"{:02d}".format(codeProd))
-                    level1[name1] = { "codigo": codigo+"{:02d}".format(codeProd),"link" : link1}
-    else: # Si tiene categorias, buscara subcategorias
-        res.extend(res1)
-        code = 0
-        for r1 in res1:
-            name1 = getProdInfo(r1,store,"name").replace(" ","-")
-            link1 = getProdInfo(r1,store,"linkCat")
-            code+=1
-            level1[name1] = getCategorias(link1,store,res,codigo+"{:02d}".format(code))
-    level0 = level1  
-    return level0
 
-def getProdInfo(soup,store,item):
-    if "Kemik" == store:
-        
-        if item == "cat":
-            subcat = findItems(soup,'div','class','product-category')
-            if not subcat:
-                menu = findItem(soup,'div','class','wide-nav')
-                cat = findItems(menu,'a','class','nav-top-link')
-                categorias = []
-                for c in cat:
-                    name = c.next_sibling
-                    if name != None:
-                        temp = findItems(name.next_sibling,'a',None,None)
-                        for t in temp:
-                            t.attrs = {'href' : t['href']}
-                            categorias.append(t)
-                    else:
-                        c.attrs ={'href': c['href']}                        
-                        categorias.append(c)
-                #print(categorias)
-                return categorias[:-1]
-            else:
-                #print(subcat)
-                sc = [i.a for i in subcat]
-                return sc
-        elif item == "prod":
-            productos = findItems(soup,'a','class','woocommerce-loop-product__link')
-            return productos
-        elif item == "name":
-            name = soup.text.strip()
-            print(name)
-            return name
-        elif item == "linkCat":
-            link = soup.get('href')
-            return link
-        elif item == "nameProd":
-            name = soup.text.strip()
-            return name
-        elif item == "linkProd":
-            link = soup.get('href')
-            return link
-        elif item == "pag":
-            pag = []
-            url = soup
-            stop = False
-            while not stop:
-                pag.append(url)
-                soup = getUrl(url)
-                newLink = findItem(soup,'link','rel','next')
-                if newLink != None:
-                    url = newLink.get('href')
-                else:
-                    stop = True
-            return pag
-    
-    elif "Intelaf" == store:
-        if item == "cat":
-            cat = findItems(soup,'a','class','hover_effect')
-            if not cat:
-                url = "https://www.intelaf.com/js/menu_productos22112021091955.json"
-                res = getUrl(url)
-                data = json.loads(res.text)
-                menu = data['menu_sub_1s']
-                categorias = []
-                for info in menu:
-                    area = info['Area']
-                    url = info['url']
-                    tag = BeautifulSoup('<a href="'+ url +'">'+area.replace(" ","-")+ '</a>','html.parser')
-                    categorias.append(tag)
-                #print(categorias)
-                return categorias
-            else:
-                return cat
-        elif item == "prod":
-            return findItems(soup,'div','class','zoom_info')
-        elif item == "name":
-            #print(soup)
-            name = (findItem(soup,'div','class','image-area'))
-            if name == None:
-                name = soup.text
-                return name
-            else:
-                return name.get('title')
-        elif item == "linkCat":
-            if soup.get('href') == None:
-                link = base+ "/" + soup.a['href']
-            else:
-                link = base+ "/" + soup.get('href')
-            return link
-        elif item == "nameProd":
-            return (findItem(soup,'button','class','btn_cotiza')).get('name')
-        elif item == "linkProd":
-            return base + "/" + (findItem(soup,'button','class','btn_mas_info')).get('name')
-        elif item == "pag":
-            return [soup]
-    elif "Max" == store:
-        if item == "cat":
-            subcategorias = findItem(soup,'ul','class',['sub-cat-list' ,'slick-initialized' ,'slick-slider'])
-            if subcategorias != None:
-                list = findItems(subcategorias,'li',None,None)
-                categorias = [i.a for i in list]
-            else:
-                menu = findItem(soup,'div','class','content-mega')
-                cat = findItems(menu,'li','class','level2')
-                categorias = [c.a for c in cat]
-            return categorias
-        elif item == "prod":
-            container = findItem(soup,'ol','class',['products','list','items','product-items'])
-            products = findItems(container,'a','class','product-item-link')
-            return products
-        elif item == "name":
-            return soup.text.strip()
-        elif item == "linkCat":
-            return soup.get('href')
-        elif item == "nameProd":
-            return soup.text.strip()
-        elif item == "linkProd":
-            return soup.get('href')
-        elif item == "pag":
-            links = []
-            souptemp = getUrl(soup)
-            num = findItem(souptemp,'span','class','toolbar-number')
-            if num != None:
-                noProductos = int(num.text.replace("Productos"," ").replace("Producto"," "))
-                paginas = 0
-                if noProductos >= 30:
-                    paginas = noProductos//30
-                else:
-                    paginas = 0
-                if (noProductos % 30) >= 1:
-                    paginas += 1
-                for iter in range(1,paginas+1):
-                    links.append(format(soup+"?p=" + format(iter) + "&product_list_limit=30"))
-                return links
-            else:
-                return [soup]
-    elif "Click" == store:
-        if item == "cat":
-            lists = []
-            menu = findItem(soup,'ul','class',['justify-content-center','container','d-flex','align-items-center','mb-0','mt-0','pr-4'])
-            lists = findItems(menu,'li','class','nav-item')
-            for l in lists:
-                name = l.a.get('href')
-                if name == None:
-                    name = l.a.text.strip("(current)",).lower().replace("ó","o")
-                    ul = findItem(soup,'div','aria-labelledby',name)
-                    listar = findItems(ul,'li',None,None)
-                    lists.extend(listar)
-            return lists
-        elif item == "prod":
-            products = findItems(soup,'div','class','pt-2')
-            return products
-        elif item == "name":
-            name = soup.a.get('href')
-            if name == None:
-                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
-                ul = findItem(soup,'div','aria-labelledby',name)
-                listar = findItems(ul,'li',None,None)
-                for l in listar:
-                    return l.a.get('href').replace("/productos/","")
-            else:
-                return name.replace("/productos/","")
-        elif item == "linkCat":
-            link = soup.a.get('href')
-            if link == None:
-                name = soup.a.text.strip("(current)",).lower().replace("ó","o")
-                ul = findItem(soup,'div','aria-labelledby',name)
-                listar = findItems(ul,'li',None,None)
-                for l in listar:
-                    linkl = base + l.a.get('href')
-                    return linkl
-            return base + link
-        elif item == "nameProd":
-            name = soup.h5.text +'-'+soup.textarea.text
-            return name
-        elif item == "linkProd":
-            link = base + soup.a.get('href')
-            return link
-        elif item == "pag":
-            tempsoup = getUrl(soup)
-            links =[]
-            pagination = findItems(tempsoup,'button','class','page-link')
-            if len(pagination) == 0:
-                res = soup
-                links.append(res)
-            elif len(pagination) == 2:
-                paginas = int(pagination[0].text)
-                for i in range(1, paginas+1):
-                    res = soup+"?page="+format(i)
-                    links.append(res)
-            elif len(pagination) == 3:
-                paginas = int(pagination[-2].text)
-                for i in range(1, paginas+1):
-                    res = soup+"?page="+format(i)
-                    links.append(res)
-            else:
-                paginas = int(pagination[-2].text)
-                for i in range(1, paginas+1):
-                    res = soup+"?page="+format(i)
-                    links.append(res)
-            return links
-    elif "Spirit" == store:
-        if item == "cat":
-            categorias = findItems(soup,'div','class','vertical-separator')
-            if not categorias:
-                categorias = findItems(soup,'li','class','vm-categories-wall-catwrapper')
-            return categorias
-        elif item == "prod":
-            productos = findItems(soup,'a','class','item-title')
-            return productos
-        elif item == "name":
-            name = soup.a.text.strip()
-            return name
-        elif item == "linkCat":
-            link = base + soup.a.get('href')
-            return link
-        elif item == "nameProd":
-            name = soup.text.strip().replace("\n","").replace(" ","-")
-            return name
-        elif item == "linkProd":
-            link = base + soup.get('href')
-            return link
-        elif item == "pag":
-            links = []
-            tempsoup = getUrl(soup)
-            # paginacion = findItem(tempsoup,'div','class',['vm-pagination','vm-pagination-bottom'])
-            paginas = findItems(tempsoup,'a','class','pagenav')
-            if not paginas:
-                links.append(soup)
-            else:
-                links = [base + i.get('href') for i in paginas[:-2]]
-                links.insert(0,soup)
-            return links
-    elif "MacroSistemas" == store:
-        if item == "cat":
-            subcategorias = findItem(soup,'ul','class',['nav','menu-left','mod-list'])
-            if subcategorias != None:
-                categorias = findItems(subcategorias,'a',None,None)
-            else:
-                menu = findItem(soup,'ul','id','menu_footer')
-                categorias = findItems(menu,'a',None,None)
-            return categorias
-        elif item == "prod":
-            productos = findItems(soup,'div','class','product-inner')
-            return productos
-        elif item == "name":
-            name = soup.text
-            return name
-        elif item == "linkCat":
-            link = base + format(soup.get('href'))
-            return link
-        elif item == "nameProd":
-            name = findItem(soup,'a','class','item-title')
-            return name.text.strip()
-        elif item == "linkProd":
-            link = base + findItem(soup,'a','class','item-title').get('href')
-            return link
-        elif item == "pag":
-            tempsoup = getUrl(soup)
-            divpag = findItem(tempsoup,'div','class','vm-pagination')
-            if divpag == None:
-                numeroPag = 1
-            else:
-                paginacion = findItem(divpag,'span','class','vm-page-counter')
-                if paginacion.text=="":
-                    numeroPag = 1
-                else:
-                    numeroPag = int(paginacion.text[-2:])
-            links = []
-            for pag in range(1,(numeroPag+1)):
-                if pag == 1:
-                    links.append(format(soup)+"?start=0")
-                elif pag >1:
-                    links.append(format(soup)+"?start="+str((pag-1)*24))
-            return links
-    elif "Funky" == store:        
-        if item == "cat":
-            menu = soup.find('ul',{'class':'sub-menu'})
-            categorias = menu.find_all('li')
-            cat = [c.a for c in categorias]
-            return cat
-        elif item == "prod":
-            lista = findItem(soup,'ul','class','tablet-columns-2')
-            products = findItems(lista,'div','class','product-loop-content')
-            return products
-        elif item == "name":
-            name = soup.text
-            return name
-        elif item == "linkCat":
-            link = soup.get('href')
-            return link
-        elif item == "nameProd":
-            name = soup.h2.text.strip()
-            return name
-        elif item == "linkProd":
-            link = soup.h2.a.get('href')
-            return link
-        elif item == "pag":
-            lista = findItem(soup,'ul','class','page-numbers')
-            if lista != None:
-                links = findItems(lista,'a','class','page-numbers')
-                newList = [l.get('href') for l in links]
-                newList.insert(0,newList[-1][:-2]+'1/')
-                newList.pop(-1)
-                return newList
-            else:
-                return [soup]    
-    elif "Elektra" == store:
-        if item == "cat":
-            categorias = findItems(soup,'div','class','vtex-store-components-3-x-infoCardTextContainer--homeImgCategorias')
-            return categorias
-        elif item == "prod":
-            productos = findItems(soup,'section','class','vtex-product-summary-2-x-container--shelfPLP')
-            return productos
-        elif item == "name":
-            name = soup.text
-            print(name)
-            return name
-        elif item == "linkCat":
-            link = soup.a.get('href')
-            return base + link
-        elif item == "nameProd":
-            name = soup.h1.text.strip()
-            return name
-        elif item == "linkProd":
-            link = soup.a.get('href')
-            return base + link
-        elif item == "pag":
-            links = []
-            page = 1
-            running = True
-            link = soup
-            while running:
-                links.append(link)
-                tempsoup = getUrl(link)
-                nextPage = tempsoup.find('div',{'class':'vtex-search-result-3-x-buttonShowMore--layout'})
-                if nextPage.button != None:
-                    page+=1
-                    link = soup +"?page="+str(page)
-                else:
-                    running = False
-            return links
-    
-    elif "Goat" == store:
-        if item == "cat":
-            pass
-        elif item == "prod":
-            pass
-        elif item == "name":
-            pass
-        elif item == "linkCat":
-            pass
-        elif item == "nameProd":
-            pass
-        elif item == "linkProd":
-            pass
-        elif item == "pag":
-            pass
+#=========Funciones para Comparar============#
+def compareProd():
+    productos.pop("fechaAct")
 
-    elif store == "TecnoFacil":
-        if item == "cat":
-            lists = findItems(soup,'div','class','media-body')
-            cat = []
-            for l in lists:
-                temp = l.a['href'].find("?")
-                if temp == -1:
-                    pass
-                else:
-                    l.a['href'] = l.a['href'][:temp+1].replace("?","")
-                cat.append(l.a)
-            return cat
-        elif item == "prod":
-            prod = findItems(soup,'h2','class','product-name')
-            return prod
-        elif item == "name":
-            name = soup.text.strip()
-            return name
-        elif item == "linkCat":
-            link =soup["href"]
-            return link
-        elif item == "nameProd":
-            name = soup.text
-            return name
-        elif item == "linkProd":
-            link = soup.a["href"]
-            return link
-        elif item == "pag":
-            links = []
-            running = True
-            link = soup
-            #print(soup)
-            while running:
-                links.append(link)
-                tempsoup = getUrl(link)
-                nextPage = findItem(tempsoup,'a','title','Siguiente')
-                if nextPage != None:
-                    link = nextPage["href"]
-                else:
-                    running = False
-            return links
+    result = {}
+    for p in productos:
+        result[p] = p+"|"+productos[p]["nombre"]
 
-    elif store == "Pacifiko":
-        if item == "cat":
-            lists = findItems(soup,'div','class','responsiveS')
-            if not lists :
-                cat = []
-                cat.extend(findItems(soup,'a','class','clearfix')[:-1])
-                cat.extend(findItems('main-menu'))
-            else:
-                cat = [l.a for l in lists]
-            return cat
-        elif item == "prod":
-            lists = findItems(soup,'div','class','product-image-container')
-            prod = [l.a for l in lists]
-            return prod
-        elif item == "name":
-            name = soup["href"][soup["href"].rfind("/")+1:].replace("-"," ")
-        elif item == "linkCat":
-            link = soup["href"]
-            return link
-        elif item == "nameProd":
-            pass
-        elif item == "linkProd":
-            pass
-        elif item == "pag":
-            pass
+    matches = {}
+    #count = 0
+    #apercent = 0
+    #bpercent = apercent
+    for r in result:
+        matches[r]= gcm(result[r],result.values(),cutoff=0.6)
+        # count+=1
+        # apercent = round(count/len(result)*100,None)
+        # if apercent != bpercent:
+        #     print(f"Current percentage {apercent}%")
+        #     bpercent = apercent
+    jsonFile(dirComparacion,"writeJson",matches)
 
-    elif store == "Guateclic":
-        if item == "cat":
+#=================Menu===================#
+def menu():
+    tienda = [c.strip() for c in categories]
+    opcion = 0
+    while opcion != 3:
+        opcion = int(input("Seleccione una opcion:\n1.Conseguir las categorias y productos de una pagina \n2.Conseguir informacion de todos los productos de una pagina\n3.Salir\n"))
+        if opcion == 1:
+            print("Elige una opcion:")
+            for i in range(0,len(tienda)):
+                print(str(i+1),tienda[i])
+            ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
+            opciones = ingreso.split(" ")
+            store = []
+            for o in opciones:
+                if int(o) < 16: store.append(tienda[int(o)-1])
+                else: print(o + " no es una opcion valida, se ira a la siguiente"); opciones.remove(o)
+            #categories.clear()
+            with cf.ThreadPoolExecutor() as executor:
+                run = [executor.submit(instr1, o, opciones[int(store.index(o))]) for o in store ]
+                for r in cf.as_completed(run):
+                    print(r.result())
+        elif opcion == 2:
+            print("Elige una opcion:")
+            for i in range(0,len(tienda)):
+                print(str(i+1),tienda[i])
+            ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
+            opciones = ingreso.split(" ")
+            store = []
+            for o in opciones:
+                if int(o) < 16: store.append(tienda[int(o)-1])
+                else: print(o + " no es una opcion valida, se ira a la siguiente"); opciones.remove(o)
+            #categories.clear()
+            with cf.ThreadPoolExecutor() as executor:
+                run = [executor.submit(instr2, o, opciones[int(store.index(o))]) for o in store ]
+                for r in cf.as_completed(run):
+                    print(r.result())
+            
+            compareProd()
+        elif opcion == 3:
             pass
-        elif item == "prod":
-            pass
-        elif item == "name":
-            pass
-        elif item == "linkCat":
-            pass
-        elif item == "nameProd":
-            pass
-        elif item == "linkProd":
-            pass
-        elif item == "pag":
-            pass
-
-    elif store == "Imeqmo":
-        if item == "cat":
-            pass
-        elif item == "prod":
-            pass
-        elif item == "name":
-            pass
-        elif item == "linkCat":
-            pass
-        elif item == "nameProd":
-            pass
-        elif item == "linkProd":
-            pass
-        elif item == "pag":
-            pass
-
-    elif store == "Office Depot":
-        if item == "cat":
-            pass
-        elif item == "prod":
-            pass
-        elif item == "name":
-            pass
-        elif item == "linkCat":
-            pass
-        elif item == "nameProd":
-            pass
-        elif item == "linkProd":
-            pass
-        elif item == "pag":
-            pass
-
-    
-    #Postponed
-    elif store == "Zukko":
-       pass
-    
-def parseProd(jsonData,cat,store):
-    product={}
-    if "-categorias-" in cat:
-        cate = cat.removeprefix("-categorias-")
-    else:
-        cate = cat
-    for i in jsonData:
-        if isinstance(jsonData[i],dict):
-            temp = parseProd(jsonData[i],format(cate+"-"+i),store)
-            product.update(temp)
         else:
-            codigos = jsonData.get("codigo")
-            link = jsonData.get("link")
-            if codigos != None and link != None:
-                product[codigos] = buscarProd(link,cate.removesuffix(i),store)
-                #print(codigo + ": "+ link)
-    return product
+            pass
 
-def jsonFile(directory,action,jsonData):
-    if action == "newCatJson":
-        file = open(directory, 'w')
-        products = {
-            "Kemik": {"link": "https://www.kemik.gt", "categorias":{}},
-            "Intelaf": {"link":"https://www.intelaf.com", "categorias":{}},
-            "Click": {"link":"https://click.gt", "categorias":{}},
-            "Funky": {"link": "https://storefunky.com", "categorias":{}},
-            "Max": {"link":"https://www.max.com.gt", "categorias":{}},
-            "Goat": {"link":"https://goatshopgt.com", "categorias":{}},
-            "Elektra": {"link":"https://www.elektra.com.gt", "categorias":{}},
-            "Spirit": {"link":"https://spiritcomputacion.com","categorias":{}},
-            "MacroSistemas": {"link":"https://www.macrosistemas.com","categorias":{}},
-            "TecnoFacil": {"link":"https://www.tecnofacil.com.gt","categorias":{}},
-            "Pacifiko": {"link":"https://www.pacifiko.com","categorias":{}},
-            "Zukko": {"link":"https://zukko.store","categorias":{}},
-            "Guateclic": {"link":"https://www.guateclic.com","categorias":{}},
-            "Imeqmo": {"link":"https://www.imeqmo.com","categorias":{}},
-            "Office Depot": {"link":"https://www.officedepot.com.gt","categorias":{}}
-        }
-        return products
-    elif action == "getJson":
-        file = open(directory,"r")
-        jsonData = json.load(file)
-        file.close()
-        return jsonData
-    elif action == "writeJson":
-        file = open(directory, 'w')
-        json.dump(jsonData, file)
-        file.close()
+#=========Setup para Programa========#
+#Entrada de Datos
 
+dirProducts = "C:/Users/javie/Desktop/ecommerceScraper/products.json"
+dirCategories = "C:/Users/javie/Desktop/ecommerceScraper/categories.json"
+dirComparacion = "C:/Users/javie/Desktop/ecommerceScraper/comparison.json"
 
+productos = jsonFile(dirProducts,"getJson",None)
+categories = jsonFile(dirCategories,"getJson",None)
+comparacion = jsonFile(dirComparacion,"getJson",None)
+#Salida de Datos
 
-categories = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/testing.json","getJson",None)
-today = date.today()
-tienda = [c.strip() for c in categories]
-print("Webscraper comparison project")
-opcion = 0
-while opcion != 3:
-    opcion = int(input("Seleccione una opcion:\n1.Conseguir las categorias y productos de una pagina \n2.Conseguir informacion de todos los productos de una pagina\n3.Salir\n"))
-    if opcion == 1:
-        #Menu to find Products
-        print("Elige una opcion:")
-        for i in range(0,len(tienda)):
-            print(str(i+1),tienda[i])
-        ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
-        opciones = ingreso.split(" ")
-        for o in opciones:
-            if int(o) < 16:
-                base = categories[tienda[int(o)-1]]["link"]
-                store = tienda[int(o)-1]
-                #print(base,store,today)
-                categories[store]["categorias"] = getCategorias(base,store,[],"{:02d}".format(int(o)))
-                categories[store]["fechaAct"]= today.strftime("%d-%b-%Y")
-                jsonFile("C:/Users/javie/Desktop/ecommerceScraper/testing.json","writeJson",categories)
-            else:
-                print(o + " no es una opcion valida, se ira a la siguiente")
-    elif opcion == 2:
-        #Menu to find each product
-        products = jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","getJson",None)
-        
-        for i in range(0,len(tienda)):
-            print(str(i+1),tienda[i])
-        ingreso = input("Escoge las tiendas que desee ver, presionando un numero separado por un espacio\n")
-        opciones = ingreso.split(" ")
-        for o in opciones:
-            if int(o) < 16:
-                store = tienda[int(o)-1]
-                products.update(parseProd(categories[store],"",store))
-                products["fechaAct"]= today.strftime("%d-%b-%Y")
-                jsonFile("C:/Users/javie/Desktop/ecommerceScraper/res.json","writeJson",products)
-            else:
-                print(o + " no es una opcion valida, se ira a la siguiente")
-    elif opcion == 3:
-        print("Adios")
-    else:
-        print("Seleccione una opcion valida")
-
-
-
-
-# Existencias del Producto
-            # Falta terminar esta parte
-            #     disp = soup.find('div',{'class':'col-xs-12 col-md-3 columna_existencias'})
-            #     tiendas = disp.find_all('div',{'class':'div_stock_sucu'})
-            #     existencias = {}
-            #     existencias["codigo"] = (paginaProducto.find('p',{'class':'codigo'}).text)[16:]
-            #     existencias["VentaLinea"] = disp.find('div',{'class':'col-xs-1'}).text
-            # for j in tiendas:
-            #     tienda = j.find_all('div')
-            #     existencias[tienda[0].text] = tienda[1] .text
-            # print(existencias)
-    #Terminado(Faltan Existencias, pero eso se vera luego)
+#========Inicio del Programa============#
+if __name__ == "__main__":
+    start = perf_counter()
+    print("Webscraper comparison project")
+    menu()
+    stop = perf_counter()
+    print("Duration of Program:", stop-start)
