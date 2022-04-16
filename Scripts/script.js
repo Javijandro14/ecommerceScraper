@@ -13,7 +13,7 @@
 function getJson(json, item) {
   if (json == undefined || json == null) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "testing.json", false);
+    xhttp.open("GET", "categories.json", false);
     //xhttp.open("GET", "EcommerceData/Guatemala/intelaf/Intelaf.json", false);
     xhttp.send();
     json = JSON.parse(xhttp.responseText);
@@ -171,35 +171,63 @@ function loadCategoria(json) {
 
 function loadProduct(codigo) {
   var xhttp = new XMLHttpRequest();
-  xhttp.open("GET", "res.json", false);
+  xhttp.open("GET", "products.json", false);
   xhttp.send();
   var products = JSON.parse(xhttp.responseText);
 
   search = false;
   for (var i in products) {
-    if(codigo == i){
-      console.log(products[i]);
-      showProd(codigo,products[i]['codigo'],products[i]['nombre'],products[i]['precio'],products[i]['oferta'],products[i]['categoria'],products[i]['detalles'],products[i]['garantia'],products[i]['link'])
+    if (codigo == i) {
+      showProd(codigo, products[i]['codigo'], products[i]['nombre'], products[i]['precio'], products[i]['oferta'], products[i]['categoria'], products[i]['detalles'], products[i]['garantia'], products[i]['link']);
+      findSimilarProd(codigo, products);
+      break;
     }
 
   }
-
-
-  return products;
 }
 
-function showProd(codigo,sku, name, precio, oferta, cat, detalle, garantia, link) {
+function showProd(codigo, sku, name, precio, oferta, cat, detalle, garantia, link) {
   document.getElementsByClassName("sku")[0].innerHTML = codigo
   document.getElementsByClassName("sku")[1].innerHTML = sku
   document.getElementsByClassName("product-title")[0].innerHTML = name
-  document.getElementsByClassName("oldprice")[0].innerHTML = "Q"+precio
-  document.getElementsByClassName("newprice")[0].innerHTML = "Q" + oferta
+  document.getElementsByClassName("oldprice")[0].innerHTML = "Q" + precio
+  document.getElementsByClassName("newprice")[0].innerHTML = "Q" + oferta.slice(oferta.lastIndexOf("Q") + 1);
   document.getElementsByClassName("cat")[0].innerHTML = cat
   document.getElementsByClassName("description")[0].innerHTML = detalle
   document.getElementsByClassName("garantia")[0].innerHTML = garantia
   var direct = document.getElementsByClassName("linktienda")[0]
   direct.setAttribute("href", link)
   direct.innerHTML = link;
-
+  var tienda = document.querySelector("#tienda");
+  tienda.innerHTML = listarTienda(codigo.slice(0, 2));
 }
-//function findSimilarProd(){}
+function findSimilarProd(codigo, product) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("GET", "comparison.json", false);
+  xhttp.send();
+  var comp = JSON.parse(xhttp.responseText);
+  lista = comp[codigo]
+  var tiendas = document.querySelector(".changeStore");
+  tiendas.innerHTML = "";
+  for (l in lista) {
+    code = lista[l].split("|")[0]
+    if (codigo != code) {
+      var opcion = document.createElement("button");
+      opcion.setAttribute("onclick", "loadProduct('" + code + "')")
+      var itemprice = document.querySelector(".newprice").innerHTML;
+      opcion.innerHTML = product[code].nombre + "<br>" + product[code].oferta + '<br> <label style="color:red;"> Differencia: Q' + (parseFloat(itemprice.slice(itemprice.lastIndexOf("Q") + 1).replace(",", "")) - parseFloat(product[code]["oferta"].slice(product[code]["oferta"].lastIndexOf("Q") + 1).replace(",", ""))) + "</label> <br> Tienda: <strong>" + listarTienda(code.slice(0, 2)) + "</strong>";
+      tiendas.append(opcion);
+    }
+  }
+}
+
+function listarTienda(no) {
+  var cat = getJson();
+  var tienda = "Ninguno";
+  for (i in cat) {
+    if (no == cat[i]["codigo"]) {
+      tienda = i;
+      return tienda
+    }
+  }
+}
